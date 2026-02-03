@@ -70,15 +70,35 @@ export default function HowItWorks() {
       <main className="min-h-screen bg-background">
         <HowItWorksNav />
         <HowItWorksHero />
-        <WhoItsFor />
-        <ThePromise />
-        <ThreeSteps />
-        <WhatsIncluded />
-        <ComparisonSection />
-        <RolloutAvailability />
-        <TheExperience />
-        <MicroFAQs />
-        <HowItWorksCTA />
+        
+        {/* Apply content-visibility to below-fold sections for faster LCP */}
+        <div className="content-visibility-auto">
+          <WhoItsFor />
+        </div>
+        <div className="content-visibility-auto">
+          <ThePromise />
+        </div>
+        <div className="content-visibility-auto">
+          <ThreeSteps />
+        </div>
+        <div className="content-visibility-auto">
+          <WhatsIncluded />
+        </div>
+        <div className="content-visibility-auto">
+          <ComparisonSection />
+        </div>
+        <div className="content-visibility-auto">
+          <RolloutAvailability />
+        </div>
+        <div className="content-visibility-auto">
+          <TheExperience />
+        </div>
+        <div className="content-visibility-auto">
+          <MicroFAQs />
+        </div>
+        <div className="content-visibility-auto">
+          <HowItWorksCTA />
+        </div>
         <ComplianceFooter />
       </main>
     </>

@@ -433,8 +433,49 @@ All colors MUST be HSL.
   pointer-events: none;
 }
 
-/* Reduced motion support */
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+
+/* GPU acceleration for animated elements */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* Contain layout for animated sections */
+.contain-layout {
+  contain: layout;
+}
+
+.contain-paint {
+  contain: paint;
+}
+
+/* Hardware acceleration trigger */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Content visibility for off-screen sections */
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
+
+/* Reduced motion support - comprehensive */
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
   .glow-pulse,
   .glow-pulse-subtle,
   .progress-flash,
@@ -452,11 +493,11 @@ All colors MUST be HSL.
   .gradient-border-animated,
   .gradient-text-animated,
   .pulse-ring {
-    animation: none;
+    animation: none !important;
   }
   
   .shake {
-    animation: none;
+    animation: none !important;
   }
   
   .premium-card:hover {

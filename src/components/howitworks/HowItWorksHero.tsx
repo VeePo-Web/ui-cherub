@@ -48,12 +48,12 @@ export function HowItWorksHero() {
 
   return (
     <section className="relative min-h-[90vh] flex flex-col items-center justify-center px-6 pt-24 pb-16 overflow-hidden">
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-gaming-purple-mid to-background">
+      {/* Animated gradient background - GPU accelerated */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-gaming-purple-mid to-background contain-paint">
         <div className="absolute inset-0">
           {/* Primary orb - large, slow float */}
           <motion.div 
-            className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary/15 rounded-full blur-[100px] float"
+            className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary/15 rounded-full blur-[100px] float will-change-transform gpu-accelerated"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.5, ease: "easeOut" }}
@@ -61,7 +61,7 @@ export function HowItWorksHero() {
           
           {/* Secondary orb - blue accent */}
           <motion.div 
-            className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-gaming-blue/15 rounded-full blur-[80px] float-delayed"
+            className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-gaming-blue/15 rounded-full blur-[80px] float-delayed will-change-transform gpu-accelerated"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
@@ -70,7 +70,7 @@ export function HowItWorksHero() {
           {/* Tertiary orb - gold accent (desktop only) */}
           {!isMobile && (
             <motion.div 
-              className="absolute top-1/2 right-1/3 w-[300px] h-[300px] bg-gaming-gold/8 rounded-full blur-[60px] float-slow"
+              className="absolute top-1/2 right-1/3 w-[300px] h-[300px] bg-gaming-gold/8 rounded-full blur-[60px] float-slow will-change-transform gpu-accelerated"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1.5, delay: 0.6, ease: "easeOut" }}

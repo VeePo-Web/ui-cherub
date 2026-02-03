@@ -123,8 +123,10 @@ export default function Waitlist() {
         />
       </div>
 
-      {/* Geographic coverage */}
-      <GeoCoverage />
+      {/* Geographic coverage - content-visibility for performance */}
+      <div className="content-visibility-auto">
+        <GeoCoverage />
+      </div>
 
       {/* Footer */}
       <footer className="py-8 px-6 border-t border-border/50">
