@@ -15,10 +15,10 @@ export function HowItWorksNav() {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
 
-  // Scroll-aware transparency
+  // Scroll-aware visibility - hidden at top, slides in on scroll
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      setIsScrolled(window.scrollY > 100);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -49,98 +49,119 @@ export function HowItWorksNav() {
 
   return (
     <>
-      <nav
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-          isScrolled
-            ? "bg-background/95 backdrop-blur-md border-b border-border/50 shadow-lg shadow-black/5"
-            : "bg-background/60 backdrop-blur-sm border-b border-transparent"
+      {/* Floating mobile menu button when nav is hidden */}
+      <AnimatePresence>
+        {!isScrolled && !isMobileMenuOpen && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="md:hidden fixed top-4 right-4 z-50 p-3 bg-background/80 backdrop-blur-sm rounded-full shadow-lg border border-border/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label="Open menu"
+          >
+            <Menu className="w-6 h-6 text-foreground" />
+          </motion.button>
         )}
-      >
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo with icon */}
-            <Link
-              to="/"
-              className="group flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg"
-            >
-              <motion.div
-                whileHover={{ rotate: [0, -10, 10, 0] }}
-                transition={{ duration: 0.4 }}
-                className="flex items-center justify-center"
-              >
-                <Gamepad2 className="w-5 h-5 text-primary group-hover:text-foreground transition-colors duration-200" />
-              </motion.div>
-              <span className="text-xl font-bold text-foreground">
-                Connor Computer
-              </span>
-            </Link>
+      </AnimatePresence>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-2">
-              {navLinks.map((link) => (
+      {/* Main nav - only renders when scrolled */}
+      <AnimatePresence>
+        {isScrolled && (
+          <motion.nav
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -100, opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/50 shadow-lg shadow-black/5"
+          >
+            <div className="max-w-6xl mx-auto px-6 py-4">
+              <div className="flex items-center justify-between">
+                {/* Logo with icon */}
                 <Link
-                  key={link.href}
-                  to={link.href}
-                  className={cn(
-                    "relative px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                    location.pathname === link.href
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
-                  )}
+                  to="/"
+                  className="group flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg"
                 >
-                  <span>{link.label}</span>
-                  {location.pathname === link.href && (
-                    <motion.div
-                      layoutId="nav-indicator"
-                      className="absolute -bottom-1 left-3 right-3 h-0.5 bg-primary rounded-full"
-                      style={{ boxShadow: "0 0 8px hsl(var(--primary) / 0.5)" }}
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    />
-                  )}
+                  <motion.div
+                    whileHover={{ rotate: [0, -10, 10, 0] }}
+                    transition={{ duration: 0.4 }}
+                    className="flex items-center justify-center"
+                  >
+                    <Gamepad2 className="w-5 h-5 text-primary group-hover:text-foreground transition-colors duration-200" />
+                  </motion.div>
+                  <span className="text-xl font-bold text-foreground">
+                    Connor Computer
+                  </span>
                 </Link>
-              ))}
 
-              {/* CTA Button */}
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="ml-4"
-              >
-                <Button
-                  asChild
-                  className="glow-pulse-subtle gap-2 px-5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                {/* Desktop Navigation */}
+                <div className="hidden md:flex items-center gap-2">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      to={link.href}
+                      className={cn(
+                        "relative px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                        "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                        location.pathname === link.href
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                      )}
+                    >
+                      <span>{link.label}</span>
+                      {location.pathname === link.href && (
+                        <motion.div
+                          layoutId="nav-indicator"
+                          className="absolute -bottom-1 left-3 right-3 h-0.5 bg-primary rounded-full"
+                          style={{ boxShadow: "0 0 8px hsl(var(--primary) / 0.5)" }}
+                          transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                        />
+                      )}
+                    </Link>
+                  ))}
+
+                  {/* CTA Button */}
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="ml-4"
+                  >
+                    <Button
+                      asChild
+                      className="glow-pulse-subtle gap-2 px-5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    >
+                      <Link to="/#waitlist-form" className="flex items-center gap-2">
+                        <span>Join Waitlist</span>
+                        <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                      </Link>
+                    </Button>
+                  </motion.div>
+                </div>
+
+                {/* Mobile Menu Button */}
+                <motion.button
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="md:hidden p-3 -mr-3 rounded-lg hover:bg-white/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <Link to="/#waitlist-form" className="flex items-center gap-2">
-                    <span>Join Waitlist</span>
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-                  </Link>
-                </Button>
-              </motion.div>
+                  <motion.div
+                    animate={{ rotate: isMobileMenuOpen ? 90 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {isMobileMenuOpen ? (
+                      <X className="w-6 h-6 text-foreground" />
+                    ) : (
+                      <Menu className="w-6 h-6 text-foreground" />
+                    )}
+                  </motion.div>
+                </motion.button>
+              </div>
             </div>
-
-            {/* Mobile Menu Button */}
-            <motion.button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-3 -mr-3 rounded-lg hover:bg-white/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-              whileTap={{ scale: 0.95 }}
-            >
-              <motion.div
-                animate={{ rotate: isMobileMenuOpen ? 90 : 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                {isMobileMenuOpen ? (
-                  <X className="w-6 h-6 text-foreground" />
-                ) : (
-                  <Menu className="w-6 h-6 text-foreground" />
-                )}
-              </motion.div>
-            </motion.button>
-          </div>
-        </div>
-      </nav>
+          </motion.nav>
+        )}
+      </AnimatePresence>
 
       {/* Mobile Menu - Full Screen Overlay */}
       <AnimatePresence>

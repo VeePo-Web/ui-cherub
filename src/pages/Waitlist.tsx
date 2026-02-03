@@ -5,7 +5,7 @@ import { TierSelector } from "@/components/waitlist/TierSelector";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 import { GeoCoverage } from "@/components/waitlist/GeoCoverage";
 import { ThankYouModal } from "@/components/waitlist/ThankYouModal";
-import { StickyDesktopCTA } from "@/components/waitlist/StickyDesktopCTA";
+
 import { HowItWorksNav } from "@/components/howitworks/HowItWorksNav";
 import { useActualSpotsRemaining } from "@/hooks/useActualSpotsRemaining";
 import { useWaitlistSubmit } from "@/hooks/useWaitlistSubmit";
@@ -99,11 +99,6 @@ export default function Waitlist() {
         Skip to form
       </a>
 
-      {/* Sticky desktop CTA */}
-      <StickyDesktopCTA 
-        spotsRemaining={spotsRemaining} 
-        onCtaClick={scrollToForm} 
-      />
 
       {/* Hero section */}
       <WaitlistHero 
