@@ -60,6 +60,18 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Gaming theme colors
+        gaming: {
+          purple: {
+            dark: "hsl(var(--gaming-purple-dark))",
+            mid: "hsl(var(--gaming-purple-mid))",
+          },
+          orange: "hsl(var(--gaming-orange))",
+          "orange-glow": "hsl(var(--gaming-orange-glow))",
+          gold: "hsl(var(--gaming-gold))",
+          blue: "hsl(var(--gaming-blue))",
+          green: "hsl(var(--gaming-green))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

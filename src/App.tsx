@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Routes, Route } from "react-router-dom";
+import Waitlist from "./pages/Waitlist";
 import Index from "./pages/Index";
 import Discover from "./pages/Discover";
 import Auth from "./pages/Auth";
@@ -16,7 +17,8 @@ const App = () => (
     <Toaster />
     <Sonner />
     <Routes>
-      <Route path="/" element={<Discover />} />
+      <Route path="/" element={<Waitlist />} />
+      <Route path="/discover" element={<Discover />} />
       <Route path="/event/:id" element={<Index />} />
       <Route path="/event/:id/edit" element={<EditEvent />} />
       <Route path="/my-events" element={<MyEvents />} />
