@@ -103,17 +103,6 @@ export function ComparisonSection() {
           </motion.div>
         </div>
 
-        {/* Bottom note */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-center text-sm text-muted-foreground italic max-w-2xl mx-auto"
-        >
-          We avoid "lease," "rental," and "finance" language on purpose—this is a 
-          clarity-first model built around performance, trust, and ease.
-        </motion.p>
       </div>
     </section>
   );

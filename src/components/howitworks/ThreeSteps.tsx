@@ -91,15 +91,15 @@ export function ThreeSteps() {
 
                 {/* Step 2: CTA button */}
                 {step.hasCta && (
-                  <div className="mt-6">
+                  <div className="mt-6 flex flex-col items-start gap-2">
                     <Button asChild className="glow-pulse">
                       <Link to="/#waitlist-form">
-                        <span className="flex flex-col items-center">
-                          <span>be the first to know when we launch in your area</span>
-                          <span className="text-xs opacity-80">10% discount first three months</span>
-                        </span>
+                        Join the Waitlist
                       </Link>
                     </Button>
+                    <span className="text-sm text-muted-foreground">
+                      10% off your first 3 months
+                    </span>
                   </div>
                 )}
 
