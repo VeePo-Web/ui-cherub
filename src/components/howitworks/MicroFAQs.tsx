@@ -10,22 +10,22 @@ const faqs = [
   {
     question: "Is this a lease or rental?",
     answer:
-      "No. We avoid that language and model. We emphasise performance, trust, reliability, ease, and style.",
+      "Think of it as a performance partnership. You pay one predictable monthly fee and we take care of everything—from day-one setup to annual upgrades to covered repairs. No hidden costs, no depreciation headaches, no obsolescence anxiety. Just always-current hardware that keeps you competitive, month after month.",
   },
   {
     question: "Will I know the exact parts?",
     answer:
-      "Yes. Each tier links to a public parts list with model numbers and a change-log.",
+      "Absolutely—we believe in radical transparency. Every tier includes a public parts list with exact model numbers, so you know precisely what's powering your gaming. When we make any upgrade or swap, it's documented in our public change-log with full reasoning. No mystery boxes, no corners cut. You see exactly what you're getting, always.",
   },
   {
     question: "What if a part fails?",
     answer:
-      "We act fast per our SLA and handle repairs end-to-end. (Insurance required.)",
+      "We've got you covered—literally. If something fails, you contact us and we handle the rest: diagnosis, parts, labour, and logistics. Our goal is minimal downtime so you're back to gaming fast. That's why we require insurance as part of the plan—it ensures rapid, no-excuses coverage for hardware issues. You focus on playing; we focus on keeping you running.",
   },
   {
     question: "Do you publish benchmarks?",
     answer:
-      "Yes—coming soon. We'll add flagship game examples and FPS/frametime charts to this page.",
+      "We're building comprehensive benchmark data for every tier—real-world FPS and frametime results across flagship titles so you can see exactly how your rig performs. Waitlist members will be the first to access these results. Want to help shape what games we test? Join the waitlist and let us know your must-play titles.",
   },
 ];
 
