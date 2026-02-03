@@ -20,11 +20,11 @@ export function WaitlistHero({ onScrollToTiers, spotsRemaining = 250, spotsLoadi
 
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden">
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-gaming-purple-mid to-background">
+      {/* Animated gradient background - GPU accelerated */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-gaming-purple-mid to-background contain-paint">
         <div className="absolute inset-0 opacity-30">
           <motion.div 
-            className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl will-change-transform"
+            className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl will-change-transform gpu-accelerated"
             animate={{ 
               scale: [1, 1.1, 1],
               opacity: [0.2, 0.3, 0.2],
@@ -32,7 +32,7 @@ export function WaitlistHero({ onScrollToTiers, spotsRemaining = 250, spotsLoadi
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.div 
-            className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gaming-blue/20 rounded-full blur-3xl will-change-transform"
+            className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gaming-blue/20 rounded-full blur-3xl will-change-transform gpu-accelerated"
             animate={{ 
               scale: [1.1, 1, 1.1],
               opacity: [0.2, 0.3, 0.2],
@@ -42,7 +42,7 @@ export function WaitlistHero({ onScrollToTiers, spotsRemaining = 250, spotsLoadi
           {/* Only show third orb on desktop for performance */}
           {!isMobile && (
             <motion.div 
-              className="absolute top-1/2 right-1/3 w-64 h-64 bg-gaming-gold/10 rounded-full blur-3xl will-change-transform"
+              className="absolute top-1/2 right-1/3 w-64 h-64 bg-gaming-gold/10 rounded-full blur-3xl will-change-transform gpu-accelerated"
               animate={{ 
                 scale: [1, 1.15, 1],
                 opacity: [0.1, 0.2, 0.1],

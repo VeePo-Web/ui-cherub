@@ -146,10 +146,10 @@ export function ThankYouModal({
           aria-modal="true"
           aria-labelledby="thank-you-title"
         >
-          {/* Confetti effect - reduced count for performance */}
+          {/* Confetti effect - reduced count and optimized for performance */}
           {showConfetti && !prefersReducedMotion && (
-            <div className="fixed inset-0 pointer-events-none overflow-hidden">
-              {[...Array(25)].map((_, i) => (
+            <div className="fixed inset-0 pointer-events-none overflow-hidden contain-paint">
+              {[...Array(15)].map((_, i) => (
                 <motion.div
                   key={i}
                   initial={{
@@ -166,11 +166,11 @@ export function ThankYouModal({
                     rotate: Math.random() * 720,
                   }}
                   transition={{
-                    duration: 2 + Math.random(),
+                    duration: 1.5 + Math.random() * 0.5,
                     ease: "easeOut",
                   }}
                   className={cn(
-                    "absolute w-3 h-3 rounded-sm will-change-transform",
+                    "absolute w-2 h-2 rounded-sm will-change-transform gpu-accelerated",
                     i % 3 === 0 && "bg-primary",
                     i % 3 === 1 && "bg-gaming-gold",
                     i % 3 === 2 && "bg-gaming-blue"

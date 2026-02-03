@@ -72,6 +72,8 @@ export function WaitlistForm({
       tradeInInterest: true, // Pre-checked for better conversion
       mailingListOptIn: true, // Pre-checked for better conversion
     },
+    mode: "onBlur", // Validate on blur instead of onChange for better performance
+    reValidateMode: "onBlur",
   });
 
   // Update tier when selected from TierSelector
