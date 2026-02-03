@@ -7,7 +7,6 @@ import { ThreeSteps } from "@/components/howitworks/ThreeSteps";
 import { WhatsIncluded } from "@/components/howitworks/WhatsIncluded";
 import { ComparisonSection } from "@/components/howitworks/ComparisonSection";
 import { RolloutAvailability } from "@/components/howitworks/RolloutAvailability";
-import { Roadmap } from "@/components/howitworks/Roadmap";
 import { TheExperience } from "@/components/howitworks/TheExperience";
 import { MicroFAQs } from "@/components/howitworks/MicroFAQs";
 import { HowItWorksCTA } from "@/components/howitworks/HowItWorksCTA";
@@ -77,7 +76,6 @@ export default function HowItWorks() {
         <WhatsIncluded />
         <ComparisonSection />
         <RolloutAvailability />
-        <Roadmap />
         <TheExperience />
         <MicroFAQs />
         <HowItWorksCTA />
