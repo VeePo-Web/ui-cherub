@@ -200,6 +200,16 @@ All colors MUST be HSL.
   animation: timeline-step 0.4s ease-out forwards;
 }
 
+/* Navigation indicator glow */
+.nav-indicator-glow {
+  box-shadow: 0 0 10px hsl(var(--primary) / 0.5);
+}
+
+/* Navigation scroll shadow */
+.nav-scrolled {
+  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.3);
+}
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   .glow-pulse,
