@@ -21,7 +21,7 @@ import {
 } from "@/lib/waitlist-validation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { TrustBadges } from "./TrustBadges";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 
 interface WaitlistFormProps {
   selectedTier: "ludacris" | "esports" | "pro" | null;
@@ -76,12 +76,18 @@ export function WaitlistForm({
     reValidateMode: "onBlur",
   });
 
-  // Update tier when selected from TierSelector
-  if (selectedTier && watch("preferredTier") !== selectedTier) {
-    setValue("preferredTier", selectedTier);
-  }
+  // Update tier when selected from TierSelector - moved to useEffect
+  useEffect(() => {
+    if (selectedTier) {
+      setValue("preferredTier", selectedTier);
+    }
+  }, [selectedTier, setValue]);
 
-  const selectedTierInfo = tierOptions.find((t) => t.id === selectedTier);
+  // Memoize tier info lookup
+  const selectedTierInfo = useMemo(
+    () => tierOptions.find((t) => t.id === selectedTier),
+    [selectedTier]
+  );
   const TierIcon = selectedTier ? tierIcons[selectedTier] : null;
   
   // Watch form values for personalization
@@ -99,31 +105,39 @@ export function WaitlistForm({
     .filter(m => progressPercent >= m.threshold)
     .pop()?.message || progressMessages[0].message;
 
-  // Trigger celebration on milestone progress
+  // Trigger celebration on milestone progress with debouncing
   useEffect(() => {
     const milestones = [50, 75, 100];
     const crossed = milestones.find(m => progressPercent >= m && prevProgress < m);
     if (crossed) {
-      setShowCelebration(true);
-      setTimeout(() => setShowCelebration(false), 500);
-      // Haptic feedback on mobile
-      if (navigator.vibrate) {
-        navigator.vibrate(30);
-      }
+      // Debounce celebration to avoid rapid re-triggers
+      const timer = setTimeout(() => {
+        setShowCelebration(true);
+        setTimeout(() => setShowCelebration(false), 500);
+        // Haptic feedback on mobile
+        if (navigator.vibrate) {
+          navigator.vibrate(30);
+        }
+      }, 100);
+      return () => clearTimeout(timer);
     }
     setPrevProgress(progressPercent);
   }, [progressPercent, prevProgress]);
 
-  const handleFormSubmit = handleSubmit(async (data) => {
-    await onSubmit(data);
-  });
+  // Memoize the submit handler
+  const handleFormSubmit = useMemo(
+    () => handleSubmit(async (data) => {
+      await onSubmit(data);
+    }),
+    [handleSubmit, onSubmit]
+  );
 
-  // Handle submit button click when tier is missing
-  const handleSubmitClick = () => {
+  // Memoize the scroll handler
+  const handleSubmitClick = useCallback(() => {
     if (!selectedTier && onScrollToTiers) {
       onScrollToTiers();
     }
-  };
+  }, [selectedTier, onScrollToTiers]);
 
   // Personalized header based on first name
   const personalizedHeader = firstName 
@@ -463,7 +477,20 @@ export function WaitlistForm({
         </form>
       </motion.div>
 
-      {/* Sticky mobile submit button */}
+      {/* Mobile error feedback */}
+      {isMobile && Object.keys(errors).length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed bottom-24 left-4 right-4 p-3 bg-destructive/10 border border-destructive/30 rounded-xl text-center text-sm text-destructive z-40"
+          role="alert"
+          aria-live="polite"
+        >
+          Please fix the errors above
+        </motion.div>
+      )}
+
+      {/* Sticky mobile submit button - FIXED: always type="button" to prevent double submission */}
       {isMobile && (
         <motion.div
           initial={{ y: 100 }}
@@ -471,7 +498,7 @@ export function WaitlistForm({
           className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t border-border z-40"
         >
           <motion.button
-            type={selectedTier ? "submit" : "button"}
+            type="button"
             onClick={selectedTier ? handleFormSubmit : handleSubmitClick}
             disabled={isSubmitting}
             className={cn(
@@ -544,6 +571,7 @@ function FormField({
           animate={{ opacity: 1, x: 0 }}
           className="text-sm text-destructive"
           role="alert"
+          aria-live="polite"
         >
           {error}
         </motion.p>

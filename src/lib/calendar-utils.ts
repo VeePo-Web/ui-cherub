@@ -98,13 +98,19 @@ export function generateLaunchReminderICS(params: LaunchReminderParams): string 
 
 export function downloadICS(content: string, filename: string): void {
   const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
+  link.href = url;
   link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(link.href);
+  
+  // Use requestAnimationFrame for smoother execution
+  requestAnimationFrame(() => {
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    // Clean up blob URL
+    URL.revokeObjectURL(url);
+  });
 }
 
 export function downloadLaunchReminder(params: LaunchReminderParams): void {

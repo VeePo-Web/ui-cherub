@@ -15,10 +15,27 @@ interface WaitlistConfirmationRequest {
   couponCode: string;
 }
 
+// Sanitize inputs to prevent injection
+const sanitizeInput = (input: string): string => {
+  return input.replace(/[<>]/g, '').trim().slice(0, 255);
+};
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Early check for API key
+  if (!RESEND_API_KEY) {
+    console.error("RESEND_API_KEY is not configured - check Supabase secrets");
+    return new Response(
+      JSON.stringify({ 
+        error: "Email service not configured",
+        hint: "RESEND_API_KEY secret is missing" 
+      }),
+      { status: 503, headers: { "Content-Type": "application/json", ...corsHeaders } }
+    );
   }
 
   try {
@@ -26,12 +43,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Validate required fields
     if (!email || !firstName || !queuePosition || !couponCode) {
-      throw new Error("Missing required fields");
+      return new Response(
+        JSON.stringify({ error: "Missing required fields" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
     }
 
-    if (!RESEND_API_KEY) {
-      throw new Error("RESEND_API_KEY is not configured");
-    }
+    // Sanitize inputs
+    const sanitizedEmail = sanitizeInput(email);
+    const sanitizedFirstName = sanitizeInput(firstName);
+    const sanitizedCouponCode = sanitizeInput(couponCode);
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -50,7 +71,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <tr>
                   <td style="padding: 40px 40px 20px; text-align: center;">
                     <h1 style="color: #ffffff; font-size: 28px; margin: 0 0 10px;">🎮 You're on the list!</h1>
-                    <p style="color: #c4b5d6; font-size: 16px; margin: 0;">Welcome to the future of gaming, ${firstName}!</p>
+                    <p style="color: #c4b5d6; font-size: 16px; margin: 0;">Welcome to the future of gaming, ${sanitizedFirstName}!</p>
                   </td>
                 </tr>
                 
@@ -69,7 +90,7 @@ const handler = async (req: Request): Promise<Response> => {
                       <tr>
                         <td style="padding: 24px; text-align: center;">
                           <p style="color: #c4b5d6; font-size: 12px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 2px;">Your 10% discount code</p>
-                          <p style="color: #fc7e30; font-size: 32px; font-weight: bold; margin: 0; font-family: monospace; letter-spacing: 4px;">${couponCode}</p>
+                          <p style="color: #fc7e30; font-size: 32px; font-weight: bold; margin: 0; font-family: monospace; letter-spacing: 4px;">${sanitizedCouponCode}</p>
                         </td>
                       </tr>
                     </table>
@@ -108,36 +129,59 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: "Team Gaming PC <noreply@yourdomain.com>", // User will update this with their verified domain
-        to: [email],
-        subject: "You're on the waitlist! Here's your 10% discount 🎮",
-        html: emailHtml,
-      }),
-    });
+    // Add AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
-    if (!res.ok) {
-      const errorData = await res.text();
-      console.error("Resend API error:", errorData);
-      throw new Error(`Failed to send email: ${errorData}`);
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${RESEND_API_KEY}`,
+        },
+        body: JSON.stringify({
+          from: "Team Gaming PC <noreply@yourdomain.com>", // User will update this with their verified domain
+          to: [sanitizedEmail],
+          subject: "You're on the waitlist! Here's your 10% discount 🎮",
+          html: emailHtml,
+        }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        const errorData = await res.text();
+        console.error("Resend API error:", errorData);
+        return new Response(
+          JSON.stringify({ error: `Failed to send email: ${errorData}` }),
+          { status: 502, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
+
+      const emailResponse = await res.json();
+      console.log("Waitlist confirmation email sent successfully:", emailResponse);
+
+      return new Response(JSON.stringify(emailResponse), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders,
+        },
+      });
+    } catch (fetchError: unknown) {
+      clearTimeout(timeoutId);
+      
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        console.error("Email service timeout");
+        return new Response(
+          JSON.stringify({ error: "Email service timeout" }),
+          { status: 504, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
+      throw fetchError;
     }
-
-    const emailResponse = await res.json();
-    console.log("Waitlist confirmation email sent successfully:", emailResponse);
-
-    return new Response(JSON.stringify(emailResponse), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error("Error in send-waitlist-confirmation function:", error);

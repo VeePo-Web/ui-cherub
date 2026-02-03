@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Copy, Check, Twitter, Facebook, Link2, Gamepad2, Mail, Phone, Trophy, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -32,13 +32,14 @@ export function ThankYouModal({
   const [displayPosition, setDisplayPosition] = useState(1); // Start at 1 to avoid showing #0
   const [showConfetti, setShowConfetti] = useState(false);
   const isMobile = useIsMobile();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check for reduced motion preference
   const prefersReducedMotion = typeof window !== "undefined" 
     ? window.matchMedia("(prefers-reduced-motion: reduce)").matches 
     : false;
 
-  // Animate queue position counter
+  // Animate queue position counter with proper cleanup
   useEffect(() => {
     if (!isOpen) {
       setDisplayPosition(1);
@@ -53,11 +54,17 @@ export function ThankYouModal({
     }
   }, [isOpen, prefersReducedMotion]);
 
-  // Separate effect for counter animation
+  // Separate effect for counter animation with proper cleanup
   useEffect(() => {
     if (!isOpen || queuePosition <= 1) {
       setDisplayPosition(queuePosition || 1);
       return;
+    }
+
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
 
     // Small delay before starting counter for better visual effect
@@ -67,20 +74,28 @@ export function ThankYouModal({
       const increment = queuePosition / steps;
       let current = 1;
 
-      const interval = setInterval(() => {
+      intervalRef.current = setInterval(() => {
         current += increment;
         if (current >= queuePosition) {
           setDisplayPosition(queuePosition);
-          clearInterval(interval);
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
         } else {
           setDisplayPosition(Math.floor(current));
         }
       }, duration / steps);
-
-      return () => clearInterval(interval);
     }, 300);
 
-    return () => clearTimeout(startDelay);
+    // Proper cleanup
+    return () => {
+      clearTimeout(startDelay);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
   }, [isOpen, queuePosition]);
 
   const handleCopy = useCallback(async () => {
@@ -93,41 +108,47 @@ export function ThankYouModal({
     }
   }, [couponCode]);
 
-  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  // Memoize share URL
+  const shareUrl = useMemo(
+    () => typeof window !== "undefined" ? window.location.href : "",
+    []
+  );
   
-  // Personalized share text with tier - UPDATED: clarify first 3 months
-  const tierName = selectedTier 
-    ? selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1) 
-    : "";
-  const shareText = selectedTier
-    ? `I just locked in the ${tierName} tier for a gaming PC subscription! I'm #${queuePosition} in line for Calgary. Get 10% off your first 3 months with code ${couponCode}!`
-    : `I just joined the waitlist for a gaming PC subscription! Get 10% off your first 3 months with code ${couponCode}!`;
+  // Memoize share text
+  const shareText = useMemo(() => {
+    const tierName = selectedTier 
+      ? selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1) 
+      : "";
+    return selectedTier
+      ? `I just locked in the ${tierName} tier for a gaming PC subscription! I'm #${queuePosition} in line for Calgary. Get 10% off your first 3 months with code ${couponCode}!`
+      : `I just joined the waitlist for a gaming PC subscription! Get 10% off your first 3 months with code ${couponCode}!`;
+  }, [selectedTier, queuePosition, couponCode]);
 
-  const handleSMSShare = () => {
+  const handleSMSShare = useCallback(() => {
     window.open(`sms:?body=${encodeURIComponent(shareText)}`, "_self");
-  };
+  }, [shareText]);
 
-  const handleTwitterShare = () => {
+  const handleTwitterShare = useCallback(() => {
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
       "_blank"
     );
-  };
+  }, [shareText, shareUrl]);
 
-  const handleFacebookShare = () => {
+  const handleFacebookShare = useCallback(() => {
     window.open(
       `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
       "_blank"
     );
-  };
+  }, [shareUrl]);
 
-  const handleCopyLink = async () => {
+  const handleCopyLink = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(`${shareUrl}?ref=${couponCode}`);
     } catch (err) {
       console.error("Failed to copy link:", err);
     }
-  };
+  }, [shareUrl, couponCode]);
 
   // Calculate percentile for dopamine hit
   const percentile = Math.min(99, Math.floor((1 - (queuePosition / 500)) * 100));
@@ -170,7 +191,7 @@ export function ThankYouModal({
                     ease: "easeOut",
                   }}
                   className={cn(
-                    "absolute w-2 h-2 rounded-sm will-change-transform gpu-accelerated",
+                    "absolute w-2 h-2 rounded-sm will-change-transform",
                     i % 3 === 0 && "bg-primary",
                     i % 3 === 1 && "bg-gaming-gold",
                     i % 3 === 2 && "bg-gaming-blue"

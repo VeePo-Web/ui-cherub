@@ -35,7 +35,7 @@ export function SaveCodeActions({
     setEmailState("sending");
     
     try {
-      await supabase.functions.invoke("send-waitlist-confirmation", {
+      const { error } = await supabase.functions.invoke("send-waitlist-confirmation", {
         body: {
           email,
           firstName,
@@ -43,6 +43,11 @@ export function SaveCodeActions({
           couponCode,
         },
       });
+      
+      if (error) {
+        throw error;
+      }
+      
       setEmailState("sent");
     } catch (error) {
       console.error("Failed to resend email:", error);
