@@ -140,10 +140,43 @@ All colors MUST be HSL.
   animation: shake 0.3s ease-in-out;
 }
 
+/* Progress bar celebration flash */
+@keyframes progress-flash {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.5); }
+}
+
+.progress-flash {
+  animation: progress-flash 0.4s ease-out;
+}
+
+/* Celebration confetti burst */
+@keyframes confetti-burst {
+  0% { transform: scale(0); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+.confetti-burst {
+  animation: confetti-burst 0.5s ease-out forwards;
+}
+
+/* Mobile sticky button pulse */
+@keyframes sticky-pulse {
+  0%, 100% { box-shadow: 0 -4px 20px hsl(25 97% 59% / 0.3); }
+  50% { box-shadow: 0 -4px 30px hsl(25 97% 59% / 0.5); }
+}
+
+.sticky-pulse {
+  animation: sticky-pulse 2s ease-in-out infinite;
+}
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   .glow-pulse,
-  .glow-pulse-subtle {
+  .glow-pulse-subtle,
+  .progress-flash,
+  .confetti-burst,
+  .sticky-pulse {
     animation: none;
   }
   

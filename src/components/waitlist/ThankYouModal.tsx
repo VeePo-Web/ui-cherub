@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Copy, Check, Twitter, Facebook, Link2, Gamepad2 } from "lucide-react";
+import { X, Copy, Check, Twitter, Facebook, Link2, Gamepad2, Mail, Phone, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ReferralLadder } from "./ReferralLadder";
 
 interface ThankYouModalProps {
   isOpen: boolean;
@@ -118,6 +119,9 @@ export function ThankYouModal({
     }
   };
 
+  // Calculate percentile for dopamine hit
+  const percentile = Math.min(99, Math.floor((1 - (queuePosition / 500)) * 100));
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -126,7 +130,7 @@ export function ThankYouModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md overflow-y-auto"
           onClick={onClose}
           role="dialog"
           aria-modal="true"
@@ -134,7 +138,7 @@ export function ThankYouModal({
         >
           {/* Confetti effect - reduced count for performance */}
           {showConfetti && !prefersReducedMotion && (
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <div className="fixed inset-0 pointer-events-none overflow-hidden">
               {[...Array(25)].map((_, i) => (
                 <motion.div
                   key={i}
@@ -172,7 +176,7 @@ export function ThankYouModal({
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-md bg-card border border-border rounded-2xl p-6 md:p-8 shadow-2xl"
+            className="relative w-full max-w-md bg-card border border-border rounded-2xl p-6 md:p-8 shadow-2xl my-8"
           >
             {/* Close button */}
             <button
@@ -209,6 +213,19 @@ export function ThankYouModal({
                 Thanks, <span className="text-foreground font-medium">{firstName}</span>! 
                 You're <span className="text-primary font-bold">#{displayPosition}</span> in the Calgary queue.
               </p>
+              
+              {/* "You beat others" dopamine hit */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 }}
+                className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-gaming-gold/10 border border-gaming-gold/30 rounded-full text-sm"
+              >
+                <Trophy className="w-4 h-4 text-gaming-gold" />
+                <span className="text-gaming-gold font-medium">
+                  You joined before {percentile}% of Calgary gamers!
+                </span>
+              </motion.div>
             </motion.div>
 
             {/* Coupon box */}
@@ -243,35 +260,64 @@ export function ThankYouModal({
                     )}
                   </button>
                 </div>
+                {/* Bonus urgency */}
+                <p className="text-xs text-muted-foreground mt-2">
+                  ⏰ First 100 users get EXTRA 5% at launch!
+                </p>
               </div>
             </motion.div>
 
-            {/* Email reminder - with fallback */}
-            <motion.p
+            {/* What happens next - clear steps */}
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="text-center text-sm text-muted-foreground mb-6"
+              className="mb-6 space-y-2"
             >
-              {emailSent 
-                ? "Check your email for your welcome message and coupon code."
-                : `Your discount code is ${couponCode}. Save it now!`
-              }
-            </motion.p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider text-center mb-3">
+                What happens next
+              </p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 text-sm">
+                  <div className="w-6 h-6 rounded-full bg-gaming-green/20 flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3 h-3 text-gaming-green" />
+                  </div>
+                  <span className="text-foreground">You're on the list!</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-3 h-3 text-muted-foreground" />
+                  </div>
+                  <span className={emailSent ? "text-foreground" : "text-muted-foreground"}>
+                    {emailSent ? "Check your email (~2 min)" : `Code saved: ${couponCode}`}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-3 h-3 text-muted-foreground" />
+                  </div>
+                  <span className="text-muted-foreground">We'll text when Calgary goes live</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
+                    <Gamepad2 className="w-3 h-3 text-muted-foreground" />
+                  </div>
+                  <span className="text-muted-foreground">First access + 10% off guaranteed</span>
+                </div>
+              </div>
+            </motion.div>
 
-            {/* Divider */}
-            <div className="border-t border-border my-6" />
+            {/* Referral ladder */}
+            <ReferralLadder couponCode={couponCode} queuePosition={queuePosition} />
 
-            {/* Share section */}
+            {/* Quick share buttons */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="text-center"
+              transition={{ delay: 0.8 }}
+              className="mt-6 text-center"
             >
-              <p className="text-sm text-muted-foreground mb-4">
-                Share & move up the queue
-              </p>
+              <p className="text-xs text-muted-foreground mb-3">Quick share</p>
               <div className="flex items-center justify-center gap-3">
                 <button
                   onClick={handleTwitterShare}
