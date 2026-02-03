@@ -1,639 +1,466 @@
 
 
-# World-Class Performance Optimization Plan
+# Form, Email & Popup Performance Optimization Plan
 
 ## Executive Summary
 
-This plan optimizes the waitlist website for world-class performance without changing any design elements. Following the comprehensive research on performance optimization inspired by Google, Cloudflare, Akamai, Fastly, Netflix, Shopify, and Pinterest, we will implement optimizations targeting Core Web Vitals (LCP < 2.5s, INP < 200ms, CLS < 0.1) while ensuring all functionality works perfectly.
+This plan ensures the waitlist form, confirmation emails, and thank-you modal work flawlessly while being extremely performance-optimized. Based on thorough code analysis, I've identified several issues that need to be addressed and optimizations to implement.
 
 ---
 
 ## Current State Analysis
 
-### Identified Performance Concerns
+### Critical Issue Identified
 
-| Area | Issue | Impact |
-|------|-------|--------|
-| **Font Loading** | Google Fonts loaded synchronously in index.html | Blocks LCP, increases TTFB |
-| **Framer Motion** | Heavy animation library used on every component | Large bundle, main thread blocking |
-| **Animation Overuse** | Multiple infinite CSS animations on every page | GPU/CPU drain, battery impact |
-| **Lazy Loading** | Components not code-split | Large initial bundle |
-| **Image Assets** | PNG files in assets folder (not WebP/AVIF) | Larger file sizes |
-| **Third-party Scripts** | Supabase client loaded eagerly | Increases initial load |
-| **Vite Config** | No production optimizations configured | Unoptimized bundles |
+| Component | Issue | Severity |
+|-----------|-------|----------|
+| **Edge Function** | `RESEND_API_KEY` secret is NOT configured | CRITICAL |
+| **Edge Function** | `verify_jwt` not explicitly set in config.toml | Medium |
+| **Form** | Mobile sticky button calls `handleFormSubmit` directly which bypasses validation | Bug |
+| **ThankYouModal** | Multiple useEffect dependencies could cause stale closures | Medium |
+| **TierCard** | Missing `aria-pressed` for accessibility | Low |
 
-### Functionality to Verify
-
-- Waitlist form submission and validation
-- Thank you modal display with confetti
-- Tier selection with haptic feedback
-- Mobile sticky CTA button
-- Navigation scroll behavior
-- FAQ accordion interactions
-- All micro-interactions and hover states
+### Secrets Status
+- `RESEND_API_KEY`: NOT FOUND - emails will fail silently
+- This explains why the edge function has no logs - it's likely failing on API key retrieval
 
 ---
 
-## Phase 1: Critical Path Optimization (Highest Impact)
+## Phase 1: Fix Critical Email Functionality
 
-### 1.1 Font Loading Optimization
+### 1.1 Add RESEND_API_KEY Secret
 
-**File: `index.html`**
+The edge function requires a Resend API key to send confirmation emails. This must be configured before emails will work.
 
-**Current Issue:** Google Fonts block rendering with synchronous load.
+**Action Required:** User must provide their Resend API key from https://resend.com/api-keys
 
-**Solution:** Implement font-display swap and preload critical font weight.
+### 1.2 Update Edge Function Configuration
 
-```html
-<!-- Add to <head> -->
-<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
-<noscript>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&display=swap">
-</noscript>
+**File: `supabase/config.toml`**
+
+Add explicit function configuration:
+
+```toml
+project_id = "sjlkfitixkwocusfbllv"
+
+[functions.send-waitlist-confirmation]
+verify_jwt = false
 ```
 
-**Why:** Preloading and async loading prevents render-blocking. The `media="print"` trick defers non-critical CSS loading.
+### 1.3 Improve Edge Function Error Handling
 
----
+**File: `supabase/functions/send-waitlist-confirmation/index.ts`**
 
-### 1.2 Vite Build Optimization
-
-**File: `vite.config.ts`**
-
-**Add production optimizations:**
+Add better error handling and logging:
 
 ```typescript
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
-import path from "path";
-import { componentTagger } from "lovable-tagger";
-
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-  },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
-  build: {
-    // Enable minification
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-    },
-    // Code splitting for better caching
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-motion': ['framer-motion'],
-          'vendor-radix': [
-            '@radix-ui/react-accordion',
-            '@radix-ui/react-checkbox',
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-select',
-            '@radix-ui/react-tooltip',
-          ],
-          'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
-          'vendor-supabase': ['@supabase/supabase-js'],
-        },
-      },
-    },
-    // Target modern browsers
-    target: 'es2020',
-    // Generate source maps for debugging
-    sourcemap: false,
-    // Chunk size warning
-    chunkSizeWarningLimit: 500,
-  },
-  // Optimize dependencies
-  optimizeDeps: {
-    include: ['react', 'react-dom', 'framer-motion'],
-  },
-}));
-```
-
-**Why:** 
-- Terser minification removes dead code and console logs
-- Manual chunks improve caching (vendor bundles rarely change)
-- ES2020 target uses modern JS features for smaller output
-
----
-
-### 1.3 Lazy Load Routes
-
-**File: `src/App.tsx`**
-
-**Implement React.lazy for route-based code splitting:**
-
-```typescript
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { Routes, Route } from "react-router-dom";
-import { Suspense, lazy } from "react";
-
-// Lazy load pages
-const Waitlist = lazy(() => import("./pages/Waitlist"));
-const HowItWorks = lazy(() => import("./pages/HowItWorks"));
-const Index = lazy(() => import("./pages/Index"));
-const Discover = lazy(() => import("./pages/Discover"));
-const Auth = lazy(() => import("./pages/Auth"));
-const Admin = lazy(() => import("./pages/Admin"));
-const MyEvents = lazy(() => import("./pages/MyEvents"));
-const CreateEvent = lazy(() => import("./pages/CreateEvent"));
-const EditEvent = lazy(() => import("./pages/EditEvent"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-
-// Minimal loading fallback
-const PageLoader = () => (
-  <div className="min-h-screen bg-background flex items-center justify-center">
-    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-  </div>
-);
-
-const App = () => (
-  <TooltipProvider>
-    <Toaster />
-    <Sonner />
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        <Route path="/" element={<Waitlist />} />
-        <Route path="/how-it-works" element={<HowItWorks />} />
-        <Route path="/discover" element={<Discover />} />
-        <Route path="/event/:id" element={<Index />} />
-        <Route path="/event/:id/edit" element={<EditEvent />} />
-        <Route path="/my-events" element={<MyEvents />} />
-        <Route path="/create-event" element={<CreateEvent />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Suspense>
-  </TooltipProvider>
-);
-
-export default App;
-```
-
-**Why:** Only the code for the current route is loaded initially, reducing initial bundle size significantly.
-
----
-
-## Phase 2: Animation Performance Optimization
-
-### 2.1 Add GPU Acceleration Hints
-
-**File: `src/index.css`**
-
-**Add performance utilities (append to existing file):**
-
-```css
-/* ===== PERFORMANCE OPTIMIZATIONS ===== */
-
-/* GPU acceleration for animated elements */
-.will-change-transform {
-  will-change: transform;
-}
-
-.will-change-opacity {
-  will-change: opacity;
-}
-
-/* Contain layout for animated sections */
-.contain-layout {
-  contain: layout;
-}
-
-.contain-paint {
-  contain: paint;
-}
-
-/* Hardware acceleration trigger */
-.gpu-accelerated {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
-
-/* Reduce motion for performance-conscious users */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* Pause animations when not visible */
-.animation-paused {
-  animation-play-state: paused !important;
-}
-
-/* Content visibility for off-screen sections */
-.content-visibility-auto {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 500px;
+// At the start of the handler, add early validation
+if (!RESEND_API_KEY) {
+  console.error("RESEND_API_KEY is not configured - check Supabase secrets");
+  return new Response(
+    JSON.stringify({ 
+      error: "Email service not configured",
+      hint: "RESEND_API_KEY secret is missing" 
+    }),
+    { status: 503, headers: { "Content-Type": "application/json", ...corsHeaders } }
+  );
 }
 ```
 
 ---
 
-### 2.2 Optimize Framer Motion Usage
+## Phase 2: Fix Form Mobile Bug
 
-**File: `src/components/waitlist/WaitlistHero.tsx`**
-
-**Key optimizations to apply:**
-
-1. Add `will-change: transform` to animated orbs
-2. Use `layoutId` carefully to prevent layout thrashing
-3. Reduce animation complexity on mobile (already partially done)
-
-**Update the animated orbs section:**
-
-```tsx
-{/* Animated gradient background - optimized */}
-<div className="absolute inset-0 bg-gradient-to-br from-background via-gaming-purple-mid to-background">
-  <div className="absolute inset-0 opacity-30">
-    <motion.div 
-      className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl will-change-transform gpu-accelerated"
-      animate={{ 
-        scale: [1, 1.1, 1],
-        opacity: [0.2, 0.3, 0.2],
-      }}
-      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-      style={{ willChange: 'transform, opacity' }}
-    />
-    {/* Similar updates for other orbs... */}
-  </div>
-</div>
-```
-
-**Apply similar pattern to:**
-- `src/components/howitworks/HowItWorksHero.tsx`
-- `src/components/waitlist/ThankYouModal.tsx` (confetti)
-
----
-
-### 2.3 Lazy Load Below-Fold Components
-
-**File: `src/pages/Waitlist.tsx`**
-
-**Implement intersection observer for heavy components:**
-
-```typescript
-import { useState, useRef, useEffect, lazy, Suspense } from "react";
-// ... existing imports ...
-
-// Lazy load below-fold components
-const GeoCoverage = lazy(() => import("@/components/waitlist/GeoCoverage").then(m => ({ default: m.GeoCoverage })));
-
-// In render, wrap with Suspense
-<Suspense fallback={<div className="h-48" />}>
-  <GeoCoverage />
-</Suspense>
-```
-
----
-
-## Phase 3: Resource Optimization
-
-### 3.1 Optimize Image Assets
-
-**Files in `src/assets/`:**
-- `arrow-down.png` - Convert to SVG or WebP
-- `badge.png` - Convert to WebP with fallback
-- `arrow-right.svg` - Already optimized
-
-**Create optimized versions:**
-
-For `badge.png`, create a WebP version and implement picture element pattern:
-
-```tsx
-// Example usage pattern
-<picture>
-  <source srcSet="/badge.webp" type="image/webp" />
-  <img src="/badge.png" alt="Badge" loading="lazy" />
-</picture>
-```
-
----
-
-### 3.2 Add Resource Hints
-
-**File: `index.html`**
-
-**Add critical resource hints:**
-
-```html
-<head>
-  <!-- DNS prefetch for external resources -->
-  <link rel="dns-prefetch" href="https://sjlkfitixkwocusfbllv.supabase.co">
-  
-  <!-- Preconnect for Supabase -->
-  <link rel="preconnect" href="https://sjlkfitixkwocusfbllv.supabase.co" crossorigin>
-  
-  <!-- Preload critical assets -->
-  <link rel="preload" href="/src/main.tsx" as="script" type="module">
-  
-  <!-- Theme color for mobile browsers -->
-  <meta name="theme-color" content="#1a0a2e">
-  
-  <!-- ... existing head content ... -->
-</head>
-```
-
----
-
-## Phase 4: Form and Modal Optimization
-
-### 4.1 Debounce Form Validation
+### 2.1 Fix Mobile Submit Button
 
 **File: `src/components/waitlist/WaitlistForm.tsx`**
 
-The current form uses react-hook-form with zod validation, which is already efficient. Additional optimizations:
-
-```typescript
-// Add to form configuration
-const {
-  register,
-  handleSubmit,
-  setValue,
-  watch,
-  formState: { errors, dirtyFields },
-} = useForm<WaitlistFormData>({
-  resolver: zodResolver(waitlistFormSchema),
-  defaultValues: {
-    preferredTier: selectedTier || undefined,
-    tradeInInterest: true,
-    mailingListOptIn: true,
-  },
-  mode: "onBlur", // Validate on blur instead of onChange for better performance
-  reValidateMode: "onBlur",
-});
+**Current Bug (Line 475):**
+```tsx
+onClick={selectedTier ? handleFormSubmit : handleSubmitClick}
 ```
 
----
+**Issue:** When tier is selected, clicking the mobile button calls `handleFormSubmit` directly. However, `handleFormSubmit` is the wrapped `handleSubmit(async (data) => {...})` which is correct for form submission, BUT the button has `type="submit"` when tier is selected, so it will trigger form submission twice.
 
-### 4.2 Optimize Thank You Modal Confetti
+**Fix:** The mobile button should always be `type="button"` since it manually triggers submission:
 
-**File: `src/components/waitlist/ThankYouModal.tsx`**
+```tsx
+<motion.button
+  type="button"  // Always button, never submit
+  onClick={selectedTier ? handleFormSubmit : handleSubmitClick}
+  disabled={isSubmitting}
+  // ... rest of props
+>
+```
 
-**Reduce confetti count and use CSS containment:**
+### 2.2 Add Form Error State Feedback
 
-```typescript
-// Reduce from 25 to 15 particles
-{showConfetti && !prefersReducedMotion && (
-  <div className="fixed inset-0 pointer-events-none overflow-hidden contain-paint">
-    {[...Array(15)].map((_, i) => (
-      <motion.div
-        key={i}
-        initial={{ /* ... */ }}
-        animate={{ /* ... */ }}
-        transition={{
-          duration: 1.5 + Math.random() * 0.5, // Shorter duration
-          ease: "easeOut",
-        }}
-        className={cn(
-          "absolute w-2 h-2 rounded-sm will-change-transform gpu-accelerated", // Smaller particles
-          // ... color classes
-        )}
-      />
-    ))}
-  </div>
+Add visual feedback when form submission fails on mobile:
+
+```tsx
+// Add to mobile button section
+{errors && Object.keys(errors).length > 0 && (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="fixed bottom-20 left-4 right-4 p-3 bg-destructive/10 border border-destructive/30 rounded-xl text-center text-sm text-destructive z-40"
+  >
+    Please fix the errors above
+  </motion.div>
 )}
 ```
 
 ---
 
-## Phase 5: Content Visibility Optimization
+## Phase 3: Optimize Form Performance
 
-### 5.1 Apply content-visibility to Sections
+### 3.1 Memoize Callbacks
 
-**File: `src/pages/HowItWorks.tsx`**
+**File: `src/components/waitlist/WaitlistForm.tsx`**
 
-**Wrap below-fold sections with content-visibility:**
-
-```tsx
-<main className="min-h-screen bg-background">
-  <HowItWorksNav />
-  <HowItWorksHero />
-  
-  {/* Apply content-visibility to below-fold sections */}
-  <div className="content-visibility-auto">
-    <WhoItsFor />
-  </div>
-  <div className="content-visibility-auto">
-    <ThePromise />
-  </div>
-  <div className="content-visibility-auto">
-    <ThreeSteps />
-  </div>
-  {/* ... continue for other sections ... */}
-</main>
-```
-
-**Why:** `content-visibility: auto` skips rendering of off-screen content, dramatically improving initial paint time.
-
----
-
-## Phase 6: Supabase Query Optimization
-
-### 6.1 Add Query Caching
-
-**File: `src/hooks/useActualSpotsRemaining.ts`**
-
-**Implement simple caching to prevent redundant queries:**
+Wrap event handlers in `useCallback` to prevent unnecessary re-renders:
 
 ```typescript
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useCallback, useMemo } from "react";
 
-const TOTAL_SPOTS = 250;
-const CACHE_KEY = 'waitlist_spots_cache';
-const CACHE_TTL = 60000; // 1 minute
+// Memoize the submit handler
+const handleFormSubmit = useCallback(
+  handleSubmit(async (data) => {
+    await onSubmit(data);
+  }),
+  [handleSubmit, onSubmit]
+);
 
-interface CacheEntry {
-  value: number;
-  timestamp: number;
-}
+// Memoize the scroll handler
+const handleSubmitClick = useCallback(() => {
+  if (!selectedTier && onScrollToTiers) {
+    onScrollToTiers();
+  }
+}, [selectedTier, onScrollToTiers]);
 
-function getFromCache(): number | null {
-  try {
-    const cached = sessionStorage.getItem(CACHE_KEY);
-    if (cached) {
-      const entry: CacheEntry = JSON.parse(cached);
-      if (Date.now() - entry.timestamp < CACHE_TTL) {
-        return entry.value;
+// Memoize tier info lookup
+const selectedTierInfo = useMemo(
+  () => tierOptions.find((t) => t.id === selectedTier),
+  [selectedTier]
+);
+```
+
+### 3.2 Debounce Progress Celebration Effect
+
+The progress effect triggers on every field change. Add debouncing:
+
+```typescript
+// Replace the milestone detection with debounced version
+useEffect(() => {
+  const milestones = [50, 75, 100];
+  const crossed = milestones.find(m => progressPercent >= m && prevProgress < m);
+  if (crossed) {
+    // Debounce celebration to avoid rapid re-triggers
+    const timer = setTimeout(() => {
+      setShowCelebration(true);
+      setTimeout(() => setShowCelebration(false), 500);
+      if (navigator.vibrate) {
+        navigator.vibrate(30);
       }
-    }
-  } catch {
-    // Ignore cache errors
+    }, 100);
+    return () => clearTimeout(timer);
   }
-  return null;
-}
+  setPrevProgress(progressPercent);
+}, [progressPercent, prevProgress]);
+```
 
-function setCache(value: number): void {
+### 3.3 Fix Conditional Hook Issue
+
+**Current Issue (Line 80-82):**
+```tsx
+if (selectedTier && watch("preferredTier") !== selectedTier) {
+  setValue("preferredTier", selectedTier);
+}
+```
+
+This runs on every render and causes unnecessary updates. Move to `useEffect`:
+
+```typescript
+// Replace with useEffect
+useEffect(() => {
+  if (selectedTier) {
+    setValue("preferredTier", selectedTier);
+  }
+}, [selectedTier, setValue]);
+```
+
+---
+
+## Phase 4: Optimize ThankYouModal
+
+### 4.1 Fix Effect Dependencies
+
+**File: `src/components/waitlist/ThankYouModal.tsx`**
+
+The counter animation effect has a potential memory leak. Fix cleanup:
+
+```typescript
+// Line 57-84: Improve cleanup
+useEffect(() => {
+  if (!isOpen || queuePosition <= 1) {
+    setDisplayPosition(queuePosition || 1);
+    return;
+  }
+
+  let intervalId: NodeJS.Timeout | null = null;
+  const startDelay = setTimeout(() => {
+    const duration = 800;
+    const steps = 20;
+    const increment = queuePosition / steps;
+    let current = 1;
+
+    intervalId = setInterval(() => {
+      current += increment;
+      if (current >= queuePosition) {
+        setDisplayPosition(queuePosition);
+        if (intervalId) clearInterval(intervalId);
+      } else {
+        setDisplayPosition(Math.floor(current));
+      }
+    }, duration / steps);
+  }, 300);
+
+  // Proper cleanup
+  return () => {
+    clearTimeout(startDelay);
+    if (intervalId) clearInterval(intervalId);
+  };
+}, [isOpen, queuePosition]);
+```
+
+### 4.2 Memoize Share Handlers
+
+```typescript
+// Already using useCallback for handleCopy - good!
+// But the share URLs should be memoized:
+
+const shareUrl = useMemo(
+  () => typeof window !== "undefined" ? window.location.href : "",
+  []
+);
+
+const shareText = useMemo(() => {
+  const tierName = selectedTier 
+    ? selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1) 
+    : "";
+  return selectedTier
+    ? `I just locked in the ${tierName} tier for a gaming PC subscription! I'm #${queuePosition} in line for Calgary. Get 10% off your first 3 months with code ${couponCode}!`
+    : `I just joined the waitlist for a gaming PC subscription! Get 10% off your first 3 months with code ${couponCode}!`;
+}, [selectedTier, queuePosition, couponCode]);
+```
+
+### 4.3 Reduce Confetti Re-renders
+
+The confetti already uses reduced count (15 particles) and CSS containment. Add `will-change` cleanup:
+
+```tsx
+// Add onAnimationComplete to clean up will-change
+<motion.div
+  key={i}
+  // ... existing props
+  onAnimationComplete={() => {
+    // will-change is automatically removed after animation
+  }}
+  className={cn(
+    "absolute w-2 h-2 rounded-sm will-change-transform",
+    // Remove gpu-accelerated as it's redundant with will-change
+    i % 3 === 0 && "bg-primary",
+    i % 3 === 1 && "bg-gaming-gold",
+    i % 3 === 2 && "bg-gaming-blue"
+  )}
+/>
+```
+
+---
+
+## Phase 5: Optimize SaveCodeActions
+
+### 5.1 Add Error Boundaries
+
+**File: `src/components/waitlist/SaveCodeActions.tsx`**
+
+The email resend should have better error handling:
+
+```typescript
+const handleEmailCode = useCallback(async () => {
+  if (emailState === "sending" || !email) return;
+  
+  setEmailState("sending");
+  
   try {
-    const entry: CacheEntry = { value, timestamp: Date.now() };
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify(entry));
-  } catch {
-    // Ignore cache errors
+    const { error } = await supabase.functions.invoke("send-waitlist-confirmation", {
+      body: {
+        email,
+        firstName,
+        queuePosition,
+        couponCode,
+      },
+    });
+    
+    if (error) {
+      throw error;
+    }
+    
+    setEmailState("sent");
+  } catch (error) {
+    console.error("Failed to resend email:", error);
+    setEmailState("error");
+    setTimeout(() => setEmailState("idle"), 3000);
   }
-}
+}, [email, firstName, queuePosition, couponCode, emailState]);
+```
 
-export function useActualSpotsRemaining() {
-  const [spotsRemaining, setSpotsRemaining] = useState(() => {
-    const cached = getFromCache();
-    return cached ?? TOTAL_SPOTS;
+### 5.2 Optimize ICS Download
+
+**File: `src/lib/calendar-utils.ts`**
+
+Add cleanup for blob URL:
+
+```typescript
+export function downloadICS(content: string, filename: string): void {
+  const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  
+  // Use requestAnimationFrame for smoother execution
+  requestAnimationFrame(() => {
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    // Clean up blob URL
+    URL.revokeObjectURL(url);
   });
-  const [isLoading, setIsLoading] = useState(() => getFromCache() === null);
-
-  useEffect(() => {
-    // Check cache first
-    const cached = getFromCache();
-    if (cached !== null) {
-      setSpotsRemaining(cached);
-      setIsLoading(false);
-      return;
-    }
-
-    const fetchSignupCount = async () => {
-      try {
-        const { count, error } = await supabase
-          .from("waitlist_signups")
-          .select("*", { count: "exact", head: true });
-
-        if (error) {
-          console.error("Error fetching signup count:", error);
-          setSpotsRemaining(TOTAL_SPOTS);
-        } else {
-          const remaining = Math.max(0, TOTAL_SPOTS - (count || 0));
-          setSpotsRemaining(remaining);
-          setCache(remaining);
-        }
-      } catch (err) {
-        console.error("Error fetching signup count:", err);
-        setSpotsRemaining(TOTAL_SPOTS);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSignupCount();
-  }, []);
-
-  return { spotsRemaining, isLoading };
 }
 ```
 
 ---
 
-## Phase 7: SEO & Meta Optimization
+## Phase 6: Accessibility Improvements
 
-### 7.1 Update index.html Meta Tags
+### 6.1 TierCard Accessibility
 
-**File: `index.html`**
+**File: `src/components/waitlist/TierCard.tsx`**
 
-**Update with proper branding and performance hints:**
+Add proper ARIA attributes:
 
-```html
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- Core Meta -->
-    <title>Connor Computer - Gaming PC Subscription | Always-Current Performance</title>
-    <meta name="description" content="Never buy outdated hardware again. Get a high-performance gaming PC with annual upgrades, covered repairs, and transparent builds—all for one monthly price. Join the Calgary waitlist." />
-    <meta name="author" content="Connor Computer" />
-    
-    <!-- Performance Hints -->
-    <meta http-equiv="x-dns-prefetch-control" content="on">
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    <link rel="dns-prefetch" href="https://sjlkfitixkwocusfbllv.supabase.co">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://sjlkfitixkwocusfbllv.supabase.co" crossorigin>
-    
-    <!-- Optimized Font Loading -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
-    <noscript>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&display=swap">
-    </noscript>
-    
-    <!-- Theme -->
-    <meta name="theme-color" content="#1a0a2e">
-    <meta name="color-scheme" content="dark">
+```tsx
+<motion.button
+  type="button"
+  onClick={onSelect}
+  aria-pressed={isSelected}
+  aria-label={`Select ${name} tier: ${tagline}`}
+  // ... rest of props
+>
+```
 
-    <!-- Open Graph -->
-    <meta property="og:title" content="Connor Computer - Gaming PC Subscription" />
-    <meta property="og:description" content="Never buy outdated hardware again. Annual upgrades, covered repairs, one monthly price." />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-    <meta property="og:locale" content="en_CA" />
+### 6.2 Form Field Accessibility
 
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Connor Computer - Gaming PC Subscription" />
-    <meta name="twitter:description" content="Never buy outdated hardware again. Annual upgrades, covered repairs, one monthly price." />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-  </head>
+Ensure all form fields have proper error announcements:
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+```tsx
+// In FormField component, add live region
+{error && (
+  <motion.p
+    id={fieldId ? `${fieldId}-error` : undefined}
+    initial={{ opacity: 0, x: -10 }}
+    animate={{ opacity: 1, x: 0 }}
+    className="text-sm text-destructive"
+    role="alert"
+    aria-live="polite"
+  >
+    {error}
+  </motion.p>
+)}
 ```
 
 ---
 
-## Implementation Summary
+## Phase 7: Edge Function Optimization
 
-### Files to Modify
+### 7.1 Add Request Timeout
+
+**File: `supabase/functions/send-waitlist-confirmation/index.ts`**
+
+Add timeout to prevent hanging requests:
+
+```typescript
+// Add AbortController for timeout
+const controller = new AbortController();
+const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+try {
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+    },
+    body: JSON.stringify({
+      from: "Team Gaming PC <noreply@yourdomain.com>",
+      to: [email],
+      subject: "You're on the waitlist! Here's your 10% discount",
+      html: emailHtml,
+    }),
+    signal: controller.signal,
+  });
+  
+  clearTimeout(timeoutId);
+  // ... rest of handling
+} catch (error) {
+  clearTimeout(timeoutId);
+  if (error.name === 'AbortError') {
+    return new Response(
+      JSON.stringify({ error: "Email service timeout" }),
+      { status: 504, headers: { ...corsHeaders } }
+    );
+  }
+  throw error;
+}
+```
+
+### 7.2 Add Input Sanitization
+
+```typescript
+// Sanitize inputs to prevent injection
+const sanitizeInput = (input: string): string => {
+  return input.replace(/[<>]/g, '').trim().slice(0, 255);
+};
+
+const sanitizedEmail = sanitizeInput(email);
+const sanitizedFirstName = sanitizeInput(firstName);
+```
+
+---
+
+## Files to Modify
 
 | File | Changes | Priority |
 |------|---------|----------|
-| `index.html` | Font optimization, resource hints, meta tags | P0 - Critical |
-| `vite.config.ts` | Build optimizations, code splitting | P0 - Critical |
-| `src/App.tsx` | Lazy load routes | P0 - Critical |
-| `src/index.css` | Performance utilities, reduced motion | P1 - High |
-| `src/components/waitlist/WaitlistHero.tsx` | GPU acceleration hints | P1 - High |
-| `src/components/howitworks/HowItWorksHero.tsx` | GPU acceleration hints | P1 - High |
-| `src/components/waitlist/ThankYouModal.tsx` | Reduced confetti, containment | P1 - High |
-| `src/components/waitlist/WaitlistForm.tsx` | Validation mode optimization | P2 - Medium |
-| `src/hooks/useActualSpotsRemaining.ts` | Query caching | P2 - Medium |
-| `src/pages/HowItWorks.tsx` | Content visibility | P2 - Medium |
-| `src/pages/Waitlist.tsx` | Lazy load below-fold | P2 - Medium |
+| `supabase/config.toml` | Add function config | P0 - Critical |
+| `supabase/functions/send-waitlist-confirmation/index.ts` | Better error handling, timeout, sanitization | P0 - Critical |
+| `src/components/waitlist/WaitlistForm.tsx` | Fix mobile button bug, memoization, useEffect fixes | P0 - Critical |
+| `src/components/waitlist/ThankYouModal.tsx` | Fix effect cleanup, memoization | P1 - High |
+| `src/components/waitlist/SaveCodeActions.tsx` | Better error handling | P1 - High |
+| `src/components/waitlist/TierCard.tsx` | Accessibility improvements | P2 - Medium |
+| `src/lib/calendar-utils.ts` | Optimize blob cleanup | P2 - Medium |
 
 ---
 
-## Expected Performance Improvements
+## Pre-Requisite: RESEND_API_KEY
 
-| Metric | Current (Estimated) | Target | Improvement |
-|--------|---------------------|--------|-------------|
-| **LCP** | ~3.5s | < 2.5s | 30%+ faster |
-| **INP** | ~250ms | < 200ms | 20%+ faster |
-| **CLS** | ~0.15 | < 0.1 | Stabilized |
-| **TTFB** | ~600ms | < 400ms | 30%+ faster |
-| **Bundle Size** | ~500KB | ~350KB | 30% smaller |
+Before the email functionality will work, you must provide a Resend API key:
+
+1. Go to https://resend.com and sign up
+2. Verify your email domain at https://resend.com/domains
+3. Create an API key at https://resend.com/api-keys
+4. Provide the API key when prompted
 
 ---
 
@@ -641,37 +468,30 @@ export function useActualSpotsRemaining() {
 
 After implementation, verify:
 
-- [ ] Waitlist form submits successfully
-- [ ] Thank you modal opens with confetti animation
-- [ ] Tier selection triggers haptic feedback on mobile
-- [ ] Mobile sticky CTA appears and works
-- [ ] Navigation hides at top, slides in on scroll
-- [ ] FAQ accordion opens/closes smoothly
-- [ ] All hover states and micro-interactions work
-- [ ] Page loads without layout shifts (CLS < 0.1)
-- [ ] Reduced motion preference is respected
-- [ ] All links navigate correctly
+- [ ] Form submits successfully on desktop
+- [ ] Form submits successfully on mobile (sticky button)
+- [ ] Validation errors appear correctly
+- [ ] Tier selection works with haptic feedback
+- [ ] Thank you modal opens with confetti
+- [ ] Queue position counter animates
+- [ ] Copy coupon code works
+- [ ] Email confirmation sends (requires RESEND_API_KEY)
+- [ ] Calendar download works
+- [ ] Social share buttons work
+- [ ] Referral link copies correctly
+- [ ] SMS share works on mobile
+- [ ] Modal closes properly
+- [ ] No console errors
+- [ ] Reduced motion preference respected
 
 ---
 
-## Technical Notes
+## Expected Performance Improvements
 
-### No Design Changes
-All optimizations preserve the existing visual design. Changes are purely technical:
-- No color changes
-- No layout changes
-- No typography changes
-- No animation visual changes (only performance improvements)
-
-### Browser Support
-- Target: Modern browsers (Chrome 88+, Firefox 78+, Safari 14+, Edge 88+)
-- ES2020 features reduce polyfill overhead
-- Graceful degradation for older browsers
-
-### Monitoring Recommendations
-Post-implementation, monitor:
-1. Core Web Vitals via Google Search Console
-2. Real-user metrics via browser performance APIs
-3. Error rates for form submissions
-4. Page load times across devices
+| Metric | Before | After |
+|--------|--------|-------|
+| Form re-renders | Every keystroke | On blur only |
+| Callback creation | Every render | Memoized |
+| Memory leaks | Possible in effects | Fixed with cleanup |
+| Bundle impact | None (no new deps) | Optimized existing |
 
