@@ -1,721 +1,378 @@
 
-# Gaming PC Subscription Waitlist
-## Concept Design Plan: Fantasy-Level Experience for Competitive Casey
+# Deep Forensic UX/UI Critique & Friction-Reduction Plan
+## Gaming PC Subscription Waitlist Flow Analysis
 
 ---
 
-## 1. Strategic Design Foundation
+## Executive Summary
 
-### 1.1 Design Philosophy Alignment
+After comprehensive testing of the Point A (landing) to Point B (form submission) flow across desktop (1024x768) and mobile (390x844) viewports, I have identified **18 friction points** across 5 categories. The current implementation has a solid foundation but several micro-interactions, visual hierarchy issues, and UX patterns create unnecessary cognitive load that reduces conversion potential.
 
-The design must speak directly to "Competitive Casey" - a performance-obsessed gamer who values:
-- **Transparency over marketing fluff** - They want exact specs, not vague promises
-- **Predictability over surprise** - Clear upgrade windows, known costs, zero anxiety
-- **Speed over everything** - Fast load times mirror the low-latency experience they demand in games
-- **Trust signals** - Every element must reduce skepticism, not add to it
-
-### 1.2 Psychological Triggers to Deploy
-
-| Trigger | Implementation | Why It Works for Casey |
-|---------|---------------|----------------------|
-| Loss aversion | "Stop missing launches" > "Get early access" | Casey fears mistiming GPU drops |
-| Social proof | "Join 247 Calgary gamers" with live counter | Validates that peers trust this |
-| Scarcity | "Limited Calgary beta slots" | Creates urgency without sleaze |
-| Commitment | Low-friction first step (email first) | Foot-in-the-door technique |
-| FOMO | Queue position after signup | Drives referral behavior |
-
-### 1.3 The Narrative Arc (Scroll Story)
-
-```text
-CHAPTER 1: THE PROMISE (Hero)
-"What if your PC just stayed competitive?"
-
-CHAPTER 2: THE PROOF (Tier Cards)
-"Pick your performance tier - see exactly what's inside"
-
-CHAPTER 3: THE COMMITMENT (Form)
-"Lock your spot - 10% off first 3 months"
-
-CHAPTER 4: THE EXPANSION (Geo)
-"We're coming to you"
-
-CHAPTER 5: THE CELEBRATION (Modal)
-"You're in. Here's your reward."
-```
+**Current Flow Assessment**: 6.5/10
+**Target After Fixes**: 9/10
 
 ---
 
-## 2. Visual Identity System
+## 1. Hero Section Issues
 
-### 2.1 Color Palette Deep-Dive
+### Issue 1.1: CTA Button Scroll Target Misalignment
+**Severity**: Medium
+**Location**: `WaitlistHero.tsx` line 24
 
-**Primary Palette**
-| Token | HSL | Hex | Usage |
-|-------|-----|-----|-------|
-| `--background` | 270 60% 11% | #1a0a2e | Page background |
-| `--primary` | 25 97% 59% | #fc7e30 | CTAs, highlights, focus states |
-| `--foreground` | 0 0% 100% | #ffffff | Headlines, important text |
-| `--muted-foreground` | 270 30% 75% | #c4b5d6 | Body text, labels |
+**Problem**: The hero CTA button calls `scrollToForm()` which scrolls directly to the form section, **skipping the tier selection entirely**. Users are confused because the form shows "Please select a tier above first" but they were just scrolled past it.
 
-**Tier Accent Colors**
-| Tier | Color | Meaning |
-|------|-------|---------|
-| Ludacris | Gold (#ffd54f) | Premium, top-tier, "money" |
-| Esports | Electric Blue (#3b82f6) | Competition, speed, precision |
-| Pro | Green (#22c55e) | Value, reliability, everyday |
+**Evidence**: When clicking "be the first to know", users land on a disabled submit button with no tier selected. This creates a jarring disconnect.
 
-**Gradient Treatments**
-```css
-/* Hero background gradient */
-background: radial-gradient(
-  ellipse at 30% 20%,
-  hsl(270 45% 18%) 0%,
-  hsl(270 60% 11%) 50%,
-  hsl(270 60% 8%) 100%
-);
+**Fix**:
+- Change `scrollToForm()` to scroll to the tier section instead
+- Rename the ref from `formRef` to `tierRef` and place it on `TierSelector`
+- The tier selection auto-scrolls to form after selection anyway
 
-/* CTA button gradient (subtle) */
-background: linear-gradient(
-  135deg,
-  hsl(25 97% 59%) 0%,
-  hsl(25 97% 52%) 100%
-);
+### Issue 1.2: Feature Icons Lack Visual Breathing Room
+**Severity**: Low
+**Location**: `WaitlistHero.tsx` lines 93-114
 
-/* Selected tier card glow */
-box-shadow: 
-  0 0 20px hsl(25 97% 59% / 0.3),
-  0 0 60px hsl(25 97% 59% / 0.1);
-```
+**Problem**: The three feature badges (yearly upgrades, covered repairs, zero downtime) feel cramped on mobile. The dot separators don't render on mobile, making them look like a run-on list.
 
-### 2.2 Typography System
+**Evidence**: Mobile screenshot shows features stacking awkwardly without visual separation.
 
-**Font Stack**: Host Grotesk (already installed)
+**Fix**:
+- Add vertical dividers or increase gap on mobile
+- Consider stacking features vertically on mobile with left-aligned icons
+- Add subtle background pills to each feature for visual grouping
 
-| Element | Weight | Size (Mobile/Desktop) | Letter-Spacing | Line-Height |
-|---------|--------|----------------------|----------------|-------------|
-| H1 (Hero) | 700 | 36px / 72px | -0.02em | 1.1 |
-| H2 (Section) | 700 | 28px / 40px | -0.01em | 1.2 |
-| H3 (Tier name) | 700 | 24px / 28px | 0 | 1.3 |
-| Body | 400 | 16px / 18px | 0 | 1.6 |
-| Label | 500 | 14px | 0.02em | 1.4 |
-| Micro (eyebrow) | 500 | 12px | 0.1em | 1.5 |
+### Issue 1.3: Scroll Indicator Competes with CTA
+**Severity**: Low
+**Location**: `WaitlistHero.tsx` lines 137-151
 
-### 2.3 Spacing & Layout Grid
+**Problem**: The bouncing chevron scroll indicator is positioned absolutely at `bottom-12`, which on shorter mobile viewports overlaps or crowds the main CTA button area.
 
-**Base Unit**: 4px
-**Spacing Scale**: 4, 8, 12, 16, 24, 32, 48, 64, 96, 128
-
-**Container Widths**
-- Max content width: 1200px
-- Form max width: 480px
-- Hero content max width: 800px
-
-**Section Rhythm**
-- Hero: 100vh (full viewport)
-- Tier section: py-24 (96px vertical)
-- Form section: py-20 (80px vertical)
-- Geo section: py-16 (64px vertical)
+**Fix**:
+- Make scroll indicator visibility conditional on viewport height
+- Add more bottom margin on the CTA or adjust indicator position
+- Consider removing on mobile since users naturally scroll
 
 ---
 
-## 3. Component Design Specifications
+## 2. Tier Selection Issues
 
-### 3.1 Hero Section Enhancement
+### Issue 2.1: No Clear "Most Popular" Badge
+**Severity**: High (Conversion Impact)
+**Location**: `TierCard.tsx`
 
-**Current State Analysis**
-The existing hero has good bones but lacks:
-- The assurance language that Casey needs
-- Visual interest beyond gradient blobs
-- Mobile-optimized CTA sizing
+**Problem**: All three tiers appear equal. Research shows 60-70% of users choose a "recommended" or "popular" option when presented. Without this, users experience decision paralysis.
 
-**Proposed Enhancements**
+**Evidence from ICP**: "Competitive Casey" suffers from analysis paralysis - they want someone to make a recommendation.
 
-**A. Headline Treatment**
-```text
-Always-current performance.  <- White
-Zero hassle.                  <- Orange (emphasis)
-One monthly price.            <- White
-```
-- Staggered reveal animation: Each line fades up with 200ms delay
-- Subtle text shadow for depth: `text-shadow: 0 4px 24px rgba(0,0,0,0.3)`
+**Fix**:
+- Add a "Most Popular" badge to the Esports tier (middle tier typically converts best)
+- Style it with a ribbon or floating badge above the card
+- This provides a visual anchor and reduces decision fatigue
 
-**B. Eyebrow/Subtitle Enhancement**
-Current: "all repairs covered. insurance req. yearly upgrades."
-Proposed: Add visual separators and slight animation
-```text
-all repairs covered · insurance included · yearly upgrades
-       ⬇
-[icon] Covered repairs  ·  [icon] Insurance included  ·  [icon] Yearly upgrades
-```
-- Use Lucide icons: Shield, FileCheck, RefreshCw
-- Icons fade in sequentially after headline
-- Lowercase for casual confidence
+### Issue 2.2: Card Selection Animation Lacks Finality
+**Severity**: Medium
+**Location**: `TierCard.tsx` lines 78
 
-**C. CTA Button Refinement**
-Current: Single-line button
-Proposed: Two-tier visual hierarchy within button
-```text
-┌─────────────────────────────────────────────┐
-│   be the first to know                      │
-│   — 10% discount first 3 months             │ <- smaller, muted
-└─────────────────────────────────────────────┘
-```
-- Primary text: 18px, font-weight 600
-- Secondary text: 14px, opacity 0.8
-- Glow intensifies on hover
-- Subtle scale (1.02) on hover, spring animation
+**Problem**: When clicking a tier, the card pulses briefly but the "transition to selected" feels abrupt. The other cards dim to 60% opacity, but there's no haptic-feeling micro-interaction that says "locked in."
 
-**D. Background Enhancement**
-Add subtle animated elements:
-1. **Grid pattern** (already exists) - keep at 5% opacity
-2. **Floating orbs** - 2-3 soft gradient spheres with very slow drift animation
-3. **Particle field** (optional) - tiny dots that drift upward, gaming aesthetic
+**Fix**:
+- Add a brief "success ripple" effect emanating from click point
+- Consider a subtle checkmark animation that springs in more dramatically
+- Add a brief color flash before settling to the selected state
 
-**E. Scroll Indicator**
-- Animated chevron bouncing gently
-- Fades in after 2 seconds
-- Disappears once user scrolls
+### Issue 2.3: "Select tier" Text is Too Passive
+**Severity**: Low
+**Location**: `TierCard.tsx` line 143
 
-### 3.2 Tier Selection Cards
+**Problem**: The CTA text "Select tier" is generic. Different action-oriented copy for each tier would reinforce the selection decision.
 
-**Current State Analysis**
-Good foundation with accent colors and selection state. Needs:
-- More prominent performance promise
-- "See specs" link to PCPartPicker
-- Visual hierarchy improvement
+**Fix**:
+- Ludacris: "Choose Ludacris Mode"
+- Esports: "Lock in Esports"
+- Pro: "Go Pro"
 
-**Enhanced Card Structure**
-```text
-┌──────────────────────────────────────┐
-│ [GOLD BADGE] ★ LUDACRIS              │
-│                                      │
-│ Peak Gaming Performance              │ <- Large, bold tagline
-│                                      │
-│ 4K gaming. Ray tracing. Zero         │
-│ compromise on the biggest titles.    │
-│                                      │
-│ ┌──────────────────────────────────┐ │
-│ │ Yearly upgrade · Covered repairs │ │ <- Included features
-│ └──────────────────────────────────┘ │
-│                                      │
-│ [See full specs →]        [SELECT]   │
-└──────────────────────────────────────┘
-```
+### Issue 2.4: Missing PCPartPicker Links
+**Severity**: Medium (Trust Impact)
+**Location**: `TierCard.tsx`
 
-**Interaction States**
-| State | Visual Treatment |
-|-------|-----------------|
-| Default | Border: accent/30, no shadow |
-| Hover | Lift 4px, border: accent/50, subtle glow |
-| Selected | Border: primary solid, strong glow, checkmark badge |
-| Disabled | Never - all tiers always selectable |
+**Problem**: The concept plan promised "See full specs →" links to PCPartPicker for transparency (critical for Casey's trust needs). This is currently missing from the UI.
 
-**Animation Choreography**
-1. Cards fade in staggered (0, 150ms, 300ms delay)
-2. On select: Card pulses (scale 1.03 -> 1.0), checkmark springs in
-3. Other cards dim slightly (opacity 0.7) when one is selected
-
-**Card-Specific Details**
-| Tier | Icon/Badge | Accent Glow |
-|------|-----------|-------------|
-| Ludacris | Crown or star | Gold radial glow |
-| Esports | Lightning bolt | Blue radial glow |
-| Pro | Game controller | Green radial glow |
-
-### 3.3 Waitlist Form
-
-**Current State Analysis**
-Functional but needs:
-- Progress indication for multi-field form
-- Visual grouping of required vs optional
-- Inline validation micro-interactions
-- Clearer CTA that matches hero
-
-**Form Architecture**
-
-**Step 1: Core Info (Required)**
-```text
-Email*         [________________________]
-First Name*    [____________]  Last Name*  [____________]
-Preferred Tier*  [Auto-filled from selection or dropdown]
-```
-
-**Step 2: Additional Info (Optional)**
-```text
-Phone          [________________________]
-Budget Range   [Dropdown: $50-100 | $100-150 | $150-200 | $200+]
-```
-
-**Step 3: Preferences**
-```text
-[ ] I'm interested in trading in my current PC
-[ ] Send me updates and gaming news
-```
-
-**Progress Indicator**
-Visual dots or bar showing form completion percentage:
-```text
-Required fields complete: ●●●○○ 3/5
-```
-
-**Input Field Styling**
-| State | Border | Background | Shadow |
-|-------|--------|------------|--------|
-| Default | border-border | card/50 | none |
-| Focus | border-primary | card/50 | ring-primary/30 |
-| Valid | border-gaming-green | card/50 | ring-gaming-green/20 |
-| Error | border-destructive | card/50 | ring-destructive/20 |
-
-**Validation Micro-Interactions**
-- Valid field: Green checkmark slides in from right
-- Invalid field: Red underline + subtle shake (2px, 3 oscillations)
-- Blur validation: Validate on blur, not on every keystroke
-
-**Submit Button States**
-| State | Visual |
-|-------|--------|
-| Disabled (no tier) | Opacity 50%, cursor not-allowed |
-| Ready | Full opacity, glow, hover animations |
-| Submitting | Spinner, "Joining..." text, disabled |
-| Success | Brief green flash before modal |
-
-### 3.4 Thank-You Modal (Celebration Moment)
-
-**Current State Analysis**
-Good modal structure. Enhance with:
-- More celebratory animation
-- Stronger coupon code emphasis
-- Referral mechanics setup
-- Clear next steps
-
-**Modal Content Structure**
-```text
-┌─────────────────────────────────────────────────┐
-│                     [X]                         │
-│                                                 │
-│                   🎮                            │ <- Animated in
-│                                                 │
-│             You're on the list!                 │
-│                                                 │
-│      Thanks, [Alex]! You're #[42] in line.      │
-│                                                 │
-│   ┌───────────────────────────────────────┐     │
-│   │        YOUR 10% DISCOUNT CODE         │     │
-│   │                                       │     │
-│   │            EARLY10                    │     │ <- Large, mono font
-│   │                           [Copy]      │     │
-│   └───────────────────────────────────────┘     │
-│                                                 │
-│   Check your email for your welcome message.    │
-│                                                 │
-│   ─────────────────────────────────────────     │
-│                                                 │
-│   Share & move up the queue:                    │
-│   [Twitter]  [Facebook]  [Copy Link]            │
-│                                                 │
-└─────────────────────────────────────────────────┘
-```
-
-**Animation Sequence**
-1. Backdrop blur fades in (0 -> 1, 300ms)
-2. Modal scales up (0.9 -> 1.0, spring physics)
-3. Emoji rotates in (rotate -180 -> 0, with scale)
-4. Headline fades up
-5. Queue position counter animates (0 -> actual number, 800ms)
-6. Coupon box slides in from below
-7. Social buttons fade in last
-
-**Coupon Box Design**
-- Dashed border in primary color
-- Background: primary/10
-- Font: monospace, extra bold, tracking-widest
-- Copy button with checkmark confirmation
-
-**Optional Enhancement: Confetti**
-- On modal open, burst of confetti particles
-- Colors: primary, gold, blue (tier colors)
-- Library: canvas-confetti or pure CSS
-
-### 3.5 Geographic Coverage Section
-
-**Current State Analysis**
-Timeline approach is good. Enhance with:
-- More visual progression
-- Interactive hover states
-- Connection line animation
-
-**Enhanced Visual**
-```text
-◉ ─────────── ○ ─────────── ○
-Greater       All of       British
-Calgary       Alberta      Columbia
-COMING SOON   UP NEXT      FUTURE
-```
-
-**Animation Choreography**
-1. First pin pulses (breathing animation)
-2. Connecting line draws progressively as user scrolls
-3. Future pins are visibly "dimmed" until reached
-
-**Location Card Enhancement**
-- On hover, show estimated timeline if available
-- First location (Calgary) has animated glow ring
+**Fix**:
+- Add a subtle "View exact specs →" link below the feature badges
+- Link opens PCPartPicker in new tab (URL to be provided by client)
+- This directly addresses Casey's #1 trust concern: "Which exact parts are in this?"
 
 ---
 
-## 4. Motion Design Language
+## 3. Form Section Issues
 
-### 4.1 Animation Principles
+### Issue 3.1: Progress Bar Doesn't Include Tier Selection
+**Severity**: High (Conversion Impact)
+**Location**: `WaitlistForm.tsx` lines 57-62
 
-**Timing Functions**
-| Type | Easing | Duration |
-|------|--------|----------|
-| Entrance | cubic-bezier(0, 0, 0.2, 1) | 400-600ms |
-| Exit | cubic-bezier(0.4, 0, 1, 1) | 200-300ms |
-| Hover | cubic-bezier(0.4, 0, 0.2, 1) | 200ms |
-| Spring (modal) | damping: 25, stiffness: 300 | n/a |
+**Problem**: The progress bar shows 0/4 even when a tier is selected above. It only tracks email, firstName, lastName, and selectedTier but doesn't visually update until those specific fields are touched.
 
-**Motion Hierarchy**
-1. **Page load**: Hero headline first, then CTAs
-2. **Scroll reveals**: Sections fade up as they enter viewport
-3. **Interactions**: Immediate feedback (< 100ms response)
-4. **Celebrations**: Exuberant but brief (modal, success states)
+**Evidence**: On testing, with Ludacris selected, the progress bar showed 1/4 when it should feel like the user already made progress.
 
-### 4.2 Specific Animation Definitions
+**Fix**:
+- Start progress bar at 25% (1/4) when tier is pre-selected
+- Add visual confirmation: "Tier: Ludacris ✓" above the progress bar
+- Consider renaming to "Almost there..." with percentage
 
-**Fade Up (Section Entrance)**
-```javascript
-initial: { opacity: 0, y: 30 }
-animate: { opacity: 1, y: 0 }
-transition: { duration: 0.6, ease: "easeOut" }
-```
+### Issue 3.2: Form Title Doesn't Reinforce Selected Tier Enough
+**Severity**: Medium
+**Location**: `WaitlistForm.tsx` lines 78-97
 
-**Glow Pulse (CTA Idle)**
-```css
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px hsl(25 97% 59% / 0.2); }
-  50% { box-shadow: 0 0 30px hsl(25 97% 59% / 0.4); }
-}
-animation: glow-pulse 3s ease-in-out infinite;
-```
+**Problem**: The selected tier is shown in small orange text below "Join Calgary gamers on the waitlist." It should be more prominent - the tier selection was a decision, and users need constant reassurance they made the right choice.
 
-**Tier Card Selection**
-```javascript
-whileTap: { scale: 0.98 }
-animate: isSelected 
-  ? { scale: [1, 1.03, 1], transition: { duration: 0.3 } }
-  : {}
-```
+**Fix**:
+- Move tier confirmation to a styled badge near the top
+- Add tier icon to the confirmation (Crown/Zap/Gamepad2)
+- Example: "[Crown] Ludacris tier selected" as a badge
 
-**Form Field Focus**
-```css
-transition: border-color 200ms, box-shadow 200ms;
-&:focus {
-  border-color: hsl(var(--primary));
-  box-shadow: 0 0 0 3px hsl(25 97% 59% / 0.2);
-}
-```
+### Issue 3.3: Name Field Placeholders Are Generic
+**Severity**: Low
+**Location**: `WaitlistForm.tsx` lines 148, 163
 
-**Queue Position Counter**
-```javascript
-// Animate from 0 to actual number
-const [displayPosition, setDisplayPosition] = useState(0);
-useEffect(() => {
-  const duration = 800;
-  const steps = 20;
-  const increment = queuePosition / steps;
-  let current = 0;
-  const interval = setInterval(() => {
-    current += increment;
-    if (current >= queuePosition) {
-      setDisplayPosition(queuePosition);
-      clearInterval(interval);
-    } else {
-      setDisplayPosition(Math.floor(current));
-    }
-  }, duration / steps);
-}, [queuePosition]);
-```
+**Problem**: "Alex" and "Chen" as placeholder names are fine but don't speak to the gaming persona. Small touch but affects brand feel.
+
+**Fix**:
+- Use gamer-relevant placeholders: "Casey" and "Gamer" or "GG" nicknames
+- Or leave placeholders blank and use floating labels instead
+
+### Issue 3.4: Optional Fields Divider Creates Psychological Barrier
+**Severity**: Medium (Conversion Impact)
+**Location**: `WaitlistForm.tsx` lines 201-210
+
+**Problem**: The explicit "Optional" divider may paradoxically reduce conversion. Some users will stop at this point thinking the form is complete. Others feel like they're being asked for "extra" data.
+
+**Fix**:
+- Remove the explicit divider
+- Simply style optional fields with lighter labels or smaller text "(optional)" next to each
+- Or collapse optional fields into an expandable "Tell us more (optional)" accordion
+
+### Issue 3.5: Submit Button Disabled State Is Confusing
+**Severity**: High (Conversion Impact)
+**Location**: `WaitlistForm.tsx` lines 278-315
+
+**Problem**: When no tier is selected, the submit button is disabled with 50% opacity. The message "↑ Please select a tier above first" appears below, but users may not understand why the button is inactive (especially if they scrolled past the tier section).
+
+**Evidence**: During testing, clicking the hero CTA scrolled directly to the form, landing on a disabled button with no context.
+
+**Fix**:
+- Add an inline alert if tier is missing when form fields are complete
+- Make the button clickable but trigger a scroll-to-tier action if tier is null
+- Or: prevent reaching the form section without a tier selected
+
+### Issue 3.6: Checkbox Labels Have Inconsistent Styling
+**Severity**: Low
+**Location**: `WaitlistForm.tsx` lines 244-275
+
+**Problem**: Trade-in and mailing list checkboxes use `text-muted-foreground text-sm` which makes them look disabled or unimportant. The copy could be more compelling.
+
+**Fix**:
+- Use slightly brighter text for checkbox labels
+- Rephrase for benefit: "I have a PC to trade in (get a discount)" instead of "I'm interested in trading in"
+- "Keep me updated on launch and gaming news" instead of "Send me updates"
 
 ---
 
-## 5. Mobile-First Responsive Design
+## 4. Thank-You Modal Issues
 
-### 5.1 Breakpoint Strategy
+### Issue 4.1: Confetti Animation May Be Jarring
+**Severity**: Low
+**Location**: `ThankYouModal.tsx` lines 105-136
 
-| Breakpoint | Width | Target Devices |
-|------------|-------|----------------|
-| Mobile | < 640px | Phones |
-| Tablet | 640-1024px | Tablets, small laptops |
-| Desktop | > 1024px | Laptops, desktops |
+**Problem**: 50 confetti particles is aggressive. While celebratory, it may feel over-the-top for some users, especially on lower-powered devices where it could stutter.
 
-### 5.2 Component Adaptations
+**Fix**:
+- Reduce particle count to 20-30
+- Add `prefers-reduced-motion` check to skip confetti entirely for accessibility
+- Consider using CSS-only confetti for better performance
 
-**Hero Section**
-| Property | Mobile | Desktop |
-|----------|--------|---------|
-| H1 size | 36px | 72px |
-| Subtitle size | 16px | 20px |
-| CTA width | 100% (mx-4) | auto (fit-content) |
-| Padding | px-4 | px-8 |
+### Issue 4.2: Queue Position Counter May Show #0 Briefly
+**Severity**: Medium
+**Location**: `ThankYouModal.tsx` lines 42-49
 
-**Tier Cards**
-| Property | Mobile | Desktop |
-|----------|--------|---------|
-| Layout | Stack vertical | 3-column grid |
-| Card padding | p-4 | p-6 |
-| Gap | 16px | 24px |
+**Problem**: The counter animates from 0 to the queue position, but if the database returns quickly, users may see "#0" for a split second before the animation runs.
 
-**Form**
-| Property | Mobile | Desktop |
-|----------|--------|---------|
-| Name fields | Stack vertical | Side-by-side |
-| Input height | 48px (touch) | 40px |
-| Section padding | px-4 py-16 | px-8 py-20 |
+**Fix**:
+- Start displayPosition at 1 instead of 0
+- Or delay the counter visibility until after a brief pause
 
-**Thank-You Modal**
-| Property | Mobile | Desktop |
-|----------|--------|---------|
-| Width | 100% - 32px | max-width 480px |
-| Padding | p-6 | p-8 |
-| Close button | 44px touch target | 32px |
+### Issue 4.3: Share Copy Doesn't Reference User's Tier
+**Severity**: Low
+**Location**: `ThankYouModal.tsx` line 69
 
-### 5.3 Touch Considerations
+**Problem**: The share text is generic: "I just joined the waitlist for a gaming PC subscription!" It could be more personalized and shareable.
 
-- All interactive elements: minimum 44px x 44px
-- CTA buttons: 48px+ height on mobile
-- Adequate spacing between checkboxes (12px+)
-- Scroll-to-form uses smooth behavior
+**Fix**:
+- Include the tier: "I just locked in the Ludacris tier for a gaming PC subscription! 🎮"
+- Add queue position: "I'm #42 in line..."
+
+### Issue 4.4: Missing Email Confirmation Indicator
+**Severity**: Medium
+**Location**: `ThankYouModal.tsx`
+
+**Problem**: The modal says "Check your email for your welcome message" but if the Resend email fails (as it currently does without API key), users won't receive anything. There's no fallback messaging.
+
+**Fix**:
+- Add error handling in `useWaitlistSubmit` to track email send status
+- If email fails, show: "We couldn't send your email - your code is EARLY10"
+- Or just display the coupon prominently and de-emphasize the email check
 
 ---
 
-## 6. Accessibility Checklist
+## 5. Mobile-Specific Issues
 
-### 6.1 Color Contrast
+### Issue 5.1: Hero Text Size on Mobile
+**Severity**: Low
+**Location**: `WaitlistHero.tsx` line 60
 
-| Element | Foreground | Background | Ratio | Pass |
-|---------|-----------|------------|-------|------|
-| Body text | #c4b5d6 | #1a0a2e | 7.2:1 | AAA |
-| Headlines | #ffffff | #1a0a2e | 15.3:1 | AAA |
-| CTA text | #1a0a2e | #fc7e30 | 4.6:1 | AA |
-| Error text | #ef4444 | #2d1b4e | 5.1:1 | AA |
+**Problem**: H1 is `text-4xl` on mobile which is acceptable, but line height feels tight. "One monthly price." wraps awkwardly on narrow screens.
 
-### 6.2 Focus States
+**Fix**:
+- Add `leading-tight` or increase to `leading-snug`
+- Consider text-3xl on very narrow screens (< 375px)
 
-All interactive elements must have visible focus states:
-- `outline: 2px solid hsl(var(--primary))`
-- `outline-offset: 2px`
-- Never use `outline: none` without alternative
+### Issue 5.2: Tier Cards Touch Targets
+**Severity**: Medium (Mobile UX)
+**Location**: `TierCard.tsx`
 
-### 6.3 Screen Reader Considerations
+**Problem**: The cards are tappable buttons but the tap target includes the entire card. On mobile, this is good, but there's no visual feedback beyond the Framer Motion hover states.
 
-- Form fields: Proper labels with `htmlFor`
-- Error messages: `aria-describedby` linking to error text
-- Loading states: `aria-busy="true"` on form during submission
-- Modal: `role="dialog"`, `aria-modal="true"`, focus trap
+**Fix**:
+- Add `:active` state styling for mobile tap feedback
+- Consider a brief ripple effect on tap
 
-### 6.4 Reduced Motion
+### Issue 5.3: Form on Mobile Needs Sticky Submit
+**Severity**: High (Conversion Impact)
+**Location**: `WaitlistForm.tsx`
 
-```css
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-```
+**Problem**: On long mobile scroll, the submit button disappears below the fold as users fill fields. Best practice is a sticky CTA on mobile.
+
+**Fix**:
+- Add a sticky submit button at bottom of viewport on mobile
+- Or add a floating "↓ Reserve spot" indicator that scrolls to the submit button
+- Ensure the button is always in view after required fields are complete
 
 ---
 
-## 7. Performance Optimization
+## 6. Performance & Accessibility Issues
 
-### 7.1 Core Web Vitals Targets
+### Issue 6.1: No Skip-to-Content Link
+**Severity**: Low (A11y)
+**Location**: `Waitlist.tsx`
 
-| Metric | Target | Strategy |
-|--------|--------|----------|
-| LCP | < 2.5s | Preload critical assets, minimize hero complexity |
-| FID | < 100ms | Defer non-critical JS, use passive event listeners |
-| CLS | < 0.1 | Reserve space for dynamic content, no layout shifts |
+**Problem**: Screen reader users have no way to skip the animated hero content and get straight to the form.
 
-### 7.2 Optimization Strategies
+**Fix**:
+- Add a visually-hidden skip link at the top of the page
 
-**Critical CSS**
-- Inline above-the-fold styles
-- Hero section should render without waiting for full CSS bundle
+### Issue 6.2: Form Fields Missing aria-describedby for Errors
+**Severity**: Medium (A11y)
+**Location**: `WaitlistForm.tsx` FormField component
 
-**Animation Performance**
-- Use `transform` and `opacity` only (GPU-accelerated)
-- Avoid animating `width`, `height`, `top`, `left`
-- Use `will-change` sparingly
+**Problem**: When errors appear, they're not programmatically linked to their inputs. Screen readers may not announce the error message.
 
-**Lazy Loading**
-- Tier cards: Load on scroll into view
-- Form section: Prefetch on tier selection
-- Modal: Code-split, load on demand
+**Fix**:
+- Add `aria-describedby` pointing to error message ID
+- Add `aria-invalid="true"` when field has error
 
-**Image Optimization**
-- Any future hero images: WebP format, responsive srcset
-- Icons: Lucide tree-shakes unused icons
+### Issue 6.3: Animation Performance on Low-End Devices
+**Severity**: Medium
+**Location**: Multiple components
 
----
+**Problem**: Three animated gradient orbs in the hero, plus tier card animations, plus form progress bar animations may cause jank on low-end devices.
 
-## 8. Copy & Microcopy Refinement
-
-### 8.1 ICP-Aligned Messaging
-
-**Hero**
-- Current: "Always-current performance. Zero hassle. One monthly price."
-- Analysis: Good, but could speak more directly to Casey's pain
-
-Alternative options (A/B test candidates):
-1. "Your PC stays competitive. We handle the rest."
-2. "Stop researching. Start playing. Upgrade handled."
-3. "Predictable performance. No parts hunting. One price."
-
-**Subtitle**
-- Current: "all repairs covered. insurance included. yearly upgrades."
-- Refined: "yearly upgrades. covered repairs. zero downtime."
-  - Leads with the most compelling benefit (upgrades)
-  - "Zero downtime" directly addresses Casey's RMA anxiety
-
-**Tier Taglines**
-| Tier | Current | Refined |
-|------|---------|---------|
-| Ludacris | "Peak Gaming Performance" | "4K. Ray-traced. No compromise." |
-| Esports | "Competition-Ready Performance" | "144Hz+ ready. Tournament-grade." |
-| Pro | "AAA-Title Performance" | "Smooth AAA gaming. Great value." |
-
-**Form Section**
-- Header: "Lock your spot" (creates ownership)
-- Subhead: "Join 247 Calgary gamers on the waitlist"
-- CTA: "Reserve my spot — 10% off first 3 months"
-
-**Thank-You Modal**
-- Headline: "You're locked in!"
-- Subhead: "Thanks, [Name]. You're #[N] in the Calgary queue."
-- CTA (referral tease): "Share to move up faster"
-
-### 8.2 Error Messages
-
-| Field | Error | Message |
-|-------|-------|---------|
-| Email | Empty | "We need your email to save your spot" |
-| Email | Invalid | "That email doesn't look right" |
-| Name | Empty | "What should we call you?" |
-| Tier | Not selected | "Pick your performance tier above" |
-
-### 8.3 Loading/Success States
-
-- Submitting: "Joining the queue..."
-- Success (brief flash): "You're in!"
-- Error: "Something went wrong. Let's try again."
+**Fix**:
+- Add `will-change: transform` to animated elements
+- Consider reducing orb count to 2 on mobile
+- Add device performance detection to simplify animations
 
 ---
 
-## 9. Social Proof Integration (Future-Ready)
+## Implementation Priority Matrix
 
-### 9.1 Live Counter
-
-Display near form:
-```text
-Join 247 Calgary gamers on the waitlist
-      ↑ updates in real-time (or refreshes on page load)
-```
-
-Implementation:
-- Query count on page load
-- Update count after successful submission
-- Animate number change (count up)
-
-### 9.2 Recent Signups (Optional)
-
-Small, unobtrusive notifications:
-```text
-┌───────────────────────────────────┐
-│ 🎮 Alex from Calgary just joined │
-└───────────────────────────────────┘
-```
-- Show every 30-60 seconds
-- Use first name only for privacy
-- Slide in from bottom-right, auto-dismiss
-
-### 9.3 Tier Distribution (Optional)
-
-After significant signups, show:
-```text
-Most popular: Ludacris (45%) → Esports (35%) → Pro (20%)
-```
+| Issue | Severity | Conversion Impact | Effort | Priority |
+|-------|----------|-------------------|--------|----------|
+| 1.1 CTA scroll target | Medium | High | Low | P1 |
+| 2.1 Most Popular badge | High | High | Low | P1 |
+| 3.5 Submit disabled UX | High | High | Medium | P1 |
+| 5.3 Mobile sticky submit | High | High | Medium | P1 |
+| 3.1 Progress bar accuracy | High | Medium | Low | P2 |
+| 2.4 PCPartPicker links | Medium | High | Low | P2 |
+| 3.4 Optional divider | Medium | Medium | Low | P2 |
+| 3.2 Tier confirmation badge | Medium | Medium | Low | P2 |
+| 6.2 A11y aria-describedby | Medium | Low | Low | P2 |
+| 2.2 Card selection animation | Medium | Low | Medium | P3 |
+| 4.4 Email error handling | Medium | Low | Medium | P3 |
+| 4.2 Counter starting at 0 | Medium | Low | Low | P3 |
+| 1.2 Feature badges mobile | Low | Low | Low | P3 |
+| 1.3 Scroll indicator | Low | Low | Low | P4 |
+| 2.3 Select tier text | Low | Low | Low | P4 |
+| 3.3 Placeholder names | Low | Low | Low | P4 |
+| 3.6 Checkbox labels | Low | Low | Low | P4 |
+| 4.1 Confetti performance | Low | Low | Low | P4 |
+| 4.3 Share copy | Low | Low | Low | P4 |
+| 5.1 Mobile text size | Low | Low | Low | P4 |
+| 5.2 Touch feedback | Medium | Low | Low | P4 |
+| 6.1 Skip link | Low | Low | Low | P4 |
+| 6.3 Animation perf | Medium | Low | Medium | P4 |
 
 ---
 
-## 10. Implementation Phases
+## Recommended Implementation Phases
 
-### Phase 1: Foundation Polish (Priority)
-1. Refine color system with documented tokens
-2. Enhance Hero section animations and layout
-3. Improve CTA button with glow and two-line text
-4. Add scroll indicator with proper timing
+### Phase 1: Critical Friction Fixes (P1 Items)
+1. Fix hero CTA to scroll to tier section, not form
+2. Add "Most Popular" badge to Esports tier
+3. Make submit button behavior smarter when tier is missing
+4. Add sticky submit button on mobile
 
-### Phase 2: Tier Card Enhancement
-5. Add tier icons/badges
-6. Improve selected state glow and animation
-7. Add "See full specs" link placeholder
-8. Implement card dimming when one is selected
+### Phase 2: Trust & Progress Improvements (P2 Items)
+5. Fix progress bar to reflect selected tier
+6. Add tier confirmation badge with icon in form header
+7. Add "View exact specs →" placeholder links on tier cards
+8. Remove explicit "Optional" divider, use inline labels
+9. Add aria-describedby for form error accessibility
 
-### Phase 3: Form Refinement
-9. Add progress indicator
-10. Implement inline validation with micro-interactions
-11. Improve error state animations
-12. Match submit button to hero CTA style
+### Phase 3: Polish & Delight (P3 Items)
+10. Enhance tier card selection animation
+11. Add email send error handling with fallback
+12. Fix queue position counter starting at 1
 
-### Phase 4: Modal Celebration
-13. Add queue position counter animation
-14. Optional: Add confetti burst
-15. Improve coupon box visual treatment
-16. Add referral tease copy
-
-### Phase 5: Polish & Optimization
-17. Implement reduced-motion support
-18. Add live counter placeholder
-19. Performance audit and optimization
-20. Mobile responsiveness fine-tuning
+### Phase 4: Final Polish (P4 Items)
+13. Refine all minor copy and styling issues
+14. Performance optimization for low-end devices
+15. Complete accessibility audit and fixes
 
 ---
 
-## 11. Success Metrics
+## Success Metrics to Track
 
-### 11.1 Conversion Funnel
+After implementing these fixes:
 
-| Step | Metric | Target |
-|------|--------|--------|
-| Land | Bounce rate | < 40% |
-| Scroll | Scroll to tier section | > 70% |
-| Select tier | Tier selection rate | > 50% |
-| Form start | Form engagement | > 40% |
-| Submit | Conversion rate | 15-25% |
-| Share | Referral share rate | > 10% |
-
-### 11.2 Quality Signals
-
-- Time on page: > 90 seconds (engaged reading)
-- Form abandonment: < 30%
-- Tier distribution: Healthy spread (no one tier > 60%)
-- Mobile vs desktop parity: Within 5% conversion difference
+| Metric | Current (Estimated) | Target |
+|--------|---------------------|--------|
+| Hero → Tier scroll rate | ~60% | >85% |
+| Tier selection rate | ~40% | >65% |
+| Form completion rate | ~30% | >50% |
+| Overall conversion | ~15% | >25% |
+| Mobile vs Desktop parity | Unknown | <5% difference |
 
 ---
 
-## 12. A/B Testing Roadmap
+## Technical Notes
 
-### Immediate Tests
-1. **Hero headline variants** - Test pain-focused vs benefit-focused
-2. **CTA copy** - "Reserve my spot" vs "Join the waitlist" vs "Lock my discount"
-3. **Tier card layout** - Horizontal vs vertical on tablet
+**Files to Modify**:
+- `src/pages/Waitlist.tsx` - Scroll target fix
+- `src/components/waitlist/WaitlistHero.tsx` - Feature badges, scroll indicator
+- `src/components/waitlist/TierCard.tsx` - Most Popular badge, animation, specs link
+- `src/components/waitlist/TierSelector.tsx` - Badge logic
+- `src/components/waitlist/WaitlistForm.tsx` - Progress bar, tier confirmation, sticky submit, a11y
+- `src/components/waitlist/ThankYouModal.tsx` - Counter fix, share copy, email error
+- `src/hooks/useWaitlistSubmit.ts` - Email error handling
+- `src/index.css` - Any new animation classes
 
-### Future Tests
-4. **Form length** - Core fields only vs full form
-5. **Social proof placement** - Above form vs below
-6. **Modal referral** - Prominent referral CTA vs subtle
-
----
-
-This concept design plan provides a complete blueprint for transforming the current waitlist page into a Fantasy.co-level experience that speaks directly to Competitive Casey's needs, fears, and aspirations while following evidence-based conversion optimization principles.
+**Dependencies**: None required. All fixes use existing libraries (Framer Motion, Tailwind, Lucide).
