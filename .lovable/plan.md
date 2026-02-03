@@ -1,246 +1,177 @@
 
 
-# Navigation Enhancement Plan — Hide at Top, Reveal on Scroll
+# How It Works Page — Roadmap Removal & FAQ Enhancement Plan
 
 ---
 
 ## Overview
 
-This plan removes the secondary sticky CTA bar and transforms the main navigation to be completely invisible at the top of the page, smoothly animating in when the user scrolls down. This creates a cleaner hero experience while maintaining persistent navigation access after initial engagement.
+This plan removes the "Roadmap: what you'll see next" section entirely and transforms the Micro-FAQs from basic, defensive answers into compelling, professional, benefit-driven responses that build trust and drive conversions.
 
 ---
 
 ## Summary of Changes
 
 ### Remove
-- `StickyDesktopCTA` component usage from `Waitlist.tsx` (lines 102-106)
-- The component file can remain but won't be rendered
+- `Roadmap` component import and usage from `HowItWorks.tsx`
+- This removes the entire "Roadmap: what you'll see next" section with its 4 timeline items
 
-### Modify
-- `HowItWorksNav.tsx` — Change from "transparent at top, solid on scroll" to "hidden at top, animate in on scroll"
+### Enhance
+- Rewrite all 4 FAQ answers to be more compelling, professional, and sales-oriented
+- Apply persuasive copywriting techniques: benefit-first, trust-building, value-reinforcing
 
 ---
 
-## Current vs. Desired Behavior
+## Changes to Make
 
-### Current Navigation Behavior
+### File 1: `src/pages/HowItWorks.tsx`
+
+**Remove:**
+- Line 10: Import statement for Roadmap component
+- Line 80: Roadmap component usage
 
 ```text
-At scroll Y = 0:
-┌─────────────────────────────────────────────────────────────┐
-│ 🎮 Connor Computer   Home  How It Works    [Join Waitlist] │ <-- VISIBLE (60% opacity)
-└─────────────────────────────────────────────────────────────┘
+Delete line 10:
+import { Roadmap } from "@/components/howitworks/Roadmap";
 
-At scroll Y > 50px:
-┌─────────────────────────────────────────────────────────────┐
-│ 🎮 Connor Computer   Home  How It Works    [Join Waitlist] │ <-- VISIBLE (95% opacity + shadow)
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Desired Navigation Behavior
-
-```text
-At scroll Y = 0:
-(Hero section - NO NAVIGATION BAR VISIBLE)
-The hero has full visual impact without any overlay
-
-At scroll Y > 100px (adjustable threshold):
-┌─────────────────────────────────────────────────────────────┐
-│ 🎮 Connor Computer   Home  How It Works    [Join Waitlist] │ <-- Slides in from top
-└─────────────────────────────────────────────────────────────┘
+Delete line 80:
+<Roadmap />
 ```
 
 ---
 
-## Technical Implementation
+### File 2: `src/components/howitworks/MicroFAQs.tsx`
 
-### File 1: `src/pages/Waitlist.tsx`
-
-**Change:** Remove `StickyDesktopCTA` import and usage
-
-**Lines to remove:**
-- Line 8: Import statement
-- Lines 102-106: Component usage
-
-```text
-Lines to Delete:
-
-Line 8:
-import { StickyDesktopCTA } from "@/components/waitlist/StickyDesktopCTA";
-
-Lines 102-106:
-{/* Sticky desktop CTA */}
-<StickyDesktopCTA 
-  spotsRemaining={spotsRemaining} 
-  onCtaClick={scrollToForm} 
-/>
-```
+**Rewrite the FAQ answers** (lines 9-30) with compelling, professional, benefit-driven copy.
 
 ---
 
-### File 2: `src/components/howitworks/HowItWorksNav.tsx`
+## FAQ Content Transformation
 
-**Change:** Transform from always-visible (with transparency changes) to hidden-at-top with slide-in animation
+### FAQ 1: "Is this a lease or rental?"
 
-**Current Implementation (lines 50-58):**
-```tsx
-<nav
-  className={cn(
-    "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-    isScrolled
-      ? "bg-background/95 backdrop-blur-md border-b border-border/50 shadow-lg shadow-black/5"
-      : "bg-background/60 backdrop-blur-sm border-b border-transparent"
-  )}
->
-```
+**Current Answer (Weak):**
+> "No. We avoid that language and model. We emphasise performance, trust, reliability, ease, and style."
 
-**New Implementation:**
-```tsx
-<AnimatePresence>
-  {isScrolled && (
-    <motion.nav
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      exit={{ y: -100, opacity: 0 }}
-      transition={{ type: "spring", damping: 25, stiffness: 300 }}
-      className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/50 shadow-lg shadow-black/5"
-    >
-      {/* ... nav content remains the same ... */}
-    </motion.nav>
-  )}
-</AnimatePresence>
-```
+**Problems:**
+- Defensive ("We avoid that language")
+- Vague and abstract ("performance, trust, reliability")
+- Doesn't explain what it IS, only what it ISN'T
+- No benefit to the customer
 
-**Scroll Threshold Change:**
-- Current: `window.scrollY > 50` (line 21)
-- New: `window.scrollY > 100` (slightly further down for cleaner hero experience)
+**New Answer (Compelling):**
+> "Think of it as a performance partnership. You pay one predictable monthly fee and we take care of everything—from day-one setup to annual upgrades to covered repairs. No hidden costs, no depreciation headaches, no obsolescence anxiety. Just always-current hardware that keeps you competitive, month after month."
+
+**Why it's better:**
+- Reframes positively ("performance partnership")
+- Emphasizes tangible benefits (predictable fee, everything handled)
+- Addresses pain points (hidden costs, depreciation, obsolescence)
+- Ends with the core value proposition
 
 ---
 
-## Animation Specification
+### FAQ 2: "Will I know the exact parts?"
 
-### Entry Animation
-```text
-Initial state:
-  - y: -100 (above viewport)
-  - opacity: 0
+**Current Answer (Weak):**
+> "Yes. Each tier links to a public parts list with model numbers and a change-log."
 
-Animate to:
-  - y: 0 (fixed at top)
-  - opacity: 1
+**Problems:**
+- Too brief and transactional
+- Misses the opportunity to build trust
+- Doesn't explain WHY transparency matters
 
-Transition:
-  - type: spring
-  - damping: 25 (slightly bouncy feel)
-  - stiffness: 300 (responsive but not jarring)
-```
+**New Answer (Compelling):**
+> "Absolutely—we believe in radical transparency. Every tier includes a public parts list with exact model numbers, so you know precisely what's powering your gaming. When we make any upgrade or swap, it's documented in our public change-log with full reasoning. No mystery boxes, no corners cut. You see exactly what you're getting, always."
 
-### Exit Animation
-```text
-Animate to:
-  - y: -100 (slides up and out)
-  - opacity: 0
-
-Transition:
-  - Same spring config for consistency
-```
+**Why it's better:**
+- Opens with confident affirmation ("Absolutely")
+- Introduces brand value ("radical transparency")
+- Explains the benefit of the feature
+- Addresses potential skepticism ("No mystery boxes, no corners cut")
+- Reinforces trust ("You see exactly what you're getting, always")
 
 ---
 
-## Component Structure Update
+### FAQ 3: "What if a part fails?"
 
-### Before (Current Structure):
-```tsx
-return (
-  <>
-    <nav className={cn("fixed ...", isScrolled ? "solid styles" : "transparent styles")}>
-      {/* nav content */}
-    </nav>
+**Current Answer (Weak):**
+> "We act fast per our SLA and handle repairs end-to-end. (Insurance required.)"
 
-    {/* Mobile menu overlay */}
-    <AnimatePresence>
-      {isMobileMenuOpen && (
-        {/* mobile menu content */}
-      )}
-    </AnimatePresence>
-  </>
-);
-```
+**Problems:**
+- Dry and corporate ("per our SLA")
+- Parenthetical feels like a disclaimer/catch
+- Doesn't convey care or speed
+- No reassurance for the worried customer
 
-### After (New Structure):
-```tsx
-return (
-  <>
-    {/* Main nav - only renders when scrolled */}
-    <AnimatePresence>
-      {isScrolled && (
-        <motion.nav
-          initial={{ y: -100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -100, opacity: 0 }}
-          transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/50 shadow-lg shadow-black/5"
-        >
-          {/* nav content unchanged */}
-        </motion.nav>
-      )}
-    </AnimatePresence>
+**New Answer (Compelling):**
+> "We've got you covered—literally. If something fails, you contact us and we handle the rest: diagnosis, parts, labour, and logistics. Our goal is minimal downtime so you're back to gaming fast. That's why we require insurance as part of the plan—it ensures rapid, no-excuses coverage for hardware issues. You focus on playing; we focus on keeping you running."
 
-    {/* Mobile menu overlay - unchanged */}
-    <AnimatePresence>
-      {isMobileMenuOpen && (
-        {/* mobile menu content */}
-      )}
-    </AnimatePresence>
-  </>
-);
-```
+**Why it's better:**
+- Opens warmly ("We've got you covered—literally")
+- Details the comprehensive service (diagnosis, parts, labour, logistics)
+- Emphasizes speed and minimal downtime
+- Reframes insurance as a BENEFIT, not a catch
+- Ends with clear value statement
 
 ---
 
-## Edge Cases Handled
+### FAQ 4: "Do you publish benchmarks?"
 
-### Mobile Menu Access
-**Issue:** If nav is hidden at top, how do users access mobile menu?
+**Current Answer (Weak):**
+> "Yes—coming soon. We'll add flagship game examples and FPS/frametime charts to this page."
 
-**Solution:** Add a floating mobile menu button that's always visible on mobile when nav is hidden
+**Problems:**
+- "Coming soon" feels uncertain and underwhelming
+- Doesn't build confidence or excitement
+- No call to action or engagement
 
-```tsx
-{/* Mobile-only floating menu button when nav is hidden */}
-{!isScrolled && (
-  <motion.button
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-    onClick={() => setIsMobileMenuOpen(true)}
-    className="md:hidden fixed top-4 right-4 z-50 p-3 bg-background/80 backdrop-blur-sm rounded-full shadow-lg border border-border/50"
-    aria-label="Open menu"
-  >
-    <Menu className="w-6 h-6 text-foreground" />
-  </motion.button>
-)}
-```
+**New Answer (Compelling):**
+> "We're building comprehensive benchmark data for every tier—real-world FPS and frametime results across flagship titles so you can see exactly how your rig performs. Waitlist members will be the first to access these results. Want to help shape what games we test? Join the waitlist and let us know your must-play titles."
 
-### Quick Scroll Up
-**Issue:** When user scrolls up quickly, nav should hide smoothly
+**Why it's better:**
+- Describes what's coming with specificity
+- Creates exclusivity ("Waitlist members will be the first")
+- Adds engagement opportunity ("help shape what games we test")
+- Converts the FAQ into a soft CTA ("Join the waitlist")
+- Turns a weakness into an interactive feature
 
-**Solution:** The exit animation handles this naturally with `AnimatePresence`
+---
 
-### Reduced Motion
-**Issue:** Some users prefer no animations
+## Visual Comparison of FAQ Answers
 
-**Solution:** The existing `motion.nav` respects `prefers-reduced-motion` via Framer Motion defaults, but we can add explicit fallback:
+| Question | Before | After |
+|----------|--------|-------|
+| Is this a lease or rental? | 22 words, defensive | 67 words, benefit-rich |
+| Will I know the exact parts? | 17 words, transactional | 55 words, trust-building |
+| What if a part fails? | 15 words, corporate | 67 words, reassuring |
+| Do you publish benchmarks? | 18 words, uncertain | 54 words, engaging CTA |
 
-```tsx
-// Add at component top
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+---
 
-// In animation props
-transition={prefersReducedMotion 
-  ? { duration: 0 } 
-  : { type: "spring", damping: 25, stiffness: 300 }
-}
-```
+## Copywriting Techniques Applied
+
+### 1. Benefit-First Framing
+Every answer now leads with what the customer gains, not what we do.
+
+### 2. Objection Handling
+Each answer anticipates the underlying concern and addresses it directly:
+- "Is this a lease?" → "No hidden costs, no depreciation headaches"
+- "What about parts?" → "No mystery boxes, no corners cut"
+- "What if something breaks?" → "minimal downtime... back to gaming fast"
+- "Where are the benchmarks?" → "Waitlist members will be the first to access"
+
+### 3. Trust Signals
+- "radical transparency"
+- "public change-log with full reasoning"
+- "You see exactly what you're getting, always"
+
+### 4. Emotional Resonance
+- "obsolescence anxiety"
+- "You focus on playing; we focus on keeping you running"
+- "your must-play titles"
+
+### 5. Soft CTAs
+The benchmark answer converts a potential weakness into a waitlist driver.
 
 ---
 
@@ -248,80 +179,71 @@ transition={prefersReducedMotion
 
 | File | Action | Details |
 |------|--------|---------|
-| `src/pages/Waitlist.tsx` | Remove | Delete StickyDesktopCTA import and usage |
-| `src/components/howitworks/HowItWorksNav.tsx` | Modify | Wrap nav in AnimatePresence, conditional render on isScrolled, add floating mobile button |
+| `src/pages/HowItWorks.tsx` | Remove | Delete Roadmap import (line 10) and usage (line 80) |
+| `src/components/howitworks/MicroFAQs.tsx` | Update | Replace all 4 FAQ answers with compelling new copy |
 
 ---
 
-## Visual Flow
-
-### Desktop Experience
+## Page Flow After Changes
 
 ```text
-SCROLL Y = 0 (Top of page):
-┌───────────────────────────────────────────────┐
-│                                               │
-│                                               │
-│        HERO SECTION - FULL IMPACT             │
-│          No navigation overlay                │
-│                                               │
-│                                               │
-└───────────────────────────────────────────────┘
+Current Flow:
+Hero → Who It's For → The Promise → Three Steps → What's Included → 
+Comparison → Rollout → ROADMAP → Experience → FAQs → CTA → Footer
 
-SCROLL Y > 100px (After scroll):
-┌───────────────────────────────────────────────┐
-│ 🎮 Connor Computer   Home   [Join Waitlist]  │  <-- Slides in
-├───────────────────────────────────────────────┤
-│                                               │
-│        Content continues...                   │
-│                                               │
-└───────────────────────────────────────────────┘
+New Flow:
+Hero → Who It's For → The Promise → Three Steps → What's Included → 
+Comparison → Rollout → Experience → FAQs (Enhanced) → CTA → Footer
 ```
 
-### Mobile Experience
+The removal of Roadmap creates a tighter narrative flow, moving directly from Rollout/Availability to The Experience to FAQs to CTA—a natural progression from "where" to "what it feels like" to "common questions" to "action."
 
-```text
-SCROLL Y = 0 (Top of page):
-┌───────────────────────────────────────────────┐
-│                                          [☰] │  <-- Floating menu button
-│                                               │
-│        HERO SECTION - FULL IMPACT             │
-│          No navigation overlay                │
-│                                               │
-└───────────────────────────────────────────────┘
+---
 
-SCROLL Y > 100px (After scroll):
-┌───────────────────────────────────────────────┐
-│ 🎮 Connor Computer                       [☰] │  <-- Full nav slides in
-├───────────────────────────────────────────────┤
-│                                               │
-│        Content continues...                   │
-│                                               │
-└───────────────────────────────────────────────┘
+## Updated FAQ Data Structure
+
+```typescript
+const faqs = [
+  {
+    question: "Is this a lease or rental?",
+    answer:
+      "Think of it as a performance partnership. You pay one predictable monthly fee and we take care of everything—from day-one setup to annual upgrades to covered repairs. No hidden costs, no depreciation headaches, no obsolescence anxiety. Just always-current hardware that keeps you competitive, month after month.",
+  },
+  {
+    question: "Will I know the exact parts?",
+    answer:
+      "Absolutely—we believe in radical transparency. Every tier includes a public parts list with exact model numbers, so you know precisely what's powering your gaming. When we make any upgrade or swap, it's documented in our public change-log with full reasoning. No mystery boxes, no corners cut. You see exactly what you're getting, always.",
+  },
+  {
+    question: "What if a part fails?",
+    answer:
+      "We've got you covered—literally. If something fails, you contact us and we handle the rest: diagnosis, parts, labour, and logistics. Our goal is minimal downtime so you're back to gaming fast. That's why we require insurance as part of the plan—it ensures rapid, no-excuses coverage for hardware issues. You focus on playing; we focus on keeping you running.",
+  },
+  {
+    question: "Do you publish benchmarks?",
+    answer:
+      "We're building comprehensive benchmark data for every tier—real-world FPS and frametime results across flagship titles so you can see exactly how your rig performs. Waitlist members will be the first to access these results. Want to help shape what games we test? Join the waitlist and let us know your must-play titles.",
+  },
+];
 ```
 
 ---
 
 ## Implementation Order
 
-1. Remove `StickyDesktopCTA` from `Waitlist.tsx`
-2. Update scroll threshold to 100px in `HowItWorksNav.tsx`
-3. Wrap nav in `AnimatePresence` with conditional rendering
-4. Add entry/exit animations to nav
-5. Add floating mobile menu button for when nav is hidden
-6. Test on desktop and mobile
-7. Verify reduced motion preferences are respected
+1. Remove Roadmap import and usage from `HowItWorks.tsx`
+2. Update FAQ answers in `MicroFAQs.tsx`
+3. Test page flow to ensure sections connect smoothly
+4. Verify accordion functionality still works correctly
 
 ---
 
 ## Success Criteria
 
-1. Hero section has no navigation overlay at top of page
-2. Navigation slides in smoothly when scrolling past 100px
-3. Navigation slides out when scrolling back to top
-4. Mobile users can still access menu via floating button at top
-5. All navigation links and CTA continue to work
-6. Animations are smooth (60fps target)
-7. Reduced motion users see instant show/hide (no animation)
-8. No StickyDesktopCTA bar appears anywhere on the page
+1. Roadmap section no longer appears on the How It Works page
+2. All 4 FAQ answers are updated with new compelling copy
+3. FAQ accordion still functions correctly (expand/collapse)
+4. Page flow feels natural without the Roadmap section
+5. FAQ answers address objections and build trust
+6. Benchmark FAQ includes soft CTA for waitlist
 
