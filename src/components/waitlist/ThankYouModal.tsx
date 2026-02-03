@@ -9,6 +9,8 @@ interface ThankYouModalProps {
   firstName: string;
   queuePosition: number;
   couponCode: string;
+  selectedTier?: string;
+  emailSent?: boolean;
 }
 
 export function ThankYouModal({
@@ -17,42 +19,61 @@ export function ThankYouModal({
   firstName,
   queuePosition,
   couponCode,
+  selectedTier,
+  emailSent = true,
 }: ThankYouModalProps) {
   const [copied, setCopied] = useState(false);
-  const [displayPosition, setDisplayPosition] = useState(0);
+  const [displayPosition, setDisplayPosition] = useState(1); // Start at 1 to avoid showing #0
   const [showConfetti, setShowConfetti] = useState(false);
+
+  // Check for reduced motion preference
+  const prefersReducedMotion = typeof window !== "undefined" 
+    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches 
+    : false;
 
   // Animate queue position counter
   useEffect(() => {
     if (!isOpen) {
-      setDisplayPosition(0);
+      setDisplayPosition(1);
       return;
     }
 
-    // Trigger confetti
-    setShowConfetti(true);
-    const confettiTimeout = setTimeout(() => setShowConfetti(false), 3000);
+    // Trigger confetti only if user doesn't prefer reduced motion
+    if (!prefersReducedMotion) {
+      setShowConfetti(true);
+      const confettiTimeout = setTimeout(() => setShowConfetti(false), 3000);
+      return () => clearTimeout(confettiTimeout);
+    }
+  }, [isOpen, prefersReducedMotion]);
 
-    // Animate counter
-    const duration = 800;
-    const steps = 20;
-    const increment = queuePosition / steps;
-    let current = 0;
+  // Separate effect for counter animation
+  useEffect(() => {
+    if (!isOpen || queuePosition <= 1) {
+      setDisplayPosition(queuePosition || 1);
+      return;
+    }
 
-    const interval = setInterval(() => {
-      current += increment;
-      if (current >= queuePosition) {
-        setDisplayPosition(queuePosition);
-        clearInterval(interval);
-      } else {
-        setDisplayPosition(Math.floor(current));
-      }
-    }, duration / steps);
+    // Small delay before starting counter for better visual effect
+    const startDelay = setTimeout(() => {
+      const duration = 800;
+      const steps = 20;
+      const increment = queuePosition / steps;
+      let current = 1;
 
-    return () => {
-      clearInterval(interval);
-      clearTimeout(confettiTimeout);
-    };
+      const interval = setInterval(() => {
+        current += increment;
+        if (current >= queuePosition) {
+          setDisplayPosition(queuePosition);
+          clearInterval(interval);
+        } else {
+          setDisplayPosition(Math.floor(current));
+        }
+      }, duration / steps);
+
+      return () => clearInterval(interval);
+    }, 300);
+
+    return () => clearTimeout(startDelay);
   }, [isOpen, queuePosition]);
 
   const handleCopy = useCallback(async () => {
@@ -66,7 +87,14 @@ export function ThankYouModal({
   }, [couponCode]);
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-  const shareText = `I just joined the waitlist for a gaming PC subscription! 🎮 Get 10% off with code ${couponCode}`;
+  
+  // Personalized share text with tier
+  const tierName = selectedTier 
+    ? selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1) 
+    : "";
+  const shareText = selectedTier
+    ? `I just locked in the ${tierName} tier for a gaming PC subscription! 🎮 I'm #${queuePosition} in line. Get 10% off with code ${couponCode}`
+    : `I just joined the waitlist for a gaming PC subscription! 🎮 Get 10% off with code ${couponCode}`;
 
   const handleTwitterShare = () => {
     window.open(
@@ -84,7 +112,7 @@ export function ThankYouModal({
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(`${shareUrl}?ref=${couponCode}`);
     } catch (err) {
       console.error("Failed to copy link:", err);
     }
@@ -100,11 +128,14 @@ export function ThankYouModal({
           transition={{ duration: 0.3 }}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md"
           onClick={onClose}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="thank-you-title"
         >
-          {/* Confetti effect */}
-          {showConfetti && (
+          {/* Confetti effect - reduced count for performance */}
+          {showConfetti && !prefersReducedMotion && (
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              {[...Array(50)].map((_, i) => (
+              {[...Array(25)].map((_, i) => (
                 <motion.div
                   key={i}
                   initial={{
@@ -125,7 +156,7 @@ export function ThankYouModal({
                     ease: "easeOut",
                   }}
                   className={cn(
-                    "absolute w-3 h-3 rounded-sm",
+                    "absolute w-3 h-3 rounded-sm will-change-transform",
                     i % 3 === 0 && "bg-primary",
                     i % 3 === 1 && "bg-gaming-gold",
                     i % 3 === 2 && "bg-gaming-blue"
@@ -146,7 +177,8 @@ export function ThankYouModal({
             {/* Close button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-secondary"
+              className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-secondary min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="Close modal"
             >
               <X className="w-5 h-5" />
             </button>
@@ -170,7 +202,7 @@ export function ThankYouModal({
               transition={{ delay: 0.2 }}
               className="text-center mb-6"
             >
-              <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+              <h2 id="thank-you-title" className="text-2xl md:text-3xl font-bold text-foreground mb-2">
                 You're locked in!
               </h2>
               <p className="text-muted-foreground">
@@ -197,11 +229,12 @@ export function ThankYouModal({
                   <button
                     onClick={handleCopy}
                     className={cn(
-                      "p-2 rounded-lg transition-all duration-200",
+                      "p-2 rounded-lg transition-all duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center",
                       copied
                         ? "bg-gaming-green/20 text-gaming-green"
                         : "bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground"
                     )}
+                    aria-label={copied ? "Copied!" : "Copy coupon code"}
                   >
                     {copied ? (
                       <Check className="w-5 h-5" />
@@ -213,14 +246,17 @@ export function ThankYouModal({
               </div>
             </motion.div>
 
-            {/* Email reminder */}
+            {/* Email reminder - with fallback */}
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
               className="text-center text-sm text-muted-foreground mb-6"
             >
-              Check your email for your welcome message and coupon code.
+              {emailSent 
+                ? "Check your email for your welcome message and coupon code."
+                : `Your discount code is ${couponCode}. Save it now!`
+              }
             </motion.p>
 
             {/* Divider */}
@@ -239,19 +275,22 @@ export function ThankYouModal({
               <div className="flex items-center justify-center gap-3">
                 <button
                   onClick={handleTwitterShare}
-                  className="p-3 rounded-xl bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-all hover:scale-105"
+                  className="p-3 rounded-xl bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-all hover:scale-105 min-w-[44px] min-h-[44px]"
+                  aria-label="Share on Twitter"
                 >
                   <Twitter className="w-5 h-5" />
                 </button>
                 <button
                   onClick={handleFacebookShare}
-                  className="p-3 rounded-xl bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-all hover:scale-105"
+                  className="p-3 rounded-xl bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-all hover:scale-105 min-w-[44px] min-h-[44px]"
+                  aria-label="Share on Facebook"
                 >
                   <Facebook className="w-5 h-5" />
                 </button>
                 <button
                   onClick={handleCopyLink}
-                  className="p-3 rounded-xl bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-all hover:scale-105"
+                  className="p-3 rounded-xl bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-all hover:scale-105 min-w-[44px] min-h-[44px]"
+                  aria-label="Copy share link"
                 >
                   <Link2 className="w-5 h-5" />
                 </button>

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Crown, Zap, Gamepad2 } from "lucide-react";
+import { Check, Crown, Zap, Gamepad2, ExternalLink, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TierCardProps {
@@ -12,6 +12,9 @@ interface TierCardProps {
   onSelect: () => void;
   index: number;
   hasSelection: boolean;
+  isPopular?: boolean;
+  specsUrl?: string;
+  selectCta?: string;
 }
 
 const accentColorMap = {
@@ -60,6 +63,9 @@ export function TierCard({
   onSelect,
   index,
   hasSelection,
+  isPopular = false,
+  specsUrl,
+  selectCta,
 }: TierCardProps) {
   const colors = accentColorMap[accentColor];
   const TierIcon = tierIcons[accentColor];
@@ -79,12 +85,25 @@ export function TierCard({
       className={cn(
         "relative w-full p-6 rounded-2xl border-2 text-left transition-all duration-300",
         "bg-card/50 backdrop-blur-sm",
+        "active:scale-[0.98] active:brightness-95", // Mobile tap feedback
         isSelected
           ? `border-primary ${colors.glowSelected}`
           : `${colors.border} ${colors.borderHover} ${colors.glow}`,
         isDimmed && "opacity-60"
       )}
     >
+      {/* Most Popular badge */}
+      {isPopular && !isSelected && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-gaming-blue text-white text-xs font-bold uppercase tracking-wider rounded-full flex items-center gap-1 shadow-lg"
+        >
+          <Star className="w-3 h-3 fill-current" />
+          Most Popular
+        </motion.div>
+      )}
+
       {/* Selected checkmark */}
       {isSelected && (
         <motion.div
@@ -132,6 +151,23 @@ export function TierCard({
         </span>
       </div>
 
+      {/* Specs link placeholder */}
+      {specsUrl && (
+        <a
+          href={specsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className={cn(
+            "inline-flex items-center gap-1 text-xs mb-4 transition-colors",
+            colors.text,
+            "hover:underline"
+          )}
+        >
+          View exact specs <ExternalLink className="w-3 h-3" />
+        </a>
+      )}
+
       {/* Select indicator */}
       <div className="pt-4 border-t border-border/50">
         <span
@@ -140,7 +176,7 @@ export function TierCard({
             isSelected ? "text-primary" : "text-muted-foreground"
           )}
         >
-          {isSelected ? "✓ Selected" : "Select tier"}
+          {isSelected ? "✓ Selected" : selectCta || "Select tier"}
         </span>
       </div>
 
