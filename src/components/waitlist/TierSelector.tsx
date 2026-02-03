@@ -41,6 +41,7 @@ export function TierSelector({ selectedTier, onSelectTier }: TierSelectorProps) 
               isSelected={selectedTier === tier.id}
               onSelect={() => onSelectTier(tier.id)}
               index={index}
+              hasSelection={selectedTier !== null}
             />
           ))}
         </div>

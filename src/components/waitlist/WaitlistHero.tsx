@@ -1,9 +1,15 @@
 import { motion } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Shield, FileCheck, RefreshCw } from "lucide-react";
 
 interface WaitlistHeroProps {
   onScrollToForm: () => void;
 }
+
+const features = [
+  { icon: RefreshCw, text: "yearly upgrades" },
+  { icon: Shield, text: "covered repairs" },
+  { icon: FileCheck, text: "zero downtime" },
+];
 
 export function WaitlistHero({ onScrollToForm }: WaitlistHeroProps) {
   return (
@@ -11,8 +17,30 @@ export function WaitlistHero({ onScrollToForm }: WaitlistHeroProps) {
       {/* Animated gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-gaming-purple-mid to-background">
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gaming-blue/20 rounded-full blur-3xl animate-pulse delay-1000" />
+          <motion.div 
+            className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"
+            animate={{ 
+              scale: [1, 1.1, 1],
+              opacity: [0.2, 0.3, 0.2],
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div 
+            className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gaming-blue/20 rounded-full blur-3xl"
+            animate={{ 
+              scale: [1.1, 1, 1.1],
+              opacity: [0.2, 0.3, 0.2],
+            }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          />
+          <motion.div 
+            className="absolute top-1/2 right-1/3 w-64 h-64 bg-gaming-gold/10 rounded-full blur-3xl"
+            animate={{ 
+              scale: [1, 1.15, 1],
+              opacity: [0.1, 0.2, 0.1],
+            }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          />
         </div>
       </div>
 
@@ -30,6 +58,7 @@ export function WaitlistHero({ onScrollToForm }: WaitlistHeroProps) {
         {/* Main headline with staggered animation */}
         <motion.h1 
           className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground mb-6"
+          style={{ textShadow: '0 4px 24px rgba(0,0,0,0.3)' }}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
@@ -60,29 +89,43 @@ export function WaitlistHero({ onScrollToForm }: WaitlistHeroProps) {
           </motion.span>
         </motion.h1>
 
-        {/* Subtitle */}
-        <motion.p 
-          className="text-lg md:text-xl text-muted-foreground mb-8 lowercase tracking-wide"
+        {/* Feature badges with icons */}
+        <motion.div 
+          className="flex flex-wrap items-center justify-center gap-4 md:gap-6 mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
         >
-          all repairs covered · insurance included · yearly upgrades
-        </motion.p>
+          {features.map((feature, index) => (
+            <motion.div
+              key={feature.text}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.9 + index * 0.1 }}
+              className="flex items-center gap-2 text-muted-foreground"
+            >
+              <feature.icon className="w-4 h-4 text-primary" />
+              <span className="text-sm md:text-base lowercase tracking-wide">{feature.text}</span>
+              {index < features.length - 1 && (
+                <span className="hidden md:inline text-muted-foreground/50 ml-2">·</span>
+              )}
+            </motion.div>
+          ))}
+        </motion.div>
 
-        {/* Primary CTA */}
+        {/* Primary CTA with glow pulse */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1 }}
+          transition={{ duration: 0.6, delay: 1.2 }}
         >
           <motion.button
             onClick={onScrollToForm}
-            className="group relative inline-flex items-center gap-3 bg-primary text-primary-foreground px-8 py-4 rounded-full font-semibold text-lg shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300"
+            className="group relative inline-flex flex-col items-center gap-1 bg-primary text-primary-foreground px-8 py-4 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 glow-pulse"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <span>be the first to know</span>
+            <span className="text-lg">be the first to know</span>
             <span className="text-sm opacity-80">— 10% discount first 3 months</span>
             
             {/* Glow effect */}
@@ -95,7 +138,7 @@ export function WaitlistHero({ onScrollToForm }: WaitlistHeroProps) {
           className="absolute bottom-12 left-1/2 -translate-x-1/2"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.5, duration: 0.6 }}
+          transition={{ delay: 2, duration: 0.6 }}
         >
           <motion.button
             onClick={onScrollToForm}

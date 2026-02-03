@@ -109,3 +109,45 @@ All colors MUST be HSL.
     @apply bg-background text-foreground font-sans;
   }
 }
+
+/* Glow pulse animation for CTA buttons */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 10px 25px -5px hsl(25 97% 59% / 0.3);
+  }
+  50% {
+    box-shadow: 0 10px 35px -5px hsl(25 97% 59% / 0.5);
+  }
+}
+
+.glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.glow-pulse-subtle {
+  animation: glow-pulse 4s ease-in-out infinite;
+}
+
+/* Shake animation for form errors */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-4px); }
+}
+
+.shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .glow-pulse,
+  .glow-pulse-subtle {
+    animation: none;
+  }
+  
+  .shake {
+    animation: none;
+  }
+}

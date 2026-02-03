@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,6 +52,14 @@ export function WaitlistForm({
   }
 
   const selectedTierInfo = tierOptions.find((t) => t.id === selectedTier);
+  
+  // Calculate progress
+  const email = watch("email");
+  const firstName = watch("firstName");
+  const lastName = watch("lastName");
+  const filledRequired = [email, firstName, lastName, selectedTier].filter(Boolean).length;
+  const totalRequired = 4;
+  const progressPercent = (filledRequired / totalRequired) * 100;
 
   const handleFormSubmit = handleSubmit(async (data) => {
     await onSubmit(data);
@@ -67,21 +75,48 @@ export function WaitlistForm({
         className="max-w-lg mx-auto"
       >
         {/* Section header */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-8">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Join the waitlist
+            Lock your spot
           </h2>
-          <p className="text-muted-foreground text-lg">
-            Be first in line when we launch in your area.
-            {selectedTierInfo && (
-              <span className="block mt-2 text-primary font-medium">
-                Selected: {selectedTierInfo.name} tier
-              </span>
-            )}
-          </p>
+          <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
+            <Users className="w-4 h-4 text-primary" />
+            <span className="text-lg">
+              Join Calgary gamers on the waitlist
+            </span>
+          </div>
+          {selectedTierInfo && (
+            <motion.p 
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-primary font-medium"
+            >
+              Selected: {selectedTierInfo.name} tier
+            </motion.p>
+          )}
         </div>
 
-        <form onSubmit={handleFormSubmit} className="space-y-6">
+        {/* Progress bar */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-muted-foreground uppercase tracking-wide">
+              Required fields
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {filledRequired}/{totalRequired}
+            </span>
+          </div>
+          <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-primary rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPercent}%` }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            />
+          </div>
+        </div>
+
+        <form onSubmit={handleFormSubmit} className="space-y-5">
           {/* Email */}
           <FormField
             label="Email"
@@ -94,14 +129,14 @@ export function WaitlistForm({
               placeholder="you@example.com"
               {...register("email")}
               className={cn(
-                "bg-card/50 border-border focus:border-primary focus:ring-primary/30",
-                errors.email && "border-destructive"
+                "h-12 bg-card/50 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all",
+                errors.email && "border-destructive shake"
               )}
             />
           </FormField>
 
           {/* Name fields */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               label="First Name"
               error={errors.firstName?.message}
@@ -113,8 +148,8 @@ export function WaitlistForm({
                 placeholder="Alex"
                 {...register("firstName")}
                 className={cn(
-                  "bg-card/50 border-border focus:border-primary focus:ring-primary/30",
-                  errors.firstName && "border-destructive"
+                  "h-12 bg-card/50 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all",
+                  errors.firstName && "border-destructive shake"
                 )}
               />
             </FormField>
@@ -130,8 +165,8 @@ export function WaitlistForm({
                 placeholder="Chen"
                 {...register("lastName")}
                 className={cn(
-                  "bg-card/50 border-border focus:border-primary focus:ring-primary/30",
-                  errors.lastName && "border-destructive"
+                  "h-12 bg-card/50 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all",
+                  errors.lastName && "border-destructive shake"
                 )}
               />
             </FormField>
@@ -149,7 +184,7 @@ export function WaitlistForm({
                   setValue("preferredTier", value)
                 }
               >
-                <SelectTrigger className="bg-card/50 border-border">
+                <SelectTrigger className="h-12 bg-card/50 border-border">
                   <SelectValue placeholder="Select a tier" />
                 </SelectTrigger>
                 <SelectContent>
@@ -163,13 +198,25 @@ export function WaitlistForm({
             </FormField>
           )}
 
+          {/* Optional fields divider */}
+          <div className="relative py-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border/50" />
+            </div>
+            <div className="relative flex justify-center">
+              <span className="bg-background px-3 text-xs text-muted-foreground uppercase tracking-wide">
+                Optional
+              </span>
+            </div>
+          </div>
+
           {/* Phone number (optional) */}
           <FormField label="Phone Number" error={errors.phoneNumber?.message}>
             <Input
               type="tel"
               placeholder="+1 (555) 123-4567"
               {...register("phoneNumber")}
-              className="bg-card/50 border-border focus:border-primary focus:ring-primary/30"
+              className="h-12 bg-card/50 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
             />
           </FormField>
 
@@ -180,7 +227,7 @@ export function WaitlistForm({
                 setValue("budgetRange", value)
               }
             >
-              <SelectTrigger className="bg-card/50 border-border">
+              <SelectTrigger className="h-12 bg-card/50 border-border">
                 <SelectValue placeholder="Select your budget range" />
               </SelectTrigger>
               <SelectContent>
@@ -194,34 +241,34 @@ export function WaitlistForm({
           </FormField>
 
           {/* Trade-in interest */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 py-1">
             <Checkbox
               id="tradeInInterest"
               onCheckedChange={(checked) =>
                 setValue("tradeInInterest", checked as boolean)
               }
-              className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+              className="h-5 w-5 border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
             />
             <Label
               htmlFor="tradeInInterest"
-              className="text-muted-foreground cursor-pointer"
+              className="text-muted-foreground cursor-pointer text-sm"
             >
               I'm interested in trading in my current PC
             </Label>
           </div>
 
           {/* Mailing list */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 py-1">
             <Checkbox
               id="mailingListOptIn"
               onCheckedChange={(checked) =>
                 setValue("mailingListOptIn", checked as boolean)
               }
-              className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+              className="h-5 w-5 border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
             />
             <Label
               htmlFor="mailingListOptIn"
-              className="text-muted-foreground cursor-pointer"
+              className="text-muted-foreground cursor-pointer text-sm"
             >
               Send me updates and gaming news
             </Label>
@@ -232,22 +279,25 @@ export function WaitlistForm({
             type="submit"
             disabled={isSubmitting || !selectedTier}
             className={cn(
-              "w-full py-4 rounded-xl font-semibold text-lg transition-all duration-300",
+              "w-full py-4 mt-4 rounded-xl font-semibold text-lg transition-all duration-300",
               "bg-primary text-primary-foreground",
               "shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40",
               "disabled:opacity-50 disabled:cursor-not-allowed",
-              "relative overflow-hidden group"
+              "relative overflow-hidden group glow-pulse-subtle"
             )}
-            whileHover={{ scale: isSubmitting ? 1 : 1.01 }}
-            whileTap={{ scale: isSubmitting ? 1 : 0.99 }}
+            whileHover={{ scale: isSubmitting || !selectedTier ? 1 : 1.01 }}
+            whileTap={{ scale: isSubmitting || !selectedTier ? 1 : 0.99 }}
           >
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Joining...
+                Joining the queue...
               </span>
             ) : (
-              <span>Join the Waitlist</span>
+              <span className="flex flex-col items-center">
+                <span>Reserve my spot</span>
+                <span className="text-sm opacity-80 font-normal">— 10% off first 3 months</span>
+              </span>
             )}
 
             {/* Button glow */}
@@ -255,9 +305,13 @@ export function WaitlistForm({
           </motion.button>
 
           {!selectedTier && (
-            <p className="text-center text-sm text-muted-foreground">
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center text-sm text-muted-foreground"
+            >
               ↑ Please select a tier above first
-            </p>
+            </motion.p>
           )}
         </form>
       </motion.div>
@@ -282,7 +336,7 @@ function FormField({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <Label className="text-foreground">
+        <Label className="text-foreground text-sm">
           {label}
           {required && <span className="text-primary ml-1">*</span>}
         </Label>
@@ -290,6 +344,7 @@ function FormField({
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 500, damping: 30 }}
             className="text-gaming-green"
           >
             <Check className="w-4 h-4" />
@@ -299,8 +354,8 @@ function FormField({
       {children}
       {error && (
         <motion.p
-          initial={{ opacity: 0, y: -5 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
           className="text-sm text-destructive"
         >
           {error}
