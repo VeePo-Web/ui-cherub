@@ -1,10 +1,12 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { WaitlistHero } from "@/components/waitlist/WaitlistHero";
 import { TierSelector } from "@/components/waitlist/TierSelector";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 import { GeoCoverage } from "@/components/waitlist/GeoCoverage";
 import { ThankYouModal } from "@/components/waitlist/ThankYouModal";
 import { StickyDesktopCTA } from "@/components/waitlist/StickyDesktopCTA";
+import { HowItWorksNav } from "@/components/howitworks/HowItWorksNav";
 import { useActualSpotsRemaining } from "@/hooks/useActualSpotsRemaining";
 import { useWaitlistSubmit } from "@/hooks/useWaitlistSubmit";
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +28,16 @@ export default function Waitlist() {
   const { submitWaitlist, isSubmitting } = useWaitlistSubmit();
   const { toast } = useToast();
   const { spotsRemaining, isLoading: spotsLoading } = useActualSpotsRemaining();
+  const location = useLocation();
+
+  // Handle hash navigation from How It Works page
+  useEffect(() => {
+    if (location.hash === "#waitlist-form") {
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+    }
+  }, [location]);
 
   const scrollToTiers = () => {
     tierRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -74,6 +86,9 @@ export default function Waitlist() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Navigation */}
+      <HowItWorksNav />
+
       {/* Skip to content for accessibility */}
       <a
         href="#waitlist-form"
