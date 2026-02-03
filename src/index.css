@@ -170,13 +170,45 @@ All colors MUST be HSL.
   animation: sticky-pulse 2s ease-in-out infinite;
 }
 
+/* Success glow animation for icons */
+@keyframes success-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(25 97% 59% / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px 10px hsl(25 97% 59% / 0.2);
+  }
+}
+
+.success-glow {
+  animation: success-glow 2s ease-in-out infinite;
+}
+
+/* Timeline step reveal animation */
+@keyframes timeline-step {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.timeline-step {
+  animation: timeline-step 0.4s ease-out forwards;
+}
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   .glow-pulse,
   .glow-pulse-subtle,
   .progress-flash,
   .confetti-burst,
-  .sticky-pulse {
+  .sticky-pulse,
+  .success-glow,
+  .timeline-step {
     animation: none;
   }
   

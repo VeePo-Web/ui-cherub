@@ -1,8 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Copy, Check, Twitter, Facebook, Link2, Gamepad2, Mail, Phone, Trophy } from "lucide-react";
+import { X, Copy, Check, Twitter, Facebook, Link2, Gamepad2, Mail, Phone, Trophy, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ReferralLadder } from "./ReferralLadder";
+import { SaveCodeActions } from "./SaveCodeActions";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Separator } from "@/components/ui/separator";
 
 interface ThankYouModalProps {
   isOpen: boolean;
@@ -12,6 +15,7 @@ interface ThankYouModalProps {
   couponCode: string;
   selectedTier?: string;
   emailSent?: boolean;
+  email?: string;
 }
 
 export function ThankYouModal({
@@ -22,10 +26,12 @@ export function ThankYouModal({
   couponCode,
   selectedTier,
   emailSent = true,
+  email,
 }: ThankYouModalProps) {
   const [copied, setCopied] = useState(false);
   const [displayPosition, setDisplayPosition] = useState(1); // Start at 1 to avoid showing #0
   const [showConfetti, setShowConfetti] = useState(false);
+  const isMobile = useIsMobile();
 
   // Check for reduced motion preference
   const prefersReducedMotion = typeof window !== "undefined" 
@@ -89,13 +95,17 @@ export function ThankYouModal({
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   
-  // Personalized share text with tier
+  // Personalized share text with tier - UPDATED: clarify first 3 months
   const tierName = selectedTier 
     ? selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1) 
     : "";
   const shareText = selectedTier
-    ? `I just locked in the ${tierName} tier for a gaming PC subscription! I'm #${queuePosition} in line. Get 10% off with code ${couponCode}`
-    : `I just joined the waitlist for a gaming PC subscription! Get 10% off with code ${couponCode}`;
+    ? `I just locked in the ${tierName} tier for a gaming PC subscription! I'm #${queuePosition} in line for Calgary. Get 10% off your first 3 months with code ${couponCode}!`
+    : `I just joined the waitlist for a gaming PC subscription! Get 10% off your first 3 months with code ${couponCode}!`;
+
+  const handleSMSShare = () => {
+    window.open(`sms:?body=${encodeURIComponent(shareText)}`, "_self");
+  };
 
   const handleTwitterShare = () => {
     window.open(
@@ -175,8 +185,8 @@ export function ThankYouModal({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-md bg-card border border-border rounded-2xl p-6 md:p-8 shadow-2xl my-8"
+          onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-card border border-border rounded-2xl p-6 md:p-8 shadow-2xl my-8"
           >
             {/* Close button */}
             <button
@@ -228,15 +238,15 @@ export function ThankYouModal({
               </motion.div>
             </motion.div>
 
-            {/* Coupon box */}
+            {/* Coupon box - UPDATED: clarify first 3 months */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="mb-6"
+              className="mb-4"
             >
               <p className="text-xs text-muted-foreground uppercase tracking-wider text-center mb-3">
-                Your 10% discount code
+                Your 10% discount code <span className="text-primary">(first 3 months)</span>
               </p>
               <div className="relative bg-primary/10 border-2 border-dashed border-primary/40 rounded-xl p-4">
                 <div className="flex items-center justify-between">
@@ -260,69 +270,114 @@ export function ThankYouModal({
                     )}
                   </button>
                 </div>
-                {/* Bonus urgency */}
+                {/* Bonus urgency - UPDATED: clarify validity */}
                 <p className="text-xs text-muted-foreground mt-2">
-                  First 100 users get extra 5% at launch!
+                  Valid for your first 3 months. First 100 users get an extra 5% at launch!
                 </p>
               </div>
+              
+              {/* Save code actions - NEW */}
+              {email && (
+                <SaveCodeActions
+                  couponCode={couponCode}
+                  email={email}
+                  queuePosition={queuePosition}
+                  selectedTier={selectedTier || ""}
+                  firstName={firstName}
+                  emailAlreadySent={emailSent}
+                />
+              )}
             </motion.div>
+            
+            <Separator className="my-4" />
 
-            {/* What happens next - clear steps */}
+            {/* What happens next - clear steps with timeline */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="mb-6 space-y-2"
+              className="mb-4"
             >
               <p className="text-xs text-muted-foreground uppercase tracking-wider text-center mb-3">
                 What happens next
               </p>
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-6 h-6 rounded-full bg-gaming-green/20 flex items-center justify-center flex-shrink-0">
+              <div className="relative space-y-0">
+                {/* Timeline connector line */}
+                <div className="absolute left-3 top-3 bottom-3 w-px bg-border" aria-hidden="true" />
+                
+                <motion.div 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.55 }}
+                  className="flex items-center gap-3 text-sm relative py-2"
+                >
+                  <div className="w-6 h-6 rounded-full bg-gaming-green/20 flex items-center justify-center flex-shrink-0 z-10">
                     <Check className="w-3 h-3 text-gaming-green" />
                   </div>
-                  <span className="text-foreground">You're on the list!</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-foreground font-medium">You're on the list!</span>
+                </motion.div>
+                
+                <motion.div 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="flex items-center gap-3 text-sm relative py-2"
+                >
+                  <div className={cn(
+                    "w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 z-10",
+                    emailSent ? "bg-gaming-green/20" : "bg-secondary"
+                  )}>
+                    <Mail className={cn("w-3 h-3", emailSent ? "text-gaming-green" : "text-muted-foreground")} />
                   </div>
                   <span className={emailSent ? "text-foreground" : "text-muted-foreground"}>
-                    {emailSent ? "Check your email (arriving shortly)" : `Code saved: ${couponCode}`}
+                    {emailSent ? "Check your email (confirmation incoming)" : `Code saved: ${couponCode}`}
                   </span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
+                </motion.div>
+                
+                <motion.div 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.65 }}
+                  className="flex items-center gap-3 text-sm relative py-2"
+                >
+                  <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 z-10">
                     <Phone className="w-3 h-3 text-muted-foreground" />
                   </div>
-                  <span className="text-muted-foreground">We'll text when Calgary goes live</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
+                  <span className="text-muted-foreground">We'll text you when Calgary goes live</span>
+                </motion.div>
+                
+                <motion.div 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.7 }}
+                  className="flex items-center gap-3 text-sm relative py-2"
+                >
+                  <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 z-10">
                     <Gamepad2 className="w-3 h-3 text-muted-foreground" />
                   </div>
-                  <span className="text-muted-foreground">First access + 10% off guaranteed</span>
-                </div>
+                  <span className="text-muted-foreground">First access + 10% off (first 3 months) guaranteed</span>
+                </motion.div>
               </div>
             </motion.div>
+            
+            <Separator className="my-4" />
 
             {/* Referral ladder */}
             <ReferralLadder couponCode={couponCode} queuePosition={queuePosition} />
 
-            {/* Quick share buttons */}
+            {/* Quick share buttons - ENHANCED with SMS */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
-              className="mt-6 text-center"
+              className="mt-4 text-center"
             >
               <p className="text-xs text-muted-foreground mb-3">Quick share</p>
               <div className="flex items-center justify-center gap-3">
                 <button
                   onClick={handleTwitterShare}
                   className="p-3 rounded-xl bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-all hover:scale-105 min-w-[44px] min-h-[44px]"
-                  aria-label="Share on Twitter"
+                  aria-label="Share on Twitter/X"
                 >
                   <Twitter className="w-5 h-5" />
                 </button>
@@ -340,6 +395,16 @@ export function ThankYouModal({
                 >
                   <Link2 className="w-5 h-5" />
                 </button>
+                {/* SMS Share - primarily for mobile but available on all */}
+                {isMobile && (
+                  <button
+                    onClick={handleSMSShare}
+                    className="p-3 rounded-xl bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-all hover:scale-105 min-w-[44px] min-h-[44px]"
+                    aria-label="Share via SMS"
+                  >
+                    <MessageSquare className="w-5 h-5" />
+                  </button>
+                )}
               </div>
             </motion.div>
           </motion.div>

@@ -21,6 +21,7 @@ export default function Waitlist() {
     couponCode: string;
     selectedTier: string;
     emailSent: boolean;
+    email: string;
   } | null>(null);
 
   const tierRef = useRef<HTMLDivElement>(null);
@@ -73,6 +74,7 @@ export default function Waitlist() {
         couponCode: result.couponCode || "EARLY10",
         selectedTier: data.preferredTier,
         emailSent: result.emailSent ?? true,
+        email: data.email,
       });
       setShowThankYou(true);
     } else {
@@ -149,6 +151,7 @@ export default function Waitlist() {
           couponCode={signupData.couponCode}
           selectedTier={signupData.selectedTier}
           emailSent={signupData.emailSent}
+          email={signupData.email}
         />
       )}
     </div>
