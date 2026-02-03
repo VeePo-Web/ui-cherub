@@ -4,10 +4,8 @@ import { TierSelector } from "@/components/waitlist/TierSelector";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 import { GeoCoverage } from "@/components/waitlist/GeoCoverage";
 import { ThankYouModal } from "@/components/waitlist/ThankYouModal";
-import { LiveActivityToast } from "@/components/waitlist/LiveActivityToast";
-import { ExitIntentModal } from "@/components/waitlist/ExitIntentModal";
 import { StickyDesktopCTA } from "@/components/waitlist/StickyDesktopCTA";
-import { useSpotsRemaining } from "@/components/waitlist/ScarcityCounter";
+import { useActualSpotsRemaining } from "@/hooks/useActualSpotsRemaining";
 import { useWaitlistSubmit } from "@/hooks/useWaitlistSubmit";
 import { useToast } from "@/hooks/use-toast";
 import type { WaitlistFormData } from "@/lib/waitlist-validation";
@@ -27,7 +25,7 @@ export default function Waitlist() {
   const formRef = useRef<HTMLDivElement>(null);
   const { submitWaitlist, isSubmitting } = useWaitlistSubmit();
   const { toast } = useToast();
-  const spotsRemaining = useSpotsRemaining(247);
+  const { spotsRemaining, isLoading: spotsLoading } = useActualSpotsRemaining();
 
   const scrollToTiers = () => {
     tierRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -74,15 +72,6 @@ export default function Waitlist() {
     }
   };
 
-  const handleExitIntentEmail = (email: string) => {
-    // Quick submit with just email - scroll to form with email pre-filled
-    scrollToForm();
-    toast({
-      title: "Great choice!",
-      description: "Complete the form below to lock in your spot.",
-    });
-  };
-
   return (
     <div className="min-h-screen bg-background">
       {/* Skip to content for accessibility */}
@@ -93,23 +82,18 @@ export default function Waitlist() {
         Skip to form
       </a>
 
-      {/* Live activity toasts */}
-      <LiveActivityToast />
-
       {/* Sticky desktop CTA */}
       <StickyDesktopCTA 
         spotsRemaining={spotsRemaining} 
         onCtaClick={scrollToForm} 
       />
 
-      {/* Exit intent modal (desktop only) */}
-      <ExitIntentModal 
-        onSubmitEmail={handleExitIntentEmail}
-        spotsRemaining={spotsRemaining}
-      />
-
       {/* Hero section */}
-      <WaitlistHero onScrollToTiers={scrollToTiers} spotsRemaining={spotsRemaining} />
+      <WaitlistHero 
+        onScrollToTiers={scrollToTiers} 
+        spotsRemaining={spotsRemaining}
+        spotsLoading={spotsLoading}
+      />
 
       {/* Tier selection */}
       <div ref={tierRef}>

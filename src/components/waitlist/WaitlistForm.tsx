@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Check, Users, Crown, Zap, Gamepad2, Flame, ChevronDown } from "lucide-react";
+import { Loader2, Check, Users, Crown, Zap, Gamepad2, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,13 +38,13 @@ const tierIcons = {
   pro: Gamepad2,
 };
 
-// Progress messages for dopamine hits
+// Progress messages for dopamine hits (no emojis)
 const progressMessages = [
   { threshold: 0, message: "Let's get started..." },
-  { threshold: 25, message: "Great start! 🎮" },
-  { threshold: 50, message: "Halfway there! 🔥" },
-  { threshold: 75, message: "Almost done! 🚀" },
-  { threshold: 100, message: "Ready to go! 🎉" },
+  { threshold: 25, message: "Great start!" },
+  { threshold: 50, message: "Halfway there!" },
+  { threshold: 75, message: "Almost done!" },
+  { threshold: 100, message: "Ready to go!" },
 ];
 
 export function WaitlistForm({
@@ -52,7 +52,7 @@ export function WaitlistForm({
   onSubmit,
   isSubmitting,
   onScrollToTiers,
-  spotsRemaining = 247,
+  spotsRemaining = 250,
 }: WaitlistFormProps) {
   const isMobile = useIsMobile();
   const [showOptional, setShowOptional] = useState(false);
@@ -320,7 +320,7 @@ export function WaitlistForm({
                 htmlFor="tradeInInterest"
                 className="text-foreground cursor-pointer text-sm"
               >
-                💰 YES! Check my PC for a bonus discount
+                Check my PC for a bonus discount
               </Label>
             </div>
 
@@ -337,7 +337,7 @@ export function WaitlistForm({
                 htmlFor="mailingListOptIn"
                 className="text-foreground cursor-pointer text-sm"
               >
-                🎮 Send me exclusive gaming deals + early access
+                Send me exclusive gaming deals + early access
               </Label>
             </div>
           </div>
@@ -404,16 +404,15 @@ export function WaitlistForm({
             </AnimatePresence>
           </div>
 
-          {/* Scarcity reminder near submit */}
+          {/* Spots remaining reminder near submit */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
             className="flex items-center justify-center gap-2 py-2 text-sm"
           >
-            <Flame className="w-4 h-4 text-destructive animate-pulse" />
             <span className="text-muted-foreground">
-              <span className="text-destructive font-semibold">{spotsRemaining}</span> spots remaining — Lock yours now
+              <span className="text-foreground font-semibold">{spotsRemaining}</span> spots remaining
             </span>
           </motion.div>
 
@@ -441,12 +440,12 @@ export function WaitlistForm({
                 </span>
               ) : !selectedTier ? (
                 <span className="flex flex-col items-center">
-                  <span>↑ Select a tier first</span>
+                  <span>Select a tier first</span>
                 </span>
               ) : (
                 <span className="flex flex-col items-center">
-                  <span>🎮 CLAIM MY 10% DISCOUNT</span>
-                  <span className="text-sm opacity-80 font-normal">Lock in my spot now →</span>
+                  <span>Reserve My Spot</span>
+                  <span className="text-sm opacity-80 font-normal">10% discount included</span>
                 </span>
               )}
 
@@ -462,12 +461,12 @@ export function WaitlistForm({
         </form>
       </motion.div>
 
-      {/* Sticky mobile submit button with pulse */}
+      {/* Sticky mobile submit button */}
       {isMobile && (
         <motion.div
           initial={{ y: 100 }}
           animate={{ y: 0 }}
-          className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t border-border z-40 sticky-pulse"
+          className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t border-border z-40"
         >
           <motion.button
             type={selectedTier ? "submit" : "button"}
@@ -487,9 +486,9 @@ export function WaitlistForm({
                 Joining...
               </span>
             ) : !selectedTier ? (
-              <span>↑ Select a tier first</span>
+              <span>Select a tier first</span>
             ) : (
-              <span>🎮 CLAIM MY 10% DISCOUNT</span>
+              <span>Reserve My Spot</span>
             )}
           </motion.button>
         </motion.div>
