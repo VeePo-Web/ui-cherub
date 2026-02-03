@@ -71,6 +71,8 @@ export function TierCard({
     <motion.button
       type="button"
       onClick={onSelect}
+      aria-pressed={isSelected}
+      aria-label={`Select ${name} tier: ${tagline}`}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
