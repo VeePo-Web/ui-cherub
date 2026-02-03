@@ -15,11 +15,17 @@ export default function Waitlist() {
     firstName: string;
     queuePosition: number;
     couponCode: string;
+    selectedTier: string;
   } | null>(null);
 
+  const tierRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const { submitWaitlist, isSubmitting } = useWaitlistSubmit();
   const { toast } = useToast();
+
+  const scrollToTiers = () => {
+    tierRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -41,6 +47,7 @@ export default function Waitlist() {
         firstName: result.firstName || data.firstName,
         queuePosition: result.queuePosition || 1,
         couponCode: result.couponCode || "EARLY10",
+        selectedTier: data.preferredTier,
       });
       setShowThankYou(true);
     } else {
@@ -55,10 +62,12 @@ export default function Waitlist() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero section */}
-      <WaitlistHero onScrollToForm={scrollToForm} />
+      <WaitlistHero onScrollToTiers={scrollToTiers} />
 
       {/* Tier selection */}
-      <TierSelector selectedTier={selectedTier} onSelectTier={handleTierSelect} />
+      <div ref={tierRef}>
+        <TierSelector selectedTier={selectedTier} onSelectTier={handleTierSelect} />
+      </div>
 
       {/* Form section with ref for scrolling */}
       <div ref={formRef}>
@@ -66,6 +75,7 @@ export default function Waitlist() {
           selectedTier={selectedTier}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
+          onScrollToTiers={scrollToTiers}
         />
       </div>
 
@@ -90,6 +100,7 @@ export default function Waitlist() {
           firstName={signupData.firstName}
           queuePosition={signupData.queuePosition}
           couponCode={signupData.couponCode}
+          selectedTier={signupData.selectedTier}
         />
       )}
     </div>

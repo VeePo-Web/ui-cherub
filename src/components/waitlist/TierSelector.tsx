@@ -7,6 +7,20 @@ interface TierSelectorProps {
   onSelectTier: (tier: "ludacris" | "esports" | "pro") => void;
 }
 
+// Custom CTAs for each tier
+const tierCtas: Record<string, string> = {
+  ludacris: "Choose Ludacris Mode",
+  esports: "Lock in Esports",
+  pro: "Go Pro",
+};
+
+// Placeholder specs URLs (to be provided by client)
+const tierSpecsUrls: Record<string, string> = {
+  ludacris: "#", // Replace with actual PCPartPicker URL
+  esports: "#",  // Replace with actual PCPartPicker URL
+  pro: "#",      // Replace with actual PCPartPicker URL
+};
+
 export function TierSelector({ selectedTier, onSelectTier }: TierSelectorProps) {
   return (
     <section className="py-20 px-6">
@@ -42,6 +56,9 @@ export function TierSelector({ selectedTier, onSelectTier }: TierSelectorProps) 
               onSelect={() => onSelectTier(tier.id)}
               index={index}
               hasSelection={selectedTier !== null}
+              isPopular={tier.id === "esports"}
+              specsUrl={tierSpecsUrls[tier.id]}
+              selectCta={tierCtas[tier.id]}
             />
           ))}
         </div>
