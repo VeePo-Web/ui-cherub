@@ -1,10 +1,8 @@
-import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Copy, Check, Twitter, Facebook, Link2, Gamepad2, Mail, Phone, Trophy, MessageSquare } from "lucide-react";
+import { X, Copy, Check, Gamepad2, Mail, Phone, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ReferralLadder } from "./ReferralLadder";
 import { SaveCodeActions } from "./SaveCodeActions";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "@/components/ui/separator";
 
 interface ThankYouModalProps {
@@ -29,9 +27,8 @@ export function ThankYouModal({
   email,
 }: ThankYouModalProps) {
   const [copied, setCopied] = useState(false);
-  const [displayPosition, setDisplayPosition] = useState(1); // Start at 1 to avoid showing #0
+  const [displayPosition, setDisplayPosition] = useState(1);
   const [showConfetti, setShowConfetti] = useState(false);
-  const isMobile = useIsMobile();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check for reduced motion preference
@@ -107,48 +104,6 @@ export function ThankYouModal({
       console.error("Failed to copy:", err);
     }
   }, [couponCode]);
-
-  // Memoize share URL
-  const shareUrl = useMemo(
-    () => typeof window !== "undefined" ? window.location.href : "",
-    []
-  );
-  
-  // Memoize share text
-  const shareText = useMemo(() => {
-    const tierName = selectedTier 
-      ? selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1) 
-      : "";
-    return selectedTier
-      ? `I just locked in the ${tierName} tier for a gaming PC subscription! I'm #${queuePosition} in line for Calgary. Get 10% off your first 3 months with code ${couponCode}!`
-      : `I just joined the waitlist for a gaming PC subscription! Get 10% off your first 3 months with code ${couponCode}!`;
-  }, [selectedTier, queuePosition, couponCode]);
-
-  const handleSMSShare = useCallback(() => {
-    window.open(`sms:?body=${encodeURIComponent(shareText)}`, "_self");
-  }, [shareText]);
-
-  const handleTwitterShare = useCallback(() => {
-    window.open(
-      `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
-      "_blank"
-    );
-  }, [shareText, shareUrl]);
-
-  const handleFacebookShare = useCallback(() => {
-    window.open(
-      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
-      "_blank"
-    );
-  }, [shareUrl]);
-
-  const handleCopyLink = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(`${shareUrl}?ref=${couponCode}`);
-    } catch (err) {
-      console.error("Failed to copy link:", err);
-    }
-  }, [shareUrl, couponCode]);
 
   // Calculate percentile for dopamine hit
   const percentile = Math.min(99, Math.floor((1 - (queuePosition / 500)) * 100));
@@ -259,7 +214,7 @@ export function ThankYouModal({
               </motion.div>
             </motion.div>
 
-            {/* Coupon box - UPDATED: clarify first 3 months */}
+            {/* Coupon box */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -291,13 +246,12 @@ export function ThankYouModal({
                     )}
                   </button>
                 </div>
-                {/* Bonus urgency - UPDATED: clarify validity */}
                 <p className="text-xs text-muted-foreground mt-2">
                   Valid for your first 3 months. First 100 users get an extra 5% at launch!
                 </p>
               </div>
               
-              {/* Save code actions - NEW */}
+              {/* Save code actions */}
               {email && (
                 <SaveCodeActions
                   couponCode={couponCode}
@@ -317,7 +271,6 @@ export function ThankYouModal({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="mb-4"
             >
               <p className="text-xs text-muted-foreground uppercase tracking-wider text-center mb-3">
                 What happens next
@@ -378,54 +331,6 @@ export function ThankYouModal({
                   </div>
                   <span className="text-muted-foreground">First access + 10% off (first 3 months) guaranteed</span>
                 </motion.div>
-              </div>
-            </motion.div>
-            
-            <Separator className="my-4" />
-
-            {/* Referral ladder */}
-            <ReferralLadder couponCode={couponCode} queuePosition={queuePosition} />
-
-            {/* Quick share buttons - ENHANCED with SMS */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="mt-4 text-center"
-            >
-              <p className="text-xs text-muted-foreground mb-3">Quick share</p>
-              <div className="flex items-center justify-center gap-3">
-                <button
-                  onClick={handleTwitterShare}
-                  className="p-3 rounded-xl bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-all hover:scale-105 min-w-[44px] min-h-[44px]"
-                  aria-label="Share on Twitter/X"
-                >
-                  <Twitter className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={handleFacebookShare}
-                  className="p-3 rounded-xl bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-all hover:scale-105 min-w-[44px] min-h-[44px]"
-                  aria-label="Share on Facebook"
-                >
-                  <Facebook className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={handleCopyLink}
-                  className="p-3 rounded-xl bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-all hover:scale-105 min-w-[44px] min-h-[44px]"
-                  aria-label="Copy share link"
-                >
-                  <Link2 className="w-5 h-5" />
-                </button>
-                {/* SMS Share - primarily for mobile but available on all */}
-                {isMobile && (
-                  <button
-                    onClick={handleSMSShare}
-                    className="p-3 rounded-xl bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-all hover:scale-105 min-w-[44px] min-h-[44px]"
-                    aria-label="Share via SMS"
-                  >
-                    <MessageSquare className="w-5 h-5" />
-                  </button>
-                )}
               </div>
             </motion.div>
           </motion.div>
