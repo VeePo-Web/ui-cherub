@@ -32,19 +32,21 @@ export function HowItWorksCTA() {
             Lock your upgrade window and early-access pricing.
           </p>
 
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Button asChild size="lg" className="glow-pulse px-8 py-6 text-base">
-              <Link to="/#waitlist-form">
-                <span className="flex flex-col items-center gap-1">
-                  <span>be the first to know when we launch in your area</span>
-                  <span className="text-sm opacity-80">10% discount first three months</span>
-                </span>
-              </Link>
-            </Button>
-          </motion.div>
+          <div className="flex flex-col items-center gap-3">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button asChild size="lg" className="glow-pulse px-8 py-4 text-lg font-semibold">
+                <Link to="/#waitlist-form">
+                  Join the Waitlist
+                </Link>
+              </Button>
+            </motion.div>
+            <span className="text-sm text-muted-foreground">
+              10% off your first 3 months
+            </span>
+          </div>
         </motion.div>
       </div>
     </section>
