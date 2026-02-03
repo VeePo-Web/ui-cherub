@@ -31,7 +31,7 @@ const faqs = [
 
 export function MicroFAQs() {
   return (
-    <section className="py-20 px-6">
+    <section className="py-24 md:py-32 px-6">
       <div className="max-w-3xl mx-auto">
         {/* Section header */}
         <motion.div
@@ -39,11 +39,14 @@ export function MicroFAQs() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-            Micro-FAQs
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
+            Quick answers
           </h2>
+          <p className="text-muted-foreground mt-4 text-lg">
+            Common questions, straight talk
+          </p>
         </motion.div>
 
         {/* Accordion */}
@@ -55,18 +58,25 @@ export function MicroFAQs() {
         >
           <Accordion type="single" collapsible className="space-y-4">
             {faqs.map((faq, index) => (
-              <AccordionItem
+              <motion.div
                 key={index}
-                value={`item-${index}`}
-                className="bg-card/30 border border-border rounded-xl px-6 overflow-hidden"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 * index }}
               >
-                <AccordionTrigger className="text-left text-foreground hover:text-primary hover:no-underline py-5">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground pb-5">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
+                <AccordionItem
+                  value={`item-${index}`}
+                  className="glass-card border border-border/50 rounded-2xl px-6 overflow-hidden data-[state=open]:border-primary/30 data-[state=open]:shadow-[0_0_30px_-10px_hsl(var(--primary)/0.3)] transition-all duration-300"
+                >
+                  <AccordionTrigger className="text-left text-foreground hover:text-primary hover:no-underline py-6 text-base md:text-lg font-medium [&[data-state=open]>svg]:rotate-180 [&>svg]:transition-transform [&>svg]:duration-300">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pb-6 text-base leading-relaxed">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              </motion.div>
             ))}
           </Accordion>
         </motion.div>
