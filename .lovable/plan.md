@@ -1,527 +1,588 @@
 
-# How It Works Page — Comprehensive Design & Implementation Plan
+
+# World-Class Thank You Page — Comprehensive Design & Implementation Plan
 
 ---
 
 ## Executive Summary
 
-This plan outlines the creation of a new standalone "How It Works" page that explains the gaming PC subscription service in depth. The page will follow Fantasy.co's design philosophy while maintaining visual consistency with the existing waitlist page. It will serve as an educational/trust-building resource that guides visitors through the service model before they join the waitlist.
+This plan transforms the existing Thank You modal into a world-class post-signup experience that maximizes referral conversions, builds lasting brand affinity, and clearly communicates the 10% discount terms. The design follows Fantasy.co's philosophy of sophisticated minimalism with purposeful micro-interactions.
 
 ---
 
-## 1. Information Architecture
+## Current State Analysis
 
-### 1.1 Page Sections (Narrative Flow)
+### What Exists Today
+- Modal-based thank you (350 lines in `ThankYouModal.tsx`)
+- Queue position display with animated counter
+- Confetti celebration effect
+- Coupon code with copy functionality
+- Referral ladder (1/3/5 referrals = rewards)
+- Social share buttons (Twitter, Facebook, copy link)
+- "What happens next" checklist
+- "You joined before X% of gamers" badge
 
-The page will unfold as a story, revealing information in logical chapters:
+### Identified Issues
+1. **10% discount clarity** — Not stated that it's for the first THREE months only
+2. **Form fields audit** — Need to verify all required fields are present
+3. **Code preservation** — No mechanism to save/export code for later use at launch
+4. **Visual hierarchy** — Modal is dense; could use better sectioning
+5. **Mobile scroll** — Long modal may require scrolling
+6. **Share incentive** — Referral benefits not compelling enough visually
+7. **Anxiety reduction** — "What happens next" could be more reassuring
 
-```text
-1. Hero Section          — "How It Works" headline + subhead
-2. Who It's For          — Qualify the reader, build empathy
-3. The Promise           — Plain English value prop
-4. The Three Steps       — Interactive step cards with tier preview
-5. What's Included       — Feature grid across all tiers
-6. Why This Beats Buying — Comparison section (us vs. retail)
-7. Roadmap               — Coming soon features
-8. The Experience        — Vision casting paragraph
-9. Micro-FAQs            — Accordion with common questions
-10. CTA Section          — Final push to waitlist
-11. Compliance Footer    — Legal fine print
-12. Footer               — Consistent with Waitlist page
-```
+### Form Fields Verification (CONFIRMED PRESENT)
+Checking `waitlist-validation.ts` and `WaitlistForm.tsx`:
+- Email (required)
+- First Name (required)
+- Last Name (required)
+- Preferred Tier (required)
+- Phone Number (optional, in collapsible section)
+- Budget Range (optional, in collapsible section)
+- Trade-in Interest (checkbox, pre-checked)
+- Mailing List Permission (checkbox, pre-checked)
 
-### 1.2 Page URL & Navigation
-
-- **Route**: `/how-it-works`
-- **Navigation**: Add link to site navigation (new simple nav component for this page)
-- The existing Navbar.tsx is designed for a different app (events platform) — will create a new lightweight nav specific to the waitlist/how-it-works pages
-
----
-
-## 2. Component Architecture
-
-### 2.1 New Files to Create
-
-```text
-src/pages/HowItWorks.tsx                    — Main page component
-src/components/howitworks/
-├── HowItWorksHero.tsx                      — Hero section
-├── WhoItsFor.tsx                           — Target audience section
-├── ThePromise.tsx                          — Value proposition section
-├── ThreeSteps.tsx                          — Interactive step cards
-├── HowItWorksTierPreview.tsx               — Mini tier cards for step 1
-├── WhatsIncluded.tsx                       — Feature grid
-├── ComparisonSection.tsx                   — Us vs. retail
-├── Roadmap.tsx                             — Coming soon features
-├── TheExperience.tsx                       — Vision casting
-├── MicroFAQs.tsx                           — Accordion FAQ
-├── HowItWorksCTA.tsx                       — Final CTA section
-├── HowItWorksNav.tsx                       — Simple floating nav
-└── ComplianceFooter.tsx                    — Legal text
-```
-
-### 2.2 Shared Components to Reuse
-
-From existing codebase:
-- `src/components/ui/accordion.tsx` — For FAQ section
-- `src/lib/utils.ts` — cn() utility
-- `src/lib/waitlist-validation.ts` — tierOptions data
-- Motion patterns from `WaitlistHero.tsx`
-- Color system from `index.css`
-- Trust badge pattern from `TrustBadges.tsx`
+**All requested fields are present and functional.**
 
 ---
 
-## 3. Detailed Section Designs
+## Design Philosophy for Thank You Page
 
-### 3.1 Hero Section — `HowItWorksHero.tsx`
+### Fantasy.co Principles Applied
+1. **Narrative arc** — The thank you experience tells a story: celebration, confirmation, then action
+2. **Generous white space** — Sections breathe; not cramped
+3. **Purposeful motion** — Every animation serves UX, not decoration
+4. **Premium feel** — Typography, spacing, and polish signal quality
+5. **Human-centered** — Personalization, clear next steps, reduced anxiety
 
-**Visual Design:**
-- Full-viewport hero with animated gradient background (reuse orb pattern from WaitlistHero)
-- Headline: "HOW IT WORKS" (uppercase, tracking-wide, primary color)
-- Subhead: "The competitive PC that just stays competitive."
-- Sub-subhead: "Annual upgrades, covered repairs (insurance required), and transparent builds—under one predictable monthly plan."
+### Psychological Objectives
+1. **Dopamine peak** — Celebratory moment confirms good decision
+2. **Commitment deepening** — Sharing increases psychological investment
+3. **Anxiety elimination** — Crystal clear on what happens next
+4. **Value reinforcement** — Remind them what they're getting
 
-**Micro-interactions:**
-- Staggered text reveal (existing pattern)
-- Subtle grid overlay
-- Scroll indicator at bottom
+---
 
-**Code Structure:**
-```tsx
-<section className="relative min-h-[80vh] flex flex-col items-center justify-center">
-  {/* Animated gradient background */}
-  {/* Grid pattern overlay */}
-  <div className="relative z-10 max-w-4xl mx-auto text-center px-6">
-    <motion.span className="text-sm uppercase tracking-widest text-primary">
-      HOW IT WORKS
-    </motion.span>
-    <motion.h1>The competitive PC that just stays competitive.</motion.h1>
-    <motion.p>Annual upgrades, covered repairs...</motion.p>
-  </div>
-</section>
-```
+## Detailed Design Specification
 
-### 3.2 Who It's For — `WhoItsFor.tsx`
+### Section 1: Celebration Header (Dopamine Moment)
 
 **Visual Design:**
-- Centered text block with generous margins
-- Section title: "Who it's for (read this if you value your time)"
-- Paragraph of empathy-building copy from the brief
+- Large animated icon (gamepad or checkmark with glow)
+- Personalized headline: "You're locked in, {firstName}!"
+- Queue position with animated counter: "You're #{position} in the Calgary queue"
+- Percentile badge: "You joined before {X}% of Calgary gamers"
 
-**Copy (exact from brief):**
-> "You want the performance, not the parts-hunt. You want stable frametimes, fast support, and to feel taken care of—with a spend that's predictable every month. You want to be the dependable teammate, not the friend reinstalling drivers on patch day."
+**Current State:** Exists, minimal changes needed
 
-**Micro-interactions:**
-- Fade-in on scroll
-- Subtle text highlight on keywords
+**Enhancement:**
+- Add subtle background gradient pulse on success
+- Make the gamepad icon have a brief "level up" glow animation
 
-### 3.3 The Promise — `ThePromise.tsx`
+---
+
+### Section 2: Discount Code (HIGH PRIORITY FIX)
+
+**Critical Update:** Clearly state the discount is for FIRST THREE MONTHS
 
 **Visual Design:**
-- Card-style container with subtle border
-- Section title: "The promise (in plain English)"
-- Copy from brief explaining scheduled upgrades, trigger-based refreshes, covered repairs
-
-**Layout:**
 ```text
 ┌────────────────────────────────────────────────────┐
-│  THE PROMISE (in plain English)                    │
+│  YOUR 10% DISCOUNT CODE                            │
 │                                                    │
-│  We keep your desktop current and reliable...     │
-│  (Insurance required.)                             │
+│  ┌──────────────────────────────────────────────┐  │
+│  │  EARLY10                          [COPY]     │  │
+│  └──────────────────────────────────────────────┘  │
+│                                                    │
+│  Valid for your first 3 months of subscription    │
+│  Save this code — you'll need it at launch        │
 └────────────────────────────────────────────────────┘
 ```
 
-### 3.4 The Three Steps — `ThreeSteps.tsx`
-
-**Visual Design:**
-- Numbered step cards in a vertical timeline layout
-- Each step has:
-  - Number badge (1, 2, 3)
-  - Title
-  - Description
-  - Interactive element or visual
-
-**Step 1: Pick your performance tier**
-- Mini tier preview cards (clickable, link to waitlist)
-- Each card shows: tier name, tagline, "See exact parts via public list" link, "(Monthly subscription: TBD.)"
-- Footer text: "Transparency is a feature: every tier maps to a live PCPartPicker build so you know what's inside before you join."
-
-**Step 2: Join the competitive waitlist**
-- Description about locking launch window
-- CTA button: "be the first to know when we launch in your area" with "10% discount first three months" subtitle
-- Links to waitlist page scroll-to-form
-
-**Step 3: Delivery & care**
-- Description about prep, verify, handover
-- Icons for: annual upgrades, interim refreshes, covered repairs
-
 **Micro-interactions:**
-- Step cards animate in sequentially on scroll
-- Hover lift on step cards
-- Tier preview cards have same tactile feel as main tier cards (but smaller)
+- Dashed border with primary color
+- Copy button turns green with checkmark on success
+- Brief confetti burst from code on first view
 
-### 3.5 Mini Tier Preview — `HowItWorksTierPreview.tsx`
+**Code Preservation Feature:**
+- Add "Email my code" button (triggers existing email if not sent)
+- Add "Save to Calendar" button (creates .ics download with launch reminder)
+- Add "Screenshot reminder" tooltip on mobile
+
+---
+
+### Section 3: Code Preservation / Save for Launch (NEW)
+
+**Purpose:** Ensure users don't lose their discount code before launch
 
 **Visual Design:**
-- Compact version of TierCard
-- Three cards side by side
-- Crown/Zap/Gamepad2 icons
-- Tier name, tagline
-- "See exact parts" link (opens PCPartPicker in new tab — placeholder # for now)
-- "Monthly subscription: TBD" text
-
-**Layout:**
 ```text
-┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-│ 👑 Ludacris     │ │ ⚡ Esports      │ │ 🎮 Pro          │
-│ Peak Gaming...  │ │ Competition...  │ │ AAA-Title...    │
-│ See exact parts │ │ See exact parts │ │ See exact parts │
-│ TBD/mo          │ │ TBD/mo          │ │ TBD/mo          │
-└─────────────────┘ └─────────────────┘ └─────────────────┘
+┌────────────────────────────────────────────────────┐
+│  SAVE YOUR CODE FOR LAUNCH                         │
+│                                                    │
+│  [Email My Code]    [Add to Calendar]              │
+│                                                    │
+│  Or screenshot this page — we'll also email you   │
+│  a reminder when Calgary goes live                 │
+└────────────────────────────────────────────────────┘
 ```
 
-### 3.6 What's Included — `WhatsIncluded.tsx`
+**Implementation Details:**
+- "Email My Code" — Retriggers confirmation email edge function
+- "Add to Calendar" — Generates .ics file with:
+  - Event title: "Gaming PC Subscription - Calgary Launch (Use Code: {CODE})"
+  - Date: 3 months from now (placeholder)
+  - Description: Discount code, queue position, tier selected
+  - Reminder: 1 day before
 
-**Visual Design:**
-- Feature grid with icons
-- 4 items in 2x2 grid on mobile, 4 columns on desktop
+---
 
-**Features:**
-1. Annual upgrade plan (with interim refresh triggers tied to major releases)
-2. Covered repairs with fast turnaround (Insurance required)
-3. Public parts lists (model numbers visible)
-4. Planned trade-in path to simplify moving up a tier
+### Section 4: What Happens Next (Enhanced)
 
-**Icons:** RefreshCw, Shield, FileCheck, ArrowUpCircle
+**Visual Design:** Vertical timeline with visual checkmarks/dots
 
-**Layout:**
 ```text
-┌─────────────┬─────────────┐
-│ 🔄 Annual   │ 🛡️ Covered  │
-│   upgrade   │   repairs   │
-├─────────────┼─────────────┤
-│ 📋 Public   │ ↗️ Trade-in │
-│   parts     │   path      │
-└─────────────┴─────────────┘
+┌────────────────────────────────────────────────────┐
+│  WHAT HAPPENS NEXT                                 │
+│                                                    │
+│  ✓ You're on the list!                            │
+│  │                                                 │
+│  ○ Check your email (confirmation incoming)       │
+│  │                                                 │
+│  ○ We'll text you when Calgary goes live          │
+│  │                                                 │
+│  ○ First access + 10% off (3 months) guaranteed   │
+└────────────────────────────────────────────────────┘
 ```
 
-### 3.7 Why This Beats Buying — `ComparisonSection.tsx`
+**Current State:** Exists, just needs copy update for "3 months" clarity
 
-**Visual Design:**
-- Two-column comparison layout
-- Left: "Retail" (pain points)
-- Right: "This plan" (solutions)
-- Clear visual distinction (muted vs. primary colors)
+**Enhancement:**
+- Add connecting lines between steps
+- Animate steps in sequentially
+- First step is green (complete), others are pending
 
-**Content from brief:**
-- Retail: "You shoulder upgrade timing, resale, repair costs, and downtime."
-- This plan: "We publish the parts, schedule the upgrade, and cover repairs under one monthly line item—local, transparent, performance-first."
+---
 
-**Bottom note:**
-> "We avoid 'lease,' 'rental,' and 'finance' language on purpose—this is a clarity-first model built around performance, trust, and ease."
+### Section 5: Referral Ladder (Enhanced)
 
-**Layout:**
+**Visual Design:** More visually compelling tier progression
+
 ```text
-┌────────────────────┬────────────────────┐
-│    RETAIL          │   THIS PLAN        │
-│    (muted)         │   (highlighted)    │
-├────────────────────┼────────────────────┤
-│ • You shoulder...  │ • We publish...    │
-│ • Upgrade timing   │ • Schedule upgrade │
-│ • Resale           │ • Cover repairs    │
-│ • Repair costs     │ • One monthly line │
-│ • Downtime         │ • Zero downtime    │
-└────────────────────┴────────────────────┘
+┌────────────────────────────────────────────────────┐
+│  MOVE UP THE QUEUE                                 │
+│                                                    │
+│  You're behind {X} people in line                  │
+│  Share to jump ahead!                              │
+│                                                    │
+│  ┌────────────────────────────────────────┐       │
+│  │ 1 referral        → Jump 10 spots      │       │
+│  ├────────────────────────────────────────┤       │
+│  │ 3 referrals       → Jump 50 spots      │       │
+│  ├────────────────────────────────────────┤       │
+│  │ 5 referrals       → VIP Beta Access    │ ★     │
+│  └────────────────────────────────────────┘       │
+│                                                    │
+│  Your referral link:                               │
+│  [https://...?ref=EARLY10        ] [Copy]         │
+└────────────────────────────────────────────────────┘
 ```
 
-### 3.8 Roadmap — `Roadmap.tsx`
+**Current State:** Exists, functional
+
+**Enhancement:**
+- Add progress bar toward next tier (0/1, 1/3, 3/5)
+- Highlight VIP tier more prominently
+- Add tooltip explaining VIP Beta Access benefits
+
+---
+
+### Section 6: Quick Share (Enhanced)
 
 **Visual Design:**
-- Vertical timeline with "Coming Soon" items
-- Each item has icon, title, description
+```text
+┌────────────────────────────────────────────────────┐
+│  QUICK SHARE                                       │
+│                                                    │
+│  [Twitter/X]  [Facebook]  [Copy Link]  [SMS]      │
+└────────────────────────────────────────────────────┘
+```
 
-**Items:**
-1. Benchmarks & flagship games — FPS/frametime examples
-2. Spec Integrity Ledger — public change-log
-3. Referral & queue position — ways to move up
-4. Community flywheel — esports tournaments
+**Enhancement:**
+- Add SMS share button for mobile
+- Pre-filled share text includes:
+  - Tier selected
+  - Queue position
+  - Referral code
+  - Clear "first 3 months" language
 
-**Micro-interactions:**
-- Items fade in sequentially
-- Pulsing indicator on first item ("Coming soon")
+**Share Text Update:**
+```
+"I just locked in the {Tier} tier for a gaming PC subscription! 
+I'm #{position} in line for Calgary. 
+Use code {CODE} for 10% off your first 3 months!"
+```
 
-### 3.9 The Experience — `TheExperience.tsx`
+---
 
-**Visual Design:**
-- Large quote-style text block
-- Centered, with generous padding
-- Italic or different font weight for emphasis
+## Technical Implementation Plan
 
-**Copy (exact from brief):**
-> "From first click to first game, the experience should feel effortless. Minimal decisions. Clear promises. Human support that speaks 'gamer.' Your job is to play; our job is to keep you current—without drama, delays, or driver roulette."
+### Phase 1: Critical Copy Fixes (Priority 0)
 
-### 3.10 Micro-FAQs — `MicroFAQs.tsx`
+**File:** `src/components/waitlist/ThankYouModal.tsx`
 
-**Visual Design:**
-- Accordion component (reuse existing)
-- Minimal styling, consistent with page aesthetic
-- 4 questions from brief
+1. Update coupon label text:
+   - Change: "Your 10% discount code"
+   - To: "Your 10% discount code (first 3 months)"
 
-**Questions:**
-1. Is this a lease or rental?
-2. Will I know the exact parts?
-3. What if a part fails?
-4. Do you publish benchmarks?
+2. Update share text variable:
+   - Add "first 3 months" to shareText
 
-**Answers:** Exact copy from brief
+3. Update "What happens next" last step:
+   - Change: "First access + 10% off guaranteed"
+   - To: "First access + 10% off your first 3 months guaranteed"
 
-### 3.11 CTA Section — `HowItWorksCTA.tsx`
+---
 
-**Visual Design:**
-- Full-width section with gradient background
-- Headline: "Join the waitlist"
-- Subhead: "Lock your upgrade window and early-access pricing."
-- CTA button: "be the first to know when we launch in your area" with "10% discount first three months"
-- Links to waitlist page (or scrolls to form if same-page)
+### Phase 2: Code Preservation Feature (Priority 1)
 
-**Micro-interactions:**
-- Button glow-pulse animation
-- Hover scale
+**New Sub-Component:** `SaveCodeActions.tsx`
 
-### 3.12 Navigation — `HowItWorksNav.tsx`
+```tsx
+interface SaveCodeActionsProps {
+  couponCode: string;
+  email: string;
+  queuePosition: number;
+  selectedTier: string;
+  onResendEmail: () => void;
+}
+```
 
-**Visual Design:**
-- Fixed position top-left (consistent with existing Navbar position)
-- Minimal design: logo + "Home" + "How It Works" + "Join Waitlist"
-- Mobile hamburger menu
+**Functionality:**
+1. "Email My Code" button
+   - Calls existing edge function to resend confirmation
+   - Shows "Sent!" confirmation state
 
-**Layout:**
+2. "Add to Calendar" button
+   - Generates ICS file with:
+     - Summary: "Gaming PC Subscription Launch"
+     - Description: Code, position, tier
+     - DTSTART: 3 months from signup
+     - VALARM: 1 day before
+   - Triggers download
+
+**Files to Create:**
+- `src/components/waitlist/SaveCodeActions.tsx`
+- `src/lib/calendar-utils.ts` (ICS generation)
+
+---
+
+### Phase 3: Visual Enhancements (Priority 2)
+
+**File:** `src/components/waitlist/ThankYouModal.tsx`
+
+1. Add section dividers between content blocks
+2. Improve timeline connecting lines in "What happens next"
+3. Add subtle background gradient animation
+4. Improve mobile scroll behavior (max-height with overflow)
+
+**File:** `src/index.css`
+
+Add new animations:
+- `@keyframes success-glow` for icon pulse
+- `@keyframes timeline-progress` for step reveals
+
+---
+
+### Phase 4: Enhanced Referral UX (Priority 3)
+
+**File:** `src/components/waitlist/ReferralLadder.tsx`
+
+1. Add progress indicator toward next tier
+2. Improve VIP tier visual prominence
+3. Add SMS share option for mobile
+
+---
+
+## File Structure Summary
+
+### Files to Modify
+1. `src/components/waitlist/ThankYouModal.tsx` — Main updates
+2. `src/components/waitlist/ReferralLadder.tsx` — Progress indicator
+3. `src/index.css` — New animations
+4. `src/pages/Waitlist.tsx` — Pass email to ThankYouModal for resend
+
+### New Files to Create
+1. `src/components/waitlist/SaveCodeActions.tsx` — Email/Calendar buttons
+2. `src/lib/calendar-utils.ts` — ICS file generation utility
+
+---
+
+## Copy Updates (Exact Changes)
+
+### ThankYouModal.tsx Line ~239
+```diff
+- Your 10% discount code
++ Your 10% discount code (first 3 months)
+```
+
+### ThankYouModal.tsx Line ~265
+```diff
+- First 100 users get extra 5% at launch!
++ Valid for your first 3 months of subscription. First 100 users get an extra 5% at launch!
+```
+
+### ThankYouModal.tsx Line ~305
+```diff
+- First access + 10% off guaranteed
++ First access + 10% off (first 3 months) guaranteed
+```
+
+### ThankYouModal.tsx Line ~97-98 (shareText)
+```diff
+- `I just locked in the ${tierName} tier for a gaming PC subscription! I'm #${queuePosition} in line. Get 10% off with code ${couponCode}`
++ `I just locked in the ${tierName} tier for a gaming PC subscription! I'm #${queuePosition} in line. Get 10% off your first 3 months with code ${couponCode}`
+```
+
+---
+
+## Calendar ICS Utility
+
+**File:** `src/lib/calendar-utils.ts`
+
+```typescript
+export function generateLaunchReminderICS(params: {
+  couponCode: string;
+  queuePosition: number;
+  selectedTier: string;
+  email: string;
+}): string {
+  // Calculate date 3 months from now
+  const launchDate = new Date();
+  launchDate.setMonth(launchDate.getMonth() + 3);
+  
+  const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Gaming PC Subscription//EN
+BEGIN:VEVENT
+DTSTART:${formatICSDate(launchDate)}
+DTEND:${formatICSDate(launchDate)}
+SUMMARY:Gaming PC Subscription - Calgary Launch
+DESCRIPTION:Your discount code: ${params.couponCode}\\nQueue position: #${params.queuePosition}\\nTier: ${params.selectedTier}\\n\\nUse this code for 10% off your first 3 months!
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:Gaming PC Subscription launches tomorrow!
+END:VALARM
+END:VEVENT
+END:VCALENDAR`;
+
+  return icsContent;
+}
+
+export function downloadICS(content: string, filename: string): void {
+  const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+}
+```
+
+---
+
+## Mobile Considerations
+
+1. **Max Height:** Modal should not exceed 90vh; use overflow-y-auto
+2. **Touch Targets:** All buttons minimum 44px
+3. **SMS Share:** Add native SMS share on mobile devices
+4. **Screenshot Prompt:** Subtle reminder to screenshot on mobile
+5. **Reduced Motion:** Respect prefers-reduced-motion for all animations
+
+---
+
+## Accessibility Checklist
+
+1. Focus trap inside modal
+2. Escape key closes modal
+3. Aria-labelledby for modal title
+4. Aria-describedby for modal description
+5. Visible focus indicators on all interactive elements
+6. Screen reader announces "Code copied" on copy action
+7. All icons have aria-labels or aria-hidden as appropriate
+
+---
+
+## Success Criteria
+
+1. Discount code clearly states "first 3 months" in 3+ locations
+2. Calendar download works on all devices
+3. Email resend triggers successfully
+4. Share text includes "first 3 months" language
+5. Mobile modal scrolls smoothly without layout issues
+6. All animations respect reduced motion preferences
+7. Referral link copies correctly with user's unique code
+8. Zero accessibility violations (axe audit)
+
+---
+
+## Implementation Order
+
+1. Copy updates (10% → "10% off first 3 months") — 15 min
+2. Create calendar utility (`src/lib/calendar-utils.ts`) — 20 min
+3. Create SaveCodeActions component — 30 min
+4. Integrate SaveCodeActions into ThankYouModal — 15 min
+5. Update share text across modal — 10 min
+6. Add SMS share button for mobile — 15 min
+7. Visual polish (animations, spacing) — 30 min
+8. Mobile scroll optimization — 15 min
+9. Accessibility audit and fixes — 20 min
+10. Testing on mobile devices — 15 min
+
+**Total Estimated Time:** ~3 hours
+
+---
+
+## Visual Mockup (ASCII)
+
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│  [Logo]  HOME  HOW IT WORKS  [JOIN WAITLIST - highlighted]  │
+│                                              [X]            │
+│                                                             │
+│                    ┌─────────────┐                          │
+│                    │   🎮 GLOW   │                          │
+│                    └─────────────┘                          │
+│                                                             │
+│              You're locked in, Casey!                       │
+│                                                             │
+│           You're #42 in the Calgary queue                   │
+│                                                             │
+│     ┌─────────────────────────────────────────────┐         │
+│     │  🏆 You joined before 89% of Calgary gamers │         │
+│     └─────────────────────────────────────────────┘         │
+│                                                             │
+│─────────────────────────────────────────────────────────────│
+│                                                             │
+│            YOUR 10% DISCOUNT CODE (first 3 months)          │
+│                                                             │
+│     ┌─────────────────────────────────────────┐             │
+│     │  EARLY10                      [COPY]    │             │
+│     └─────────────────────────────────────────┘             │
+│                                                             │
+│     Valid for your first 3 months of subscription           │
+│                                                             │
+│     [ Email My Code ]    [ Add to Calendar ]                │
+│                                                             │
+│─────────────────────────────────────────────────────────────│
+│                                                             │
+│                    WHAT HAPPENS NEXT                        │
+│                                                             │
+│     ✓ You're on the list!                                  │
+│     │                                                       │
+│     ○ Check your email (confirmation incoming)              │
+│     │                                                       │
+│     ○ We'll text you when Calgary goes live                 │
+│     │                                                       │
+│     ○ First access + 10% off (first 3 months) guaranteed    │
+│                                                             │
+│─────────────────────────────────────────────────────────────│
+│                                                             │
+│                    MOVE UP THE QUEUE                        │
+│                                                             │
+│     You're behind 41 people in line                         │
+│     Share to jump ahead!                                    │
+│                                                             │
+│     ┌─────────────────────────────────────────┐             │
+│     │ 1 referral  ──────────────  Jump 10     │             │
+│     │ 3 referrals ──────────────  Jump 50     │             │
+│     │ 5 referrals ──────────────  VIP Beta ★  │             │
+│     └─────────────────────────────────────────┘             │
+│                                                             │
+│     Your referral link:                                     │
+│     [ https://...?ref=EARLY10           ] [Copy]            │
+│                                                             │
+│─────────────────────────────────────────────────────────────│
+│                                                             │
+│                      QUICK SHARE                            │
+│                                                             │
+│         [X/Twitter]  [Facebook]  [Copy]  [SMS]              │
+│                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 3.13 Compliance Footer — `ComplianceFooter.tsx`
+---
 
-**Visual Design:**
-- Small text, muted color
-- Legal copy from brief about repairs, insurance, upgrades
+## Edge Cases Handled
+
+1. **Email already sent** — "Email My Code" changes to "Resend Email"
+2. **Queue position = 1** — "You're first in line!" instead of "behind 0 people"
+3. **No tier selected** — Fallback to generic messaging
+4. **Copy fails** — Graceful fallback with manual select prompt
+5. **Calendar download blocked** — Show manual instructions
+6. **Very long queue position** — Abbreviate (e.g., "1.2K" for 1,234)
 
 ---
 
-## 4. Technical Implementation Details
-
-### 4.1 Route Setup
-
-Update `src/App.tsx`:
-```tsx
-import HowItWorks from "./pages/HowItWorks";
-
-<Route path="/how-it-works" element={<HowItWorks />} />
-```
-
-### 4.2 SEO Integration
-
-Create SEO component with meta from brief:
-```tsx
-<Helmet>
-  <title>How It Works — Always-current gaming performance with yearly upgrades & covered repairs (Calgary)</title>
-  <meta name="description" content="See how our three-tier monthly plan keeps your desktop competitive..." />
-  {/* JSON-LD schema from brief */}
-</Helmet>
-```
-
-### 4.3 Schema Markup
-
-Add HowTo schema from brief as JSON-LD script tag
-
-### 4.4 Shared State
-
-- `useActualSpotsRemaining` hook can be reused for scarcity counter
-- Tier data from `waitlist-validation.ts`
-
-### 4.5 Cross-Page Navigation
-
-- "Join Waitlist" button in nav links to `/` (waitlist page)
-- Step 2 CTA links to `/?scrollTo=form` or uses React Router navigation with state
-- Consider using `Link` from react-router-dom with scroll behavior
-
----
-
-## 5. Animation & Micro-Interaction Specifications
-
-### 5.1 Scroll Animations
-
-All sections use `whileInView` from Framer Motion:
-```tsx
-initial={{ opacity: 0, y: 30 }}
-whileInView={{ opacity: 1, y: 0 }}
-viewport={{ once: true }}
-transition={{ duration: 0.6 }}
-```
-
-### 5.2 Stagger Delays
-
-For lists/grids, stagger children:
-```tsx
-transition={{ duration: 0.5, delay: index * 0.1 }}
-```
-
-### 5.3 Hover States
-
-All interactive elements:
-- Cards: `whileHover={{ scale: 1.02, y: -4 }}`
-- Buttons: `whileHover={{ scale: 1.02 }}`
-- Links: underline on hover
-
-### 5.4 Reduced Motion
-
-Respect `prefers-reduced-motion`:
-```tsx
-const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-```
-
----
-
-## 6. Mobile Responsiveness
-
-### 6.1 Breakpoint Strategy
-
-- Mobile-first approach
-- `sm:` (640px) — Minor adjustments
-- `md:` (768px) — Two-column layouts
-- `lg:` (1024px) — Full desktop layouts
-
-### 6.2 Mobile-Specific Considerations
-
-- Single-column layouts by default
-- Larger touch targets (min 44px)
-- Sticky CTA at bottom on mobile
-- Collapsible sections for long content
-- Reduced animation complexity
-
----
-
-## 7. Accessibility Requirements
-
-### 7.1 Semantic HTML
-
-- Proper heading hierarchy (h1 > h2 > h3)
-- Landmark regions (nav, main, section, footer)
-- ARIA labels where needed
-
-### 7.2 Focus Management
-
-- Visible focus indicators
-- Skip-to-content link
-- Logical tab order
-
-### 7.3 Screen Reader Support
-
-- Alt text for decorative elements (empty alt)
-- Descriptive link text
-- Accordion aria-expanded states (handled by Radix)
-
----
-
-## 8. Performance Considerations
-
-### 8.1 Code Splitting
-
-- Each section component can be lazy-loaded if needed
-- Critical hero renders immediately
-
-### 8.2 Animation Performance
-
-- Use `will-change-transform` on animated elements
-- Reduce orb count on mobile (existing pattern)
-- Use CSS animations where possible
-
-### 8.3 Bundle Size
-
-- Reuse existing components
-- No new dependencies required
-- Framer Motion already installed
-
----
-
-## 9. File Structure Summary
+## Data Flow
 
 ```text
-src/
-├── pages/
-│   └── HowItWorks.tsx              ← NEW
-├── components/
-│   └── howitworks/                 ← NEW FOLDER
-│       ├── HowItWorksHero.tsx
-│       ├── WhoItsFor.tsx
-│       ├── ThePromise.tsx
-│       ├── ThreeSteps.tsx
-│       ├── HowItWorksTierPreview.tsx
-│       ├── WhatsIncluded.tsx
-│       ├── ComparisonSection.tsx
-│       ├── Roadmap.tsx
-│       ├── TheExperience.tsx
-│       ├── MicroFAQs.tsx
-│       ├── HowItWorksCTA.tsx
-│       ├── HowItWorksNav.tsx
-│       └── ComplianceFooter.tsx
-└── App.tsx                         ← MODIFY (add route)
+Waitlist.tsx
+    │
+    ├─► WaitlistForm.tsx
+    │       │
+    │       └─► handleSubmit() → useWaitlistSubmit hook
+    │               │
+    │               └─► Supabase insert
+    │                       │
+    │                       └─► Returns: queuePosition, couponCode, firstName
+    │
+    └─► ThankYouModal.tsx (receives signup data)
+            │
+            ├─► SaveCodeActions.tsx
+            │       │
+            │       ├─► "Email My Code" → edge function
+            │       └─► "Add to Calendar" → ICS download
+            │
+            ├─► ReferralLadder.tsx
+            │       │
+            │       └─► Copy referral link
+            │
+            └─► Social share buttons
 ```
 
 ---
 
-## 10. Implementation Order
+## Props Update for ThankYouModal
 
-1. Create `HowItWorksNav.tsx` — Navigation component
-2. Create `HowItWorksHero.tsx` — Hero section
-3. Create `HowItWorks.tsx` page scaffold
-4. Add route to `App.tsx`
-5. Create remaining section components in narrative order
-6. Add SEO/schema markup
-7. Test responsiveness
-8. Test accessibility
-9. Cross-link with waitlist page
+Current props:
+```typescript
+interface ThankYouModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  firstName: string;
+  queuePosition: number;
+  couponCode: string;
+  selectedTier?: string;
+  emailSent?: boolean;
+}
+```
 
----
+Updated props (add email for resend feature):
+```typescript
+interface ThankYouModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  firstName: string;
+  queuePosition: number;
+  couponCode: string;
+  selectedTier?: string;
+  emailSent?: boolean;
+  email?: string; // NEW: For resend email feature
+}
+```
 
-## 11. Content Verification
+This requires updating:
+1. `ThankYouModal.tsx` interface
+2. `Waitlist.tsx` signupData state
+3. `Waitlist.tsx` ThankYouModal props
 
-All copy will be taken exactly from the provided brief, including:
-- Headlines and subheadlines
-- Body copy paragraphs
-- FAQ questions and answers
-- Legal/compliance text
-- Meta descriptions and schema markup
-
----
-
-## 12. Visual Consistency Checklist
-
-Ensure matching with Waitlist page:
-- Color palette (purple background, orange primary)
-- Typography (Host Grotesk)
-- Border radius (rounded-xl, rounded-2xl)
-- Gradient orb animations
-- Card styling (bg-card/50 backdrop-blur-sm)
-- Glow effects on CTAs
-- Trust badge styling
-- Footer design
-
----
-
-## 13. Success Criteria
-
-1. Page loads in under 3 seconds
-2. All sections animate smoothly on scroll
-3. Mobile layout is single-column and touch-friendly
-4. Navigation works correctly between pages
-5. CTA buttons link to waitlist form
-6. FAQ accordion functions correctly
-7. Schema markup validates in testing tools
-8. Accessibility audit passes (axe, Lighthouse)
-9. Zero console errors
-10. Consistent visual language with waitlist page
