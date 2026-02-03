@@ -127,6 +127,54 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist_signups: {
+        Row: {
+          budget_range: string | null
+          coupon_code: string
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          mailing_list_opt_in: boolean
+          phone_number: string | null
+          preferred_tier: string
+          queue_position: number
+          referral_source: string | null
+          trade_in_interest: boolean
+        }
+        Insert: {
+          budget_range?: string | null
+          coupon_code?: string
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          mailing_list_opt_in?: boolean
+          phone_number?: string | null
+          preferred_tier: string
+          queue_position?: number
+          referral_source?: string | null
+          trade_in_interest?: boolean
+        }
+        Update: {
+          budget_range?: string | null
+          coupon_code?: string
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          mailing_list_opt_in?: boolean
+          phone_number?: string | null
+          preferred_tier?: string
+          queue_position?: number
+          referral_source?: string | null
+          trade_in_interest?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
