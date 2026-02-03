@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
 import { ChevronDown, Shield, FileCheck, RefreshCw } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { CountdownTimer } from "./CountdownTimer";
 import { ScarcityCounter } from "./ScarcityCounter";
 
 interface WaitlistHeroProps {
   onScrollToTiers: () => void;
   spotsRemaining?: number;
+  spotsLoading?: boolean;
 }
 
 const features = [
@@ -15,7 +15,7 @@ const features = [
   { icon: FileCheck, text: "zero downtime" },
 ];
 
-export function WaitlistHero({ onScrollToTiers, spotsRemaining = 247 }: WaitlistHeroProps) {
+export function WaitlistHero({ onScrollToTiers, spotsRemaining = 250, spotsLoading = false }: WaitlistHeroProps) {
   const isMobile = useIsMobile();
 
   return (
@@ -64,14 +64,18 @@ export function WaitlistHero({ onScrollToTiers, spotsRemaining = 247 }: Waitlist
       />
 
       <div className="relative z-10 max-w-4xl mx-auto text-center">
-        {/* Countdown timer - urgency trigger */}
+        {/* Simple discount badge */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="mb-6"
         >
-          <CountdownTimer />
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/30 rounded-full">
+            <span className="text-sm font-medium text-primary">
+              10% discount when you sign up on the waitlist
+            </span>
+          </div>
         </motion.div>
 
         {/* Main headline with staggered animation */}
@@ -129,14 +133,14 @@ export function WaitlistHero({ onScrollToTiers, spotsRemaining = 247 }: Waitlist
           ))}
         </motion.div>
 
-        {/* Scarcity counter - FOMO trigger */}
+        {/* Scarcity counter - real data */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 1.0 }}
           className="mb-8"
         >
-          <ScarcityCounter initialSpots={spotsRemaining} />
+          <ScarcityCounter spotsRemaining={spotsRemaining} isLoading={spotsLoading} />
         </motion.div>
 
         {/* Primary CTA with glow pulse */}
@@ -152,8 +156,8 @@ export function WaitlistHero({ onScrollToTiers, spotsRemaining = 247 }: Waitlist
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <span className="text-lg">🎮 Claim my 10% discount</span>
-            <span className="text-sm opacity-80">Lock in your spot now</span>
+            <span className="text-lg">Reserve my spot</span>
+            <span className="text-sm opacity-80">10% discount included</span>
             
             {/* Glow effect */}
             <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />

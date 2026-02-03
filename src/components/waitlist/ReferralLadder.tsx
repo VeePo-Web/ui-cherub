@@ -43,7 +43,7 @@ export function ReferralLadder({ couponCode, queuePosition }: ReferralLadderProp
           You're behind <span className="text-primary font-bold">{Math.max(0, queuePosition - 1)}</span> people in line
         </p>
         <p className="text-foreground font-medium">
-          Share to jump ahead! 🚀
+          Share to jump ahead!
         </p>
       </div>
 
@@ -83,7 +83,7 @@ export function ReferralLadder({ couponCode, queuePosition }: ReferralLadderProp
               "text-sm",
               tier.highlight ? "text-primary font-semibold" : "text-muted-foreground"
             )}>
-              {tier.reward} {tier.highlight && "🌟"}
+              {tier.reward}
             </span>
           </motion.div>
         ))}

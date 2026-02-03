@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gamepad2, Flame } from "lucide-react";
+import { Gamepad2 } from "lucide-react";
 
 interface StickyDesktopCTAProps {
   spotsRemaining: number;
@@ -39,11 +39,10 @@ export function StickyDesktopCTA({ spotsRemaining, onCtaClick }: StickyDesktopCT
                 <span className="font-semibold text-foreground">Gaming PC Subscription</span>
               </div>
 
-              {/* Center: Scarcity */}
+              {/* Center: Spots info */}
               <div className="flex items-center gap-2 text-sm">
-                <Flame className="w-4 h-4 text-destructive animate-pulse" />
                 <span className="text-muted-foreground">
-                  <span className="text-destructive font-bold">{spotsRemaining}</span> Calgary spots left
+                  <span className="text-foreground font-bold">{spotsRemaining}</span> Calgary spots left
                 </span>
               </div>
 
@@ -54,7 +53,7 @@ export function StickyDesktopCTA({ spotsRemaining, onCtaClick }: StickyDesktopCT
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Join Now — 10% Off
+                Join the waitlist - 10% discount
               </motion.button>
             </div>
           </div>

@@ -94,8 +94,8 @@ export function ThankYouModal({
     ? selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1) 
     : "";
   const shareText = selectedTier
-    ? `I just locked in the ${tierName} tier for a gaming PC subscription! 🎮 I'm #${queuePosition} in line. Get 10% off with code ${couponCode}`
-    : `I just joined the waitlist for a gaming PC subscription! 🎮 Get 10% off with code ${couponCode}`;
+    ? `I just locked in the ${tierName} tier for a gaming PC subscription! I'm #${queuePosition} in line. Get 10% off with code ${couponCode}`
+    : `I just joined the waitlist for a gaming PC subscription! Get 10% off with code ${couponCode}`;
 
   const handleTwitterShare = () => {
     window.open(
@@ -262,7 +262,7 @@ export function ThankYouModal({
                 </div>
                 {/* Bonus urgency */}
                 <p className="text-xs text-muted-foreground mt-2">
-                  ⏰ First 100 users get EXTRA 5% at launch!
+                  First 100 users get extra 5% at launch!
                 </p>
               </div>
             </motion.div>
@@ -289,7 +289,7 @@ export function ThankYouModal({
                     <Mail className="w-3 h-3 text-muted-foreground" />
                   </div>
                   <span className={emailSent ? "text-foreground" : "text-muted-foreground"}>
-                    {emailSent ? "Check your email (~2 min)" : `Code saved: ${couponCode}`}
+                    {emailSent ? "Check your email (arriving shortly)" : `Code saved: ${couponCode}`}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
