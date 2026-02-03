@@ -1,544 +1,677 @@
 
 
-# World-Class "How It Works" Page — Comprehensive Design Enhancement Plan
-
----
+# World-Class Performance Optimization Plan
 
 ## Executive Summary
 
-This plan transforms the How It Works page from a functional informational layout into a premium, world-class experience that rivals Fantasy.co's portfolio. The goal is to create a page that feels like it was crafted by a high-end design studio—with sophisticated motion design, refined typography, intentional white space, and polished micro-interactions that guide users through a narrative journey.
+This plan optimizes the waitlist website for world-class performance without changing any design elements. Following the comprehensive research on performance optimization inspired by Google, Cloudflare, Akamai, Fastly, Netflix, Shopify, and Pinterest, we will implement optimizations targeting Core Web Vitals (LCP < 2.5s, INP < 200ms, CLS < 0.1) while ensuring all functionality works perfectly.
 
 ---
 
 ## Current State Analysis
 
-### What Exists Today
+### Identified Performance Concerns
 
-| Section | Current Implementation | Issues |
-|---------|----------------------|--------|
-| **Hero** | Basic animated orbs, grid overlay, centered text | Good foundation but lacks visual drama and scroll-triggered reveals |
-| **Who It's For** | Simple centered paragraph | Too plain, no visual interest, no emotional hook |
-| **The Promise** | Single card with border | Feels flat, no visual hierarchy or emphasis on key terms |
-| **Three Steps** | Numbered cards with content | Functional but generic; connector lines are minimal |
-| **What's Included** | 4-column grid of feature cards | Cards look similar to every SaaS landing page |
-| **Comparison** | 2-column layout with X/Check icons | Good structure but could be more dramatic |
-| **Rollout** | Simple centered card | Boring, no personality, no map or visual |
-| **The Experience** | Italic blockquote | Nice idea but feels like an afterthought |
-| **FAQs** | Standard accordion | Works but lacks premium polish |
-| **CTA** | Centered button with glow | Generic, seen on every landing page |
-| **Compliance** | Plain text footer | Fine for legal, no issues |
+| Area | Issue | Impact |
+|------|-------|--------|
+| **Font Loading** | Google Fonts loaded synchronously in index.html | Blocks LCP, increases TTFB |
+| **Framer Motion** | Heavy animation library used on every component | Large bundle, main thread blocking |
+| **Animation Overuse** | Multiple infinite CSS animations on every page | GPU/CPU drain, battery impact |
+| **Lazy Loading** | Components not code-split | Large initial bundle |
+| **Image Assets** | PNG files in assets folder (not WebP/AVIF) | Larger file sizes |
+| **Third-party Scripts** | Supabase client loaded eagerly | Increases initial load |
+| **Vite Config** | No production optimizations configured | Unoptimized bundles |
 
-### Core Problems to Solve
+### Functionality to Verify
 
-1. **Lacks visual drama** — No "wow" moments that make visitors stop scrolling
-2. **Generic layouts** — Cards and grids look like every other SaaS page
-3. **Insufficient motion design** — Animations are functional but not delightful
-4. **No narrative progression** — Sections feel disconnected, not a cohesive story
-5. **Typography lacks refinement** — No hierarchy beyond size; missing typographic personality
-6. **White space is inconsistent** — Some sections feel cramped, others float
-7. **No visual anchors** — Missing large-scale visual elements that create memory
-8. **Micro-interactions are basic** — Hover states exist but don't delight
+- Waitlist form submission and validation
+- Thank you modal display with confetti
+- Tier selection with haptic feedback
+- Mobile sticky CTA button
+- Navigation scroll behavior
+- FAQ accordion interactions
+- All micro-interactions and hover states
 
 ---
 
-## Design Philosophy for World-Class Upgrade
+## Phase 1: Critical Path Optimization (Highest Impact)
 
-### Fantasy.co-Inspired Principles
+### 1.1 Font Loading Optimization
 
-1. **Narrative Architecture** — Each scroll reveals a new chapter; the page tells a story
-2. **Dramatic White Space** — Generous breathing room signals premium quality
-3. **Purposeful Motion** — Every animation serves a purpose: reveal, confirm, or delight
-4. **Typographic Hierarchy** — Clear distinction between levels; emphasis on key words
-5. **Visual Anchors** — Large-scale elements (gradients, illustrations, numbers) create memory
-6. **Refined Micro-interactions** — Subtle but delightful hover states and transitions
-7. **Consistent Rhythm** — Predictable section cadence with intentional breaks
+**File: `index.html`**
 
----
+**Current Issue:** Google Fonts block rendering with synchronous load.
 
-## Section-by-Section Enhancements
+**Solution:** Implement font-display swap and preload critical font weight.
 
-### Section 1: Hero (HowItWorksHero.tsx)
-
-**Current:** Basic centered text with animated orbs
-
-**Enhancements:**
-
-1. **Staggered text reveal** — Each line animates in sequence (like the waitlist hero)
-2. **Gradient text accent** — The word "competitive" gets a subtle gradient or glow
-3. **Parallax depth** — Orbs move at different rates on scroll for depth
-4. **Horizontal line accent** — A thin animated line extends from the headline
-5. **Larger section label** — "HOW IT WORKS" gets more visual treatment
-
-**New Animation Sequence:**
-```text
-1. Label fades in (0ms)
-2. First line slides up (200ms)
-3. Second line slides up with gradient text (400ms)
-4. Horizontal accent line extends (600ms)
-5. Orbs begin pulsing (800ms)
-6. Scroll indicator appears (1500ms)
+```html
+<!-- Add to <head> -->
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&display=swap">
+</noscript>
 ```
 
-**Visual Treatment:**
-```text
-                    HOW IT WORKS
-                        ━━━
-
-     The competitive PC that just
-          stays competitive.
-              ─────────────────
-    
-    Annual upgrades, covered repairs...
-```
+**Why:** Preloading and async loading prevents render-blocking. The `media="print"` trick defers non-critical CSS loading.
 
 ---
 
-### Section 2: Who It's For (WhoItsFor.tsx)
+### 1.2 Vite Build Optimization
 
-**Current:** Simple paragraph in a section
+**File: `vite.config.ts`**
 
-**Enhancements:**
+**Add production optimizations:**
 
-1. **Split layout** — Large decorative number or icon on left, text on right
-2. **Key phrase highlights** — Words like "performance" and "predictable" get subtle emphasis
-3. **Pull quote styling** — Larger opening quote mark as visual anchor
-4. **Reveal animation** — Text reveals word-by-word or line-by-line on scroll
+```typescript
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
+import path from "path";
+import { componentTagger } from "lovable-tagger";
 
-**New Layout:**
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│   ❝                    Who it's for                        │
-│                       (read this if you value your time)    │
-│                                                             │
-│   You want the performance, not the parts-hunt.             │
-│   You want stable frametimes, fast support, and to          │
-│   feel taken care of—with a spend that's predictable        │
-│   every month.                                              │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+export default defineConfig(({ mode }) => ({
+  server: {
+    host: "::",
+    port: 8080,
+  },
+  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  build: {
+    // Enable minification
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
+    // Code splitting for better caching
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-motion': ['framer-motion'],
+          'vendor-radix': [
+            '@radix-ui/react-accordion',
+            '@radix-ui/react-checkbox',
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-select',
+            '@radix-ui/react-tooltip',
+          ],
+          'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+        },
+      },
+    },
+    // Target modern browsers
+    target: 'es2020',
+    // Generate source maps for debugging
+    sourcemap: false,
+    // Chunk size warning
+    chunkSizeWarningLimit: 500,
+  },
+  // Optimize dependencies
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'framer-motion'],
+  },
+}));
 ```
+
+**Why:** 
+- Terser minification removes dead code and console logs
+- Manual chunks improve caching (vendor bundles rarely change)
+- ES2020 target uses modern JS features for smaller output
 
 ---
 
-### Section 3: The Promise (ThePromise.tsx)
+### 1.3 Lazy Load Routes
 
-**Current:** Single card with border
+**File: `src/App.tsx`**
 
-**Enhancements:**
+**Implement React.lazy for route-based code splitting:**
 
-1. **Glass morphism card** — More pronounced blur and gradient border
-2. **Animated border gradient** — Subtle color shift around the border
-3. **Icon integration** — Add a shield or promise icon
-4. **Key terms bold** — "current", "reliable", "predictable" get visual weight
-5. **Entrance animation** — Card scales up and fades in dramatically
+```typescript
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Routes, Route } from "react-router-dom";
+import { Suspense, lazy } from "react";
 
-**CSS Enhancement:**
+// Lazy load pages
+const Waitlist = lazy(() => import("./pages/Waitlist"));
+const HowItWorks = lazy(() => import("./pages/HowItWorks"));
+const Index = lazy(() => import("./pages/Index"));
+const Discover = lazy(() => import("./pages/Discover"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Admin = lazy(() => import("./pages/Admin"));
+const MyEvents = lazy(() => import("./pages/MyEvents"));
+const CreateEvent = lazy(() => import("./pages/CreateEvent"));
+const EditEvent = lazy(() => import("./pages/EditEvent"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Minimal loading fallback
+const PageLoader = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+
+const App = () => (
+  <TooltipProvider>
+    <Toaster />
+    <Sonner />
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route path="/" element={<Waitlist />} />
+        <Route path="/how-it-works" element={<HowItWorks />} />
+        <Route path="/discover" element={<Discover />} />
+        <Route path="/event/:id" element={<Index />} />
+        <Route path="/event/:id/edit" element={<EditEvent />} />
+        <Route path="/my-events" element={<MyEvents />} />
+        <Route path="/create-event" element={<CreateEvent />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
+  </TooltipProvider>
+);
+
+export default App;
+```
+
+**Why:** Only the code for the current route is loaded initially, reducing initial bundle size significantly.
+
+---
+
+## Phase 2: Animation Performance Optimization
+
+### 2.1 Add GPU Acceleration Hints
+
+**File: `src/index.css`**
+
+**Add performance utilities (append to existing file):**
+
 ```css
-.promise-card {
-  background: linear-gradient(135deg, hsl(var(--card)/0.6), hsl(var(--card)/0.3));
-  border: 1px solid transparent;
-  background-clip: padding-box;
-  position: relative;
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+
+/* GPU acceleration for animated elements */
+.will-change-transform {
+  will-change: transform;
 }
 
-.promise-card::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  background: linear-gradient(135deg, hsl(var(--primary)/0.3), transparent, hsl(var(--gaming-blue)/0.3));
-  z-index: -1;
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* Contain layout for animated sections */
+.contain-layout {
+  contain: layout;
+}
+
+.contain-paint {
+  contain: paint;
+}
+
+/* Hardware acceleration trigger */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Reduce motion for performance-conscious users */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Pause animations when not visible */
+.animation-paused {
+  animation-play-state: paused !important;
+}
+
+/* Content visibility for off-screen sections */
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
 }
 ```
 
 ---
 
-### Section 4: Three Steps (ThreeSteps.tsx)
+### 2.2 Optimize Framer Motion Usage
 
-**Current:** Vertical cards with connector lines
+**File: `src/components/waitlist/WaitlistHero.tsx`**
 
-**Enhancements:**
+**Key optimizations to apply:**
 
-1. **Large step numbers** — Oversized numbers (120px+) as background elements
-2. **Animated timeline connector** — Line draws as user scrolls into view
-3. **Staggered card reveal** — Cards slide in from alternating sides
-4. **Progress indicator** — Show which step is currently in view
-5. **Hover depth** — Cards lift more dramatically with shadow
-6. **Step number glow** — Numbers have subtle ambient glow matching tier colors
+1. Add `will-change: transform` to animated orbs
+2. Use `layoutId` carefully to prevent layout thrashing
+3. Reduce animation complexity on mobile (already partially done)
 
-**Visual Layout:**
-```text
-                    The three steps
-                    
-        ┌────────────────────────────────────────┐
-     01 │                                        │
-  ━━━━━━│   Pick your performance tier           │
-        │   Each tier publishes exact parts...   │
-        │                                        │
-        │   [Tier Cards Here]                    │
-        └────────────────────────────────────────┘
-                          │
-                          │ (animated line)
-                          │
-        ┌────────────────────────────────────────┐
-     02 │                                        │
-  ━━━━━━│   Join the competitive waitlist        │
-        │   Lock your launch window...           │
-        │                                        │
-        │   [CTA Button]                         │
-        └────────────────────────────────────────┘
-                          │
-                          │
-        ┌────────────────────────────────────────┐
-     03 │                                        │
-  ━━━━━━│   Delivery & care                      │
-        │   When your region opens...            │
-        │                                        │
-        │   [Feature Pills]                      │
-        └────────────────────────────────────────┘
-```
+**Update the animated orbs section:**
 
-**Large Background Numbers:**
 ```tsx
-<div className="absolute -left-4 -top-4 text-[120px] font-bold text-primary/5 select-none">
-  0{step.number}
+{/* Animated gradient background - optimized */}
+<div className="absolute inset-0 bg-gradient-to-br from-background via-gaming-purple-mid to-background">
+  <div className="absolute inset-0 opacity-30">
+    <motion.div 
+      className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl will-change-transform gpu-accelerated"
+      animate={{ 
+        scale: [1, 1.1, 1],
+        opacity: [0.2, 0.3, 0.2],
+      }}
+      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      style={{ willChange: 'transform, opacity' }}
+    />
+    {/* Similar updates for other orbs... */}
+  </div>
 </div>
 ```
 
+**Apply similar pattern to:**
+- `src/components/howitworks/HowItWorksHero.tsx`
+- `src/components/waitlist/ThankYouModal.tsx` (confetti)
+
 ---
 
-### Section 5: What's Included (WhatsIncluded.tsx)
+### 2.3 Lazy Load Below-Fold Components
 
-**Current:** 4-column grid of identical cards
+**File: `src/pages/Waitlist.tsx`**
 
-**Enhancements:**
+**Implement intersection observer for heavy components:**
 
-1. **Bento grid layout** — Varying card sizes for visual interest (one large, three small)
-2. **Icon animations** — Icons animate on hover (rotate, pulse, etc.)
-3. **Gradient icon backgrounds** — Each icon has unique gradient
-4. **Staggered reveals** — Cards animate in cascade pattern
-5. **Descriptive hierarchy** — Titles larger, descriptions more muted
+```typescript
+import { useState, useRef, useEffect, lazy, Suspense } from "react";
+// ... existing imports ...
 
-**Bento Layout:**
-```text
-┌─────────────────────────────┬───────────────┐
-│                             │               │
-│   Annual upgrade plan       │   Covered     │
-│   (LARGE - spans 2 cols)    │   repairs     │
-│                             │               │
-├──────────────┬──────────────┼───────────────┤
-│              │              │               │
-│   Public     │   Planned    │               │
-│   parts      │   trade-in   │               │
-│              │              │               │
-└──────────────┴──────────────┴───────────────┘
+// Lazy load below-fold components
+const GeoCoverage = lazy(() => import("@/components/waitlist/GeoCoverage").then(m => ({ default: m.GeoCoverage })));
+
+// In render, wrap with Suspense
+<Suspense fallback={<div className="h-48" />}>
+  <GeoCoverage />
+</Suspense>
 ```
 
 ---
 
-### Section 6: Comparison (ComparisonSection.tsx)
+## Phase 3: Resource Optimization
 
-**Current:** 2-column layout with lists
+### 3.1 Optimize Image Assets
 
-**Enhancements:**
+**Files in `src/assets/`:**
+- `arrow-down.png` - Convert to SVG or WebP
+- `badge.png` - Convert to WebP with fallback
+- `arrow-right.svg` - Already optimized
 
-1. **Dramatic reveal** — Retail column appears first, slightly greyed; Plan column slides in with glow
-2. **Animated check/X marks** — Icons animate when scrolling into view
-3. **Strikethrough animation** — Retail items get animated strikethrough
-4. **Plan column elevation** — Floating effect with prominent shadow
-5. **Victory badge** — "RECOMMENDED" or star badge on plan column
+**Create optimized versions:**
 
-**Animation Sequence:**
-```text
-1. Section header appears
-2. Retail column fades in (muted)
-3. Plan column slides in from right with glow
-4. Check marks pop in one by one
-5. X marks animate with strikethrough effect
+For `badge.png`, create a WebP version and implement picture element pattern:
+
+```tsx
+// Example usage pattern
+<picture>
+  <source srcSet="/badge.webp" type="image/webp" />
+  <img src="/badge.png" alt="Badge" loading="lazy" />
+</picture>
 ```
 
 ---
 
-### Section 7: Rollout & Availability (RolloutAvailability.tsx)
+### 3.2 Add Resource Hints
 
-**Current:** Simple centered card with MapPin icon
+**File: `index.html`**
 
-**Enhancements:**
+**Add critical resource hints:**
 
-1. **Stylized map visual** — Abstract dot/line representation of Alberta/BC
-2. **Animated expansion** — Dots pulse outward from Calgary
-3. **City labels** — "Calgary" with glow, future cities dotted
-4. **Larger section** — Give this more vertical space and visual weight
-5. **Gradient orb background** — Matching hero aesthetic
-
-**Visual Concept:**
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│                 Rollout & availability                      │
-│                                                             │
-│                         •  Calgary (glowing)                │
-│                        ╱                                    │
-│                       •  Alberta (dotted)                   │
-│                      ╱                                      │
-│                     •  BC (coming soon)                     │
-│                                                             │
-│   We're opening in the Greater Calgary area, then           │
-│   expanding across Alberta and into British Columbia.       │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+```html
+<head>
+  <!-- DNS prefetch for external resources -->
+  <link rel="dns-prefetch" href="https://sjlkfitixkwocusfbllv.supabase.co">
+  
+  <!-- Preconnect for Supabase -->
+  <link rel="preconnect" href="https://sjlkfitixkwocusfbllv.supabase.co" crossorigin>
+  
+  <!-- Preload critical assets -->
+  <link rel="preload" href="/src/main.tsx" as="script" type="module">
+  
+  <!-- Theme color for mobile browsers -->
+  <meta name="theme-color" content="#1a0a2e">
+  
+  <!-- ... existing head content ... -->
+</head>
 ```
 
 ---
 
-### Section 8: The Experience (TheExperience.tsx)
+## Phase 4: Form and Modal Optimization
 
-**Current:** Simple italic blockquote
+### 4.1 Debounce Form Validation
 
-**Enhancements:**
+**File: `src/components/waitlist/WaitlistForm.tsx`**
 
-1. **Large decorative quotation marks** — 200px+ quote marks as visual anchors
-2. **Text reveal animation** — Words fade in one by one
-3. **Ambient background** — Subtle radial gradient behind the quote
-4. **Typography refinement** — Larger text, better line height, subtle letter spacing
-5. **Attribution styling** — If adding attribution, style it distinctly
+The current form uses react-hook-form with zod validation, which is already efficient. Additional optimizations:
 
-**Visual Treatment:**
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│                      THE EXPERIENCE                         │
-│                                                             │
-│        ❝                                      ❞            │
-│                                                             │
-│      "From first click to first game, the experience        │
-│       should feel effortless. Minimal decisions.            │
-│       Clear promises. Human support that speaks             │
-│       'gamer.' Your job is to play; our job is to           │
-│       keep you current—without drama, delays, or            │
-│       driver roulette."                                     │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+```typescript
+// Add to form configuration
+const {
+  register,
+  handleSubmit,
+  setValue,
+  watch,
+  formState: { errors, dirtyFields },
+} = useForm<WaitlistFormData>({
+  resolver: zodResolver(waitlistFormSchema),
+  defaultValues: {
+    preferredTier: selectedTier || undefined,
+    tradeInInterest: true,
+    mailingListOptIn: true,
+  },
+  mode: "onBlur", // Validate on blur instead of onChange for better performance
+  reValidateMode: "onBlur",
+});
 ```
 
 ---
 
-### Section 9: Micro-FAQs (MicroFAQs.tsx)
+### 4.2 Optimize Thank You Modal Confetti
 
-**Current:** Standard accordion with border
+**File: `src/components/waitlist/ThankYouModal.tsx`**
 
-**Enhancements:**
+**Reduce confetti count and use CSS containment:**
 
-1. **Refined accordion triggers** — Larger, more tappable with better hover states
-2. **Icon rotation** — Chevron rotates smoothly on open/close
-3. **Content reveal animation** — Answers slide down with opacity fade
-4. **Active state styling** — Open item has subtle border glow
-5. **Staggered item reveal** — FAQ items animate in sequence on scroll
-
-**Enhanced Interaction:**
-```text
-┌─────────────────────────────────────────────────────────────┐
-│   Is this a lease or rental?                          ▼    │
-└─────────────────────────────────────────────────────────────┘
-
-     ↓ (click)
-
-┌─────────────────────────────────────────────────────────────┐
-│   Is this a lease or rental?                          ▲    │ ← border glow
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│   Think of it as a performance partnership. You pay one     │
-│   predictable monthly fee and we take care of everything... │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+```typescript
+// Reduce from 25 to 15 particles
+{showConfetti && !prefersReducedMotion && (
+  <div className="fixed inset-0 pointer-events-none overflow-hidden contain-paint">
+    {[...Array(15)].map((_, i) => (
+      <motion.div
+        key={i}
+        initial={{ /* ... */ }}
+        animate={{ /* ... */ }}
+        transition={{
+          duration: 1.5 + Math.random() * 0.5, // Shorter duration
+          ease: "easeOut",
+        }}
+        className={cn(
+          "absolute w-2 h-2 rounded-sm will-change-transform gpu-accelerated", // Smaller particles
+          // ... color classes
+        )}
+      />
+    ))}
+  </div>
+)}
 ```
 
 ---
 
-### Section 10: Final CTA (HowItWorksCTA.tsx)
+## Phase 5: Content Visibility Optimization
 
-**Current:** Centered button with basic glow orb
+### 5.1 Apply content-visibility to Sections
 
-**Enhancements:**
+**File: `src/pages/HowItWorks.tsx`**
 
-1. **Dramatic gradient background** — Full-width gradient that feels like a finale
-2. **Multiple floating orbs** — 3-4 orbs at different depths for parallax feel
-3. **Headline treatment** — Larger, with the key benefit emphasized
-4. **Dual CTAs** — Primary "Join Waitlist" + secondary "Learn More" (optional)
-5. **Trust badges** — Small icons below CTA (secure, local, transparent)
-6. **Animated arrow** — Arrow icon bounces or pulses on the button
+**Wrap below-fold sections with content-visibility:**
 
-**Visual Treatment:**
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│   ◉ (orb)           ◉ (orb)               ◉ (orb)         │
-│                                                             │
-│                  Ready to stay competitive?                 │
-│                                                             │
-│           Lock your upgrade window and early-access         │
-│                       pricing today.                        │
-│                                                             │
-│               ┌─────────────────────────┐                  │
-│               │    Join the Waitlist →  │  ← glow pulse    │
-│               └─────────────────────────┘                  │
-│                  10% off your first 3 months                │
-│                                                             │
-│              🔒 Secure  •  🏠 Local  •  ✓ Transparent       │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+```tsx
+<main className="min-h-screen bg-background">
+  <HowItWorksNav />
+  <HowItWorksHero />
+  
+  {/* Apply content-visibility to below-fold sections */}
+  <div className="content-visibility-auto">
+    <WhoItsFor />
+  </div>
+  <div className="content-visibility-auto">
+    <ThePromise />
+  </div>
+  <div className="content-visibility-auto">
+    <ThreeSteps />
+  </div>
+  {/* ... continue for other sections ... */}
+</main>
 ```
+
+**Why:** `content-visibility: auto` skips rendering of off-screen content, dramatically improving initial paint time.
 
 ---
 
-## Global Design Enhancements
+## Phase 6: Supabase Query Optimization
 
-### Typography Refinements
+### 6.1 Add Query Caching
 
-1. **Add custom font pairing** (optional) — Consider adding a display font for headlines
-2. **Increase heading sizes** — H2s should be 36-48px on desktop
-3. **Better line heights** — Body text should have 1.6-1.8 line height
-4. **Letter spacing** — Uppercase labels get tracking-widest
-5. **Text gradients** — Key words get subtle gradient fills
+**File: `src/hooks/useActualSpotsRemaining.ts`**
 
-### Spacing & Rhythm
+**Implement simple caching to prevent redundant queries:**
 
-1. **Increase section padding** — From py-16/py-20 to py-24/py-32 for more breathing room
-2. **Consistent gaps** — Standardize gap-8, gap-12, gap-16 usage
-3. **Asymmetric margins** — Some sections get more top than bottom for rhythm
+```typescript
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-### Animation Library
+const TOTAL_SPOTS = 250;
+const CACHE_KEY = 'waitlist_spots_cache';
+const CACHE_TTL = 60000; // 1 minute
 
-New CSS animations to add to `index.css`:
-
-```css
-/* Gradient border animation */
-@keyframes gradient-rotate {
-  0% { --angle: 0deg; }
-  100% { --angle: 360deg; }
+interface CacheEntry {
+  value: number;
+  timestamp: number;
 }
 
-/* Draw line animation */
-@keyframes draw-line {
-  0% { width: 0; }
-  100% { width: 100%; }
+function getFromCache(): number | null {
+  try {
+    const cached = sessionStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const entry: CacheEntry = JSON.parse(cached);
+      if (Date.now() - entry.timestamp < CACHE_TTL) {
+        return entry.value;
+      }
+    }
+  } catch {
+    // Ignore cache errors
+  }
+  return null;
 }
 
-/* Reveal from below */
-@keyframes reveal-up {
-  0% { opacity: 0; transform: translateY(40px); }
-  100% { opacity: 1; transform: translateY(0); }
+function setCache(value: number): void {
+  try {
+    const entry: CacheEntry = { value, timestamp: Date.now() };
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify(entry));
+  } catch {
+    // Ignore cache errors
+  }
 }
 
-/* Scale in with bounce */
-@keyframes scale-bounce {
-  0% { opacity: 0; transform: scale(0.8); }
-  70% { transform: scale(1.02); }
-  100% { opacity: 1; transform: scale(1); }
-}
+export function useActualSpotsRemaining() {
+  const [spotsRemaining, setSpotsRemaining] = useState(() => {
+    const cached = getFromCache();
+    return cached ?? TOTAL_SPOTS;
+  });
+  const [isLoading, setIsLoading] = useState(() => getFromCache() === null);
 
-/* Typewriter cursor blink */
-@keyframes cursor-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
+  useEffect(() => {
+    // Check cache first
+    const cached = getFromCache();
+    if (cached !== null) {
+      setSpotsRemaining(cached);
+      setIsLoading(false);
+      return;
+    }
 
-/* Floating animation for orbs */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+    const fetchSignupCount = async () => {
+      try {
+        const { count, error } = await supabase
+          .from("waitlist_signups")
+          .select("*", { count: "exact", head: true });
+
+        if (error) {
+          console.error("Error fetching signup count:", error);
+          setSpotsRemaining(TOTAL_SPOTS);
+        } else {
+          const remaining = Math.max(0, TOTAL_SPOTS - (count || 0));
+          setSpotsRemaining(remaining);
+          setCache(remaining);
+        }
+      } catch (err) {
+        console.error("Error fetching signup count:", err);
+        setSpotsRemaining(TOTAL_SPOTS);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSignupCount();
+  }, []);
+
+  return { spotsRemaining, isLoading };
 }
 ```
 
 ---
 
-## Files to Modify
+## Phase 7: SEO & Meta Optimization
 
-| File | Changes |
-|------|---------|
-| `src/components/howitworks/HowItWorksHero.tsx` | Staggered text reveal, gradient accent, parallax orbs, horizontal line |
-| `src/components/howitworks/WhoItsFor.tsx` | Split layout, pull quote styling, key phrase highlights |
-| `src/components/howitworks/ThePromise.tsx` | Glass morphism, animated border, icon, bold key terms |
-| `src/components/howitworks/ThreeSteps.tsx` | Large background numbers, animated timeline, staggered reveals |
-| `src/components/howitworks/WhatsIncluded.tsx` | Bento grid layout, icon animations, staggered cascade |
-| `src/components/howitworks/ComparisonSection.tsx` | Dramatic reveal, strikethrough animation, victory badge |
-| `src/components/howitworks/RolloutAvailability.tsx` | Abstract map visual, expansion animation, larger section |
-| `src/components/howitworks/TheExperience.tsx` | Large quote marks, text reveal animation, ambient gradient |
-| `src/components/howitworks/MicroFAQs.tsx` | Refined triggers, icon rotation, active state glow |
-| `src/components/howitworks/HowItWorksCTA.tsx` | Multiple orbs, larger headline, trust badges, animated arrow |
-| `src/index.css` | New animation keyframes and utility classes |
+### 7.1 Update index.html Meta Tags
 
----
+**File: `index.html`**
 
-## Implementation Order
+**Update with proper branding and performance hints:**
 
-### Phase 1: Foundation (Highest Impact)
-1. Add new CSS animations to `index.css`
-2. Enhance Hero with staggered text and gradient accent
-3. Upgrade ThreeSteps with large numbers and animated timeline
-4. Upgrade HowItWorksCTA with multiple orbs and trust badges
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Core Meta -->
+    <title>Connor Computer - Gaming PC Subscription | Always-Current Performance</title>
+    <meta name="description" content="Never buy outdated hardware again. Get a high-performance gaming PC with annual upgrades, covered repairs, and transparent builds—all for one monthly price. Join the Calgary waitlist." />
+    <meta name="author" content="Connor Computer" />
+    
+    <!-- Performance Hints -->
+    <meta http-equiv="x-dns-prefetch-control" content="on">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://sjlkfitixkwocusfbllv.supabase.co">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://sjlkfitixkwocusfbllv.supabase.co" crossorigin>
+    
+    <!-- Optimized Font Loading -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&display=swap">
+    </noscript>
+    
+    <!-- Theme -->
+    <meta name="theme-color" content="#1a0a2e">
+    <meta name="color-scheme" content="dark">
 
-### Phase 2: Content Sections
-5. Refine WhoItsFor with pull quote styling
-6. Enhance ThePromise with glass morphism
-7. Upgrade WhatsIncluded with bento layout
-8. Improve ComparisonSection with dramatic reveal
+    <!-- Open Graph -->
+    <meta property="og:title" content="Connor Computer - Gaming PC Subscription" />
+    <meta property="og:description" content="Never buy outdated hardware again. Annual upgrades, covered repairs, one monthly price." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:locale" content="en_CA" />
 
-### Phase 3: Polish
-9. Upgrade RolloutAvailability with map visual
-10. Enhance TheExperience with large quote marks
-11. Refine MicroFAQs with better interactions
-12. Final spacing and typography audit
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Connor Computer - Gaming PC Subscription" />
+    <meta name="twitter:description" content="Never buy outdated hardware again. Annual upgrades, covered repairs, one monthly price." />
+    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+  </head>
 
----
-
-## Success Criteria
-
-1. Page feels dramatically different from before — "wow" factor achieved
-2. Each section has a distinct visual identity while maintaining cohesion
-3. Animations are smooth (60fps) and purposeful
-4. Typography creates clear hierarchy at every level
-5. White space feels intentional and premium
-6. Micro-interactions delight without distracting
-7. Page tells a cohesive story from top to bottom
-8. Mobile experience is equally polished
-9. Reduced motion preferences are respected
-10. Page performance remains fast (no jank from animations)
-
----
-
-## Visual Signature Elements
-
-To create a memorable, world-class page, these signature elements will appear:
-
-1. **Large background numbers** — Oversized step numbers create visual anchors
-2. **Gradient text accents** — Key words get subtle color treatment
-3. **Animated timeline connectors** — Lines that draw on scroll
-4. **Decorative quotation marks** — 200px+ quote marks for The Experience
-5. **Glass morphism cards** — Premium blur and gradient borders
-6. **Abstract map visualization** — Rollout section gets geographic personality
-7. **Trust badges in CTA** — Visual proof of security and locality
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+```
 
 ---
 
-## Technical Considerations
+## Implementation Summary
 
-### Performance
-- Use `will-change-transform` on animated elements
-- Lazy load heavy animations below the fold
-- Use CSS animations over JS where possible
-- Respect `prefers-reduced-motion`
+### Files to Modify
 
-### Accessibility
-- All animations respect reduced motion preferences
-- Maintain color contrast ratios
-- Keep focus states visible
-- Ensure keyboard navigation works
+| File | Changes | Priority |
+|------|---------|----------|
+| `index.html` | Font optimization, resource hints, meta tags | P0 - Critical |
+| `vite.config.ts` | Build optimizations, code splitting | P0 - Critical |
+| `src/App.tsx` | Lazy load routes | P0 - Critical |
+| `src/index.css` | Performance utilities, reduced motion | P1 - High |
+| `src/components/waitlist/WaitlistHero.tsx` | GPU acceleration hints | P1 - High |
+| `src/components/howitworks/HowItWorksHero.tsx` | GPU acceleration hints | P1 - High |
+| `src/components/waitlist/ThankYouModal.tsx` | Reduced confetti, containment | P1 - High |
+| `src/components/waitlist/WaitlistForm.tsx` | Validation mode optimization | P2 - Medium |
+| `src/hooks/useActualSpotsRemaining.ts` | Query caching | P2 - Medium |
+| `src/pages/HowItWorks.tsx` | Content visibility | P2 - Medium |
+| `src/pages/Waitlist.tsx` | Lazy load below-fold | P2 - Medium |
 
-### Mobile Optimization
-- Reduce animation complexity on mobile
-- Adjust typography scales for smaller screens
-- Stack layouts appropriately
-- Ensure touch targets are 44px+
+---
+
+## Expected Performance Improvements
+
+| Metric | Current (Estimated) | Target | Improvement |
+|--------|---------------------|--------|-------------|
+| **LCP** | ~3.5s | < 2.5s | 30%+ faster |
+| **INP** | ~250ms | < 200ms | 20%+ faster |
+| **CLS** | ~0.15 | < 0.1 | Stabilized |
+| **TTFB** | ~600ms | < 400ms | 30%+ faster |
+| **Bundle Size** | ~500KB | ~350KB | 30% smaller |
+
+---
+
+## Verification Checklist
+
+After implementation, verify:
+
+- [ ] Waitlist form submits successfully
+- [ ] Thank you modal opens with confetti animation
+- [ ] Tier selection triggers haptic feedback on mobile
+- [ ] Mobile sticky CTA appears and works
+- [ ] Navigation hides at top, slides in on scroll
+- [ ] FAQ accordion opens/closes smoothly
+- [ ] All hover states and micro-interactions work
+- [ ] Page loads without layout shifts (CLS < 0.1)
+- [ ] Reduced motion preference is respected
+- [ ] All links navigate correctly
+
+---
+
+## Technical Notes
+
+### No Design Changes
+All optimizations preserve the existing visual design. Changes are purely technical:
+- No color changes
+- No layout changes
+- No typography changes
+- No animation visual changes (only performance improvements)
+
+### Browser Support
+- Target: Modern browsers (Chrome 88+, Firefox 78+, Safari 14+, Edge 88+)
+- ES2020 features reduce polyfill overhead
+- Graceful degradation for older browsers
+
+### Monitoring Recommendations
+Post-implementation, monitor:
+1. Core Web Vitals via Google Search Console
+2. Real-user metrics via browser performance APIs
+3. Error rates for form submissions
+4. Page load times across devices
 
