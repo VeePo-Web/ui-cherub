@@ -21,6 +21,27 @@ const tierSpecsUrls: Record<string, string> = {
   pro: "#",      // Replace with actual PCPartPicker URL
 };
 
+// Price anchoring data
+const tierPricing: Record<string, { price: string; savings: string }> = {
+  ludacris: { price: "~$250", savings: "$100" },
+  esports: { price: "~$175", savings: "$75" },
+  pro: { price: "~$125", savings: "$50" },
+};
+
+// Social proof per tier
+const tierWaitingCount: Record<string, number> = {
+  ludacris: 34,
+  esports: 89,
+  pro: 52,
+};
+
+// Scarcity per tier
+const tierSpotsLeft: Record<string, number> = {
+  ludacris: 50,
+  esports: 100,
+  pro: 100,
+};
+
 export function TierSelector({ selectedTier, onSelectTier }: TierSelectorProps) {
   return (
     <section className="py-20 px-6">
@@ -59,6 +80,10 @@ export function TierSelector({ selectedTier, onSelectTier }: TierSelectorProps) 
               isPopular={tier.id === "esports"}
               specsUrl={tierSpecsUrls[tier.id]}
               selectCta={tierCtas[tier.id]}
+              estimatedPrice={tierPricing[tier.id]?.price}
+              savings={tierPricing[tier.id]?.savings}
+              waitingCount={tierWaitingCount[tier.id]}
+              spotsLeft={tierSpotsLeft[tier.id]}
             />
           ))}
         </div>

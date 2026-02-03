@@ -7,6 +7,7 @@ interface SubmitResult {
   queuePosition?: number;
   couponCode?: string;
   firstName?: string;
+  emailSent?: boolean;
   error?: string;
 }
 
@@ -45,6 +46,7 @@ export function useWaitlistSubmit() {
       }
 
       // Trigger confirmation email via edge function
+      let emailSent = true;
       try {
         await supabase.functions.invoke("send-waitlist-confirmation", {
           body: {
@@ -57,6 +59,7 @@ export function useWaitlistSubmit() {
       } catch (emailError) {
         // Don't fail the signup if email fails - just log it
         console.error("Failed to send confirmation email:", emailError);
+        emailSent = false;
       }
 
       return {
@@ -64,6 +67,7 @@ export function useWaitlistSubmit() {
         queuePosition: insertedData.queue_position,
         couponCode: insertedData.coupon_code,
         firstName: insertedData.first_name,
+        emailSent,
       };
     } catch (error) {
       console.error("Waitlist submission error:", error);

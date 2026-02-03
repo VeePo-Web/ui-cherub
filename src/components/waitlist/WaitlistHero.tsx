@@ -1,9 +1,12 @@
 import { motion } from "framer-motion";
 import { ChevronDown, Shield, FileCheck, RefreshCw } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { CountdownTimer } from "./CountdownTimer";
+import { ScarcityCounter } from "./ScarcityCounter";
 
 interface WaitlistHeroProps {
   onScrollToTiers: () => void;
+  spotsRemaining?: number;
 }
 
 const features = [
@@ -12,7 +15,7 @@ const features = [
   { icon: FileCheck, text: "zero downtime" },
 ];
 
-export function WaitlistHero({ onScrollToTiers }: WaitlistHeroProps) {
+export function WaitlistHero({ onScrollToTiers, spotsRemaining = 247 }: WaitlistHeroProps) {
   const isMobile = useIsMobile();
 
   return (
@@ -61,6 +64,16 @@ export function WaitlistHero({ onScrollToTiers }: WaitlistHeroProps) {
       />
 
       <div className="relative z-10 max-w-4xl mx-auto text-center">
+        {/* Countdown timer - urgency trigger */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mb-6"
+        >
+          <CountdownTimer />
+        </motion.div>
+
         {/* Main headline with staggered animation */}
         <motion.h1 
           className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground mb-6 leading-tight"
@@ -97,7 +110,7 @@ export function WaitlistHero({ onScrollToTiers }: WaitlistHeroProps) {
 
         {/* Feature badges with icons - improved mobile layout */}
         <motion.div 
-          className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mb-10"
+          className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
@@ -116,6 +129,16 @@ export function WaitlistHero({ onScrollToTiers }: WaitlistHeroProps) {
           ))}
         </motion.div>
 
+        {/* Scarcity counter - FOMO trigger */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, delay: 1.0 }}
+          className="mb-8"
+        >
+          <ScarcityCounter initialSpots={spotsRemaining} />
+        </motion.div>
+
         {/* Primary CTA with glow pulse */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -129,8 +152,8 @@ export function WaitlistHero({ onScrollToTiers }: WaitlistHeroProps) {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <span className="text-lg">be the first to know</span>
-            <span className="text-sm opacity-80">— 10% discount first 3 months</span>
+            <span className="text-lg">🎮 Claim my 10% discount</span>
+            <span className="text-sm opacity-80">Lock in your spot now</span>
             
             {/* Glow effect */}
             <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />

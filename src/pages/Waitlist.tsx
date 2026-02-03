@@ -4,6 +4,10 @@ import { TierSelector } from "@/components/waitlist/TierSelector";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 import { GeoCoverage } from "@/components/waitlist/GeoCoverage";
 import { ThankYouModal } from "@/components/waitlist/ThankYouModal";
+import { LiveActivityToast } from "@/components/waitlist/LiveActivityToast";
+import { ExitIntentModal } from "@/components/waitlist/ExitIntentModal";
+import { StickyDesktopCTA } from "@/components/waitlist/StickyDesktopCTA";
+import { useSpotsRemaining } from "@/components/waitlist/ScarcityCounter";
 import { useWaitlistSubmit } from "@/hooks/useWaitlistSubmit";
 import { useToast } from "@/hooks/use-toast";
 import type { WaitlistFormData } from "@/lib/waitlist-validation";
@@ -16,23 +20,29 @@ export default function Waitlist() {
     queuePosition: number;
     couponCode: string;
     selectedTier: string;
+    emailSent: boolean;
   } | null>(null);
 
   const tierRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const { submitWaitlist, isSubmitting } = useWaitlistSubmit();
   const { toast } = useToast();
+  const spotsRemaining = useSpotsRemaining(247);
 
   const scrollToTiers = () => {
     tierRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const scrollToForm = () => {
-    formRef.current?.scrollIntoView({ behavior: "smooth" });
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
   const handleTierSelect = (tier: "ludacris" | "esports" | "pro") => {
     setSelectedTier(tier);
+    // Haptic feedback on mobile
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
     // Auto-scroll to form after selecting tier
     setTimeout(() => {
       formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -43,11 +53,16 @@ export default function Waitlist() {
     const result = await submitWaitlist(data);
 
     if (result.success) {
+      // Haptic feedback on mobile
+      if (navigator.vibrate) {
+        navigator.vibrate([50, 50, 100]);
+      }
       setSignupData({
         firstName: result.firstName || data.firstName,
         queuePosition: result.queuePosition || 1,
         couponCode: result.couponCode || "EARLY10",
         selectedTier: data.preferredTier,
+        emailSent: result.emailSent ?? true,
       });
       setShowThankYou(true);
     } else {
@@ -59,10 +74,42 @@ export default function Waitlist() {
     }
   };
 
+  const handleExitIntentEmail = (email: string) => {
+    // Quick submit with just email - scroll to form with email pre-filled
+    scrollToForm();
+    toast({
+      title: "Great choice!",
+      description: "Complete the form below to lock in your spot.",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Skip to content for accessibility */}
+      <a
+        href="#waitlist-form"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg"
+      >
+        Skip to form
+      </a>
+
+      {/* Live activity toasts */}
+      <LiveActivityToast />
+
+      {/* Sticky desktop CTA */}
+      <StickyDesktopCTA 
+        spotsRemaining={spotsRemaining} 
+        onCtaClick={scrollToForm} 
+      />
+
+      {/* Exit intent modal (desktop only) */}
+      <ExitIntentModal 
+        onSubmitEmail={handleExitIntentEmail}
+        spotsRemaining={spotsRemaining}
+      />
+
       {/* Hero section */}
-      <WaitlistHero onScrollToTiers={scrollToTiers} />
+      <WaitlistHero onScrollToTiers={scrollToTiers} spotsRemaining={spotsRemaining} />
 
       {/* Tier selection */}
       <div ref={tierRef}>
@@ -76,6 +123,7 @@ export default function Waitlist() {
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           onScrollToTiers={scrollToTiers}
+          spotsRemaining={spotsRemaining}
         />
       </div>
 
@@ -101,6 +149,7 @@ export default function Waitlist() {
           queuePosition={signupData.queuePosition}
           couponCode={signupData.couponCode}
           selectedTier={signupData.selectedTier}
+          emailSent={signupData.emailSent}
         />
       )}
     </div>

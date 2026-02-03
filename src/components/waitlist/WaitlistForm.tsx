@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion } from "framer-motion";
-import { Loader2, Check, Users, Crown, Zap, Gamepad2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Loader2, Check, Users, Crown, Zap, Gamepad2, Flame, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,12 +20,15 @@ import {
   budgetOptions,
 } from "@/lib/waitlist-validation";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { TrustBadges } from "./TrustBadges";
+import { useState, useEffect } from "react";
 
 interface WaitlistFormProps {
   selectedTier: "ludacris" | "esports" | "pro" | null;
   onSubmit: (data: WaitlistFormData) => Promise<void>;
   isSubmitting: boolean;
   onScrollToTiers?: () => void;
+  spotsRemaining?: number;
 }
 
 // Tier icons for the confirmation badge
@@ -35,13 +38,27 @@ const tierIcons = {
   pro: Gamepad2,
 };
 
+// Progress messages for dopamine hits
+const progressMessages = [
+  { threshold: 0, message: "Let's get started..." },
+  { threshold: 25, message: "Great start! 🎮" },
+  { threshold: 50, message: "Halfway there! 🔥" },
+  { threshold: 75, message: "Almost done! 🚀" },
+  { threshold: 100, message: "Ready to go! 🎉" },
+];
+
 export function WaitlistForm({
   selectedTier,
   onSubmit,
   isSubmitting,
   onScrollToTiers,
+  spotsRemaining = 247,
 }: WaitlistFormProps) {
   const isMobile = useIsMobile();
+  const [showOptional, setShowOptional] = useState(false);
+  const [prevProgress, setPrevProgress] = useState(0);
+  const [showCelebration, setShowCelebration] = useState(false);
+  
   const {
     register,
     handleSubmit,
@@ -52,8 +69,8 @@ export function WaitlistForm({
     resolver: zodResolver(waitlistFormSchema),
     defaultValues: {
       preferredTier: selectedTier || undefined,
-      tradeInInterest: false,
-      mailingListOptIn: false,
+      tradeInInterest: true, // Pre-checked for better conversion
+      mailingListOptIn: true, // Pre-checked for better conversion
     },
   });
 
@@ -65,13 +82,35 @@ export function WaitlistForm({
   const selectedTierInfo = tierOptions.find((t) => t.id === selectedTier);
   const TierIcon = selectedTier ? tierIcons[selectedTier] : null;
   
-  // Calculate progress - tier counts as 1 of 4
+  // Watch form values for personalization
   const email = watch("email");
   const firstName = watch("firstName");
   const lastName = watch("lastName");
+  
+  // Calculate progress - tier counts as 1 of 4
   const filledRequired = [email, firstName, lastName, selectedTier].filter(Boolean).length;
   const totalRequired = 4;
   const progressPercent = (filledRequired / totalRequired) * 100;
+  
+  // Get current progress message
+  const currentMessage = progressMessages
+    .filter(m => progressPercent >= m.threshold)
+    .pop()?.message || progressMessages[0].message;
+
+  // Trigger celebration on milestone progress
+  useEffect(() => {
+    const milestones = [50, 75, 100];
+    const crossed = milestones.find(m => progressPercent >= m && prevProgress < m);
+    if (crossed) {
+      setShowCelebration(true);
+      setTimeout(() => setShowCelebration(false), 500);
+      // Haptic feedback on mobile
+      if (navigator.vibrate) {
+        navigator.vibrate(30);
+      }
+    }
+    setPrevProgress(progressPercent);
+  }, [progressPercent, prevProgress]);
 
   const handleFormSubmit = handleSubmit(async (data) => {
     await onSubmit(data);
@@ -84,6 +123,11 @@ export function WaitlistForm({
     }
   };
 
+  // Personalized header based on first name
+  const personalizedHeader = firstName 
+    ? `Lock your spot, ${firstName}!` 
+    : "Lock your spot";
+
   return (
     <section className="py-20 px-6 pb-32 md:pb-20" id="waitlist-form">
       <motion.div
@@ -93,11 +137,16 @@ export function WaitlistForm({
         transition={{ duration: 0.6 }}
         className="max-w-lg mx-auto"
       >
-        {/* Section header */}
+        {/* Section header - personalized */}
         <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Lock your spot
-          </h2>
+          <motion.h2 
+            key={personalizedHeader}
+            initial={{ opacity: 0.8 }}
+            animate={{ opacity: 1 }}
+            className="text-3xl md:text-4xl font-bold text-foreground mb-4"
+          >
+            {personalizedHeader}
+          </motion.h2>
           <div className="flex items-center justify-center gap-2 text-muted-foreground mb-4">
             <Users className="w-4 h-4 text-primary" />
             <span className="text-lg">
@@ -121,23 +170,43 @@ export function WaitlistForm({
           )}
         </div>
 
-        {/* Progress bar */}
+        {/* Progress bar with celebration */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-muted-foreground uppercase tracking-wide">
-              {progressPercent === 100 ? "Ready to submit!" : "Almost there..."}
-            </span>
+            <motion.span 
+              key={currentMessage}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="text-xs text-muted-foreground uppercase tracking-wide"
+            >
+              {currentMessage}
+            </motion.span>
             <span className="text-xs text-muted-foreground">
               {filledRequired}/{totalRequired} complete
             </span>
           </div>
-          <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+          <div className="relative h-1.5 bg-secondary rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-primary rounded-full"
+              className={cn(
+                "h-full bg-primary rounded-full",
+                showCelebration && "progress-flash"
+              )}
               initial={{ width: 0 }}
               animate={{ width: `${progressPercent}%` }}
               transition={{ duration: 0.3, ease: "easeOut" }}
             />
+            {/* Celebration burst */}
+            <AnimatePresence>
+              {showCelebration && (
+                <motion.div
+                  initial={{ scale: 0, opacity: 1 }}
+                  animate={{ scale: 2, opacity: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-primary rounded-full"
+                  style={{ right: `${100 - progressPercent}%` }}
+                />
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
@@ -236,70 +305,117 @@ export function WaitlistForm({
             </FormField>
           )}
 
-          {/* Phone number (optional) - inline label */}
-          <FormField label="Phone Number" error={errors.phoneNumber?.message} optional fieldId="phoneNumber">
-            <Input
-              id="phoneNumber"
-              type="tel"
-              placeholder="+1 (555) 123-4567"
-              {...register("phoneNumber")}
-              className="h-12 bg-card/50 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-            />
-          </FormField>
+          {/* Pre-checked benefit checkboxes - above optional fields */}
+          <div className="space-y-3 py-2">
+            <div className="flex items-center gap-3">
+              <Checkbox
+                id="tradeInInterest"
+                defaultChecked={true}
+                onCheckedChange={(checked) =>
+                  setValue("tradeInInterest", checked as boolean)
+                }
+                className="h-5 w-5 border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+              />
+              <Label
+                htmlFor="tradeInInterest"
+                className="text-foreground cursor-pointer text-sm"
+              >
+                💰 YES! Check my PC for a bonus discount
+              </Label>
+            </div>
 
-          {/* Budget range (optional) - inline label */}
-          <FormField label="Monthly Budget" optional fieldId="budgetRange">
-            <Select
-              onValueChange={(value: "50-100" | "100-150" | "150-200" | "200+") =>
-                setValue("budgetRange", value)
-              }
-            >
-              <SelectTrigger className="h-12 bg-card/50 border-border">
-                <SelectValue placeholder="Select your budget range" />
-              </SelectTrigger>
-              <SelectContent>
-                {budgetOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FormField>
-
-          {/* Trade-in interest - improved copy */}
-          <div className="flex items-center gap-3 py-1">
-            <Checkbox
-              id="tradeInInterest"
-              onCheckedChange={(checked) =>
-                setValue("tradeInInterest", checked as boolean)
-              }
-              className="h-5 w-5 border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-            />
-            <Label
-              htmlFor="tradeInInterest"
-              className="text-foreground/80 cursor-pointer text-sm"
-            >
-              I have a PC to trade in (potential discount)
-            </Label>
+            <div className="flex items-center gap-3">
+              <Checkbox
+                id="mailingListOptIn"
+                defaultChecked={true}
+                onCheckedChange={(checked) =>
+                  setValue("mailingListOptIn", checked as boolean)
+                }
+                className="h-5 w-5 border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+              />
+              <Label
+                htmlFor="mailingListOptIn"
+                className="text-foreground cursor-pointer text-sm"
+              >
+                🎮 Send me exclusive gaming deals + early access
+              </Label>
+            </div>
           </div>
 
-          {/* Mailing list - improved copy */}
-          <div className="flex items-center gap-3 py-1">
-            <Checkbox
-              id="mailingListOptIn"
-              onCheckedChange={(checked) =>
-                setValue("mailingListOptIn", checked as boolean)
-              }
-              className="h-5 w-5 border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-            />
-            <Label
-              htmlFor="mailingListOptIn"
-              className="text-foreground/80 cursor-pointer text-sm"
+          {/* Collapsible optional fields */}
+          <div className="border-t border-border/50 pt-4">
+            <button
+              type="button"
+              onClick={() => setShowOptional(!showOptional)}
+              className="flex items-center justify-between w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              Keep me updated on launch and gaming news
-            </Label>
+              <span>Tell us more (optional)</span>
+              <motion.div
+                animate={{ rotate: showOptional ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronDown className="w-4 h-4" />
+              </motion.div>
+            </button>
+            
+            <AnimatePresence>
+              {showOptional && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="space-y-4 pt-4">
+                    {/* Phone number (optional) */}
+                    <FormField label="Phone Number" error={errors.phoneNumber?.message} optional fieldId="phoneNumber">
+                      <Input
+                        id="phoneNumber"
+                        type="tel"
+                        placeholder="+1 (555) 123-4567"
+                        {...register("phoneNumber")}
+                        className="h-12 bg-card/50 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                      />
+                    </FormField>
+
+                    {/* Budget range (optional) */}
+                    <FormField label="Monthly Budget" optional fieldId="budgetRange">
+                      <Select
+                        onValueChange={(value: "50-100" | "100-150" | "150-200" | "200+") =>
+                          setValue("budgetRange", value)
+                        }
+                      >
+                        <SelectTrigger className="h-12 bg-card/50 border-border">
+                          <SelectValue placeholder="Select your budget range" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {budgetOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormField>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
+
+          {/* Scarcity reminder near submit */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="flex items-center justify-center gap-2 py-2 text-sm"
+          >
+            <Flame className="w-4 h-4 text-destructive animate-pulse" />
+            <span className="text-muted-foreground">
+              <span className="text-destructive font-semibold">{spotsRemaining}</span> spots remaining — Lock yours now
+            </span>
+          </motion.div>
 
           {/* Submit button - desktop version */}
           <div className="hidden md:block">
@@ -329,8 +445,8 @@ export function WaitlistForm({
                 </span>
               ) : (
                 <span className="flex flex-col items-center">
-                  <span>Reserve my spot</span>
-                  <span className="text-sm opacity-80 font-normal">— 10% off first 3 months</span>
+                  <span>🎮 CLAIM MY 10% DISCOUNT</span>
+                  <span className="text-sm opacity-80 font-normal">Lock in my spot now →</span>
                 </span>
               )}
 
@@ -338,15 +454,20 @@ export function WaitlistForm({
               <div className="absolute inset-0 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
             </motion.button>
           </div>
+
+          {/* Trust badges */}
+          <div className="pt-4">
+            <TrustBadges />
+          </div>
         </form>
       </motion.div>
 
-      {/* Sticky mobile submit button */}
+      {/* Sticky mobile submit button with pulse */}
       {isMobile && (
         <motion.div
           initial={{ y: 100 }}
           animate={{ y: 0 }}
-          className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t border-border z-40"
+          className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t border-border z-40 sticky-pulse"
         >
           <motion.button
             type={selectedTier ? "submit" : "button"}
@@ -368,7 +489,7 @@ export function WaitlistForm({
             ) : !selectedTier ? (
               <span>↑ Select a tier first</span>
             ) : (
-              <span>Reserve my spot — 10% off</span>
+              <span>🎮 CLAIM MY 10% DISCOUNT</span>
             )}
           </motion.button>
         </motion.div>
