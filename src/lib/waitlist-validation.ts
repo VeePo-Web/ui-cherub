@@ -40,23 +40,23 @@ export const tierOptions = [
   {
     id: "ludacris" as const,
     name: "Ludacris",
-    tagline: "Peak Gaming Performance",
-    description: "For those who demand the absolute best. 4K gaming, ray tracing, zero compromises.",
-    accentColor: "gaming-gold",
+    tagline: "4K. Ray-traced. No compromise.",
+    description: "For those who demand the absolute best. Max settings on every title, future-proofed for years.",
+    accentColor: "gaming-gold" as const,
   },
   {
     id: "esports" as const,
     name: "Esports",
-    tagline: "Competition-Ready Performance",
-    description: "Built for competitive play. High refresh rates, low latency, tournament-grade specs.",
-    accentColor: "gaming-blue",
+    tagline: "144Hz+ ready. Tournament-grade.",
+    description: "Built for competitive play. Ultra-low latency, high refresh rates, zero input lag.",
+    accentColor: "gaming-blue" as const,
   },
   {
     id: "pro" as const,
     name: "Pro",
-    tagline: "AAA-Title Performance",
-    description: "Smooth gameplay on demanding titles. Great visuals, excellent value.",
-    accentColor: "gaming-green",
+    tagline: "Smooth AAA gaming. Great value.",
+    description: "Reliable performance on demanding titles. Quality components, hassle-free gaming.",
+    accentColor: "gaming-green" as const,
   },
 ] as const;
 
