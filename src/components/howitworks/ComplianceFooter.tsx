@@ -14,7 +14,7 @@ export function ComplianceFooter() {
             Compliance
           </h3>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            All repairs are covered under the plan; insurance is required. Yearly upgrades 
+            All repairs are covered under the plan; company-provided insurance is included. Yearly upgrades 
             apply to gaming desktops; interim refreshes follow major CPU/component releases. 
             Full terms, response times, and swap/loaner policies will be published in a short, 
             readable SLA at launch.

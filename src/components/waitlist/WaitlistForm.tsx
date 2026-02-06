@@ -323,21 +323,26 @@ export function WaitlistForm({
 
           {/* Pre-checked benefit checkboxes - above optional fields */}
           <div className="space-y-3 py-2">
-            <div className="flex items-center gap-3">
-              <Checkbox
-                id="tradeInInterest"
-                defaultChecked={true}
-                onCheckedChange={(checked) =>
-                  setValue("tradeInInterest", checked as boolean)
-                }
-                className="h-5 w-5 border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-              />
-              <Label
-                htmlFor="tradeInInterest"
-                className="text-foreground cursor-pointer text-sm"
-              >
-                Check my PC for a bonus discount
-              </Label>
+            <div className="space-y-1">
+              <div className="flex items-center gap-3">
+                <Checkbox
+                  id="tradeInInterest"
+                  defaultChecked={true}
+                  onCheckedChange={(checked) =>
+                    setValue("tradeInInterest", checked as boolean)
+                  }
+                  className="h-5 w-5 border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                />
+                <Label
+                  htmlFor="tradeInInterest"
+                  className="text-foreground cursor-pointer text-sm"
+                >
+                  Check my PC for a bonus discount
+                </Label>
+              </div>
+              <p className="text-xs text-muted-foreground pl-8">
+                Trade-ins get up to $1,000 trade-in value (subject to terms & conditions).
+              </p>
             </div>
 
             <div className="flex items-center gap-3">
@@ -357,6 +362,93 @@ export function WaitlistForm({
               </Label>
             </div>
           </div>
+
+          {/* Trade-in details section - shows when tradeInInterest is checked */}
+          <AnimatePresence>
+            {watch("tradeInInterest") && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="p-4 rounded-xl bg-card/50 border border-border/50 space-y-4">
+                  <div className="text-sm text-foreground font-medium">
+                    Tell us about your current PC
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* GPU */}
+                    <FormField label="GPU" error={errors.tradeInGpu?.message} optional fieldId="tradeInGpu">
+                      <Input
+                        id="tradeInGpu"
+                        type="text"
+                        placeholder="e.g. RTX 3070, RX 6800"
+                        {...register("tradeInGpu")}
+                        className="h-10 bg-card/50 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm"
+                      />
+                    </FormField>
+
+                    {/* CPU */}
+                    <FormField label="CPU" error={errors.tradeInCpu?.message} optional fieldId="tradeInCpu">
+                      <Input
+                        id="tradeInCpu"
+                        type="text"
+                        placeholder="e.g. Ryzen 5 5600X, i7-12700K"
+                        {...register("tradeInCpu")}
+                        className="h-10 bg-card/50 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm"
+                      />
+                    </FormField>
+
+                    {/* RAM */}
+                    <FormField label="RAM" error={errors.tradeInRam?.message} optional fieldId="tradeInRam">
+                      <Input
+                        id="tradeInRam"
+                        type="text"
+                        placeholder="e.g. 16GB DDR4, 32GB DDR5"
+                        {...register("tradeInRam")}
+                        className="h-10 bg-card/50 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm"
+                      />
+                    </FormField>
+
+                    {/* Storage */}
+                    <FormField label="Storage" error={errors.tradeInStorage?.message} optional fieldId="tradeInStorage">
+                      <Input
+                        id="tradeInStorage"
+                        type="text"
+                        placeholder="e.g. 1TB NVMe SSD"
+                        {...register("tradeInStorage")}
+                        className="h-10 bg-card/50 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm"
+                      />
+                    </FormField>
+
+                    {/* Motherboard */}
+                    <FormField label="Motherboard" error={errors.tradeInMotherboard?.message} optional fieldId="tradeInMotherboard">
+                      <Input
+                        id="tradeInMotherboard"
+                        type="text"
+                        placeholder="e.g. B550, Z690"
+                        {...register("tradeInMotherboard")}
+                        className="h-10 bg-card/50 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm"
+                      />
+                    </FormField>
+
+                    {/* Computer Age/Uptime */}
+                    <FormField label="Computer Age" error={errors.tradeInUptime?.message} optional fieldId="tradeInUptime">
+                      <Input
+                        id="tradeInUptime"
+                        type="text"
+                        placeholder="e.g. 2 years, Built 2022"
+                        {...register("tradeInUptime")}
+                        className="h-10 bg-card/50 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm"
+                      />
+                    </FormField>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Collapsible optional fields */}
           <div className="border-t border-border/50 pt-4">

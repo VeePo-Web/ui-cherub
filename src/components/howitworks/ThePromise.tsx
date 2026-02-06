@@ -64,7 +64,7 @@ export function ThePromise() {
               className="text-sm text-muted-foreground/70 mt-6 flex items-center gap-2"
             >
               <span className="w-1 h-1 rounded-full bg-primary/50" />
-              Insurance required for repair coverage
+              Company-provided insurance included for repair coverage
             </motion.p>
           </div>
         </motion.div>

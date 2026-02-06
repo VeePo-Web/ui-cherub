@@ -50,6 +50,8 @@ export function TierSelector({ selectedTier, onSelectTier }: TierSelectorProps) 
               index={index}
               hasSelection={selectedTier !== null}
               selectCta={tierCtas[tier.id]}
+              specsUrl={tier.specsUrl}
+              specs={tier.specs}
             />
           ))}
         </div>

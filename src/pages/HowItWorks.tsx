@@ -31,7 +31,7 @@ const jsonLdSchema = {
     {
       "@type": "HowToStep",
       "name": "Delivery & Care",
-      "text": "We deliver ready-to-play and handle upgrades and covered repairs (insurance required)."
+      "text": "We deliver ready-to-play and handle upgrades and covered repairs (company-provided insurance included)."
     }
   ],
   "areaServed": {
@@ -48,7 +48,7 @@ export default function HowItWorks() {
         <title>How It Works — Always-current gaming performance with yearly upgrades & covered repairs (Calgary)</title>
         <meta 
           name="description" 
-          content="See how our three-tier monthly plan keeps your desktop competitive: annual upgrades, trigger-based refreshes, covered repairs (insurance required), and public parts lists. Join the waitlist for early access in the Greater Calgary area." 
+          content="See how our three-tier monthly plan keeps your desktop competitive: annual upgrades, trigger-based refreshes, covered repairs (company-provided insurance included), and public parts lists. Join the waitlist for early access in the Greater Calgary area." 
         />
         <meta 
           name="keywords" 

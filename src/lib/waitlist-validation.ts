@@ -32,6 +32,43 @@ export const waitlistFormSchema = z.object({
     .or(z.literal("")),
   tradeInInterest: z.boolean().default(false),
   mailingListOptIn: z.boolean().default(false),
+  // Trade-in spec fields (all optional)
+  tradeInGpu: z
+    .string()
+    .trim()
+    .max(100, "GPU must be less than 100 characters")
+    .optional()
+    .or(z.literal("")),
+  tradeInCpu: z
+    .string()
+    .trim()
+    .max(100, "CPU must be less than 100 characters")
+    .optional()
+    .or(z.literal("")),
+  tradeInRam: z
+    .string()
+    .trim()
+    .max(50, "RAM must be less than 50 characters")
+    .optional()
+    .or(z.literal("")),
+  tradeInStorage: z
+    .string()
+    .trim()
+    .max(100, "Storage must be less than 100 characters")
+    .optional()
+    .or(z.literal("")),
+  tradeInMotherboard: z
+    .string()
+    .trim()
+    .max(100, "Motherboard must be less than 100 characters")
+    .optional()
+    .or(z.literal("")),
+  tradeInUptime: z
+    .string()
+    .trim()
+    .max(50, "Computer age must be less than 50 characters")
+    .optional()
+    .or(z.literal("")),
 });
 
 export type WaitlistFormData = z.infer<typeof waitlistFormSchema>;
@@ -40,23 +77,29 @@ export const tierOptions = [
   {
     id: "ludacris" as const,
     name: "Ludacris",
-    tagline: "4K. Ray-traced. No compromise.",
+    tagline: "Peak Gaming Performance",
     description: "For those who demand the absolute best. Max settings on every title, future-proofed for years.",
     accentColor: "gaming-gold" as const,
+    specsUrl: "https://ca.pcpartpicker.com/list/GcVLC8",
+    specs: ["RTX 4090", "Ryzen 9 7950X", "64GB DDR5"],
   },
   {
     id: "esports" as const,
     name: "Esports",
-    tagline: "144Hz+ ready. Tournament-grade.",
+    tagline: "Competition-Ready Performance",
     description: "Built for competitive play. Ultra-low latency, high refresh rates, zero input lag.",
     accentColor: "gaming-blue" as const,
+    specsUrl: "https://ca.pcpartpicker.com/list/9NwCpK",
+    specs: ["RTX 4070 Super", "Ryzen 7 7800X3D", "32GB DDR5"],
   },
   {
     id: "pro" as const,
     name: "Pro",
-    tagline: "Smooth AAA gaming. Great value.",
+    tagline: "AAA-Title Performance",
     description: "Reliable performance on demanding titles. Quality components, hassle-free gaming.",
     accentColor: "gaming-green" as const,
+    specsUrl: "https://ca.pcpartpicker.com/list/VJdJzP",
+    specs: ["RTX 4060 Ti", "Ryzen 5 7600", "32GB DDR5"],
   },
 ] as const;
 

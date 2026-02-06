@@ -9,7 +9,8 @@ const tiers = [
     tagline: "Peak Gaming Performance",
     icon: Crown,
     accentColor: "gaming-gold",
-    specsUrl: "#", // Placeholder for PCPartPicker link
+    specsUrl: "https://ca.pcpartpicker.com/list/GcVLC8",
+    specs: ["RTX 4090", "Ryzen 9 7950X", "64GB DDR5"],
   },
   {
     id: "esports",
@@ -17,7 +18,8 @@ const tiers = [
     tagline: "Competition-Ready Performance",
     icon: Zap,
     accentColor: "gaming-blue",
-    specsUrl: "#",
+    specsUrl: "https://ca.pcpartpicker.com/list/9NwCpK",
+    specs: ["RTX 4070 Super", "Ryzen 7 7800X3D", "32GB DDR5"],
   },
   {
     id: "pro",
@@ -25,7 +27,8 @@ const tiers = [
     tagline: "AAA-Title Performance",
     icon: Gamepad2,
     accentColor: "gaming-green",
-    specsUrl: "#",
+    specsUrl: "https://ca.pcpartpicker.com/list/VJdJzP",
+    specs: ["RTX 4060 Ti", "Ryzen 5 7600", "32GB DDR5"],
   },
 ];
 
@@ -84,6 +87,18 @@ export function HowItWorksTierPreview() {
               {tier.tagline}
             </p>
 
+            {/* Specs pills */}
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {tier.specs.map((spec) => (
+                <span
+                  key={spec}
+                  className="text-xs px-2 py-0.5 rounded-full bg-secondary/80 text-muted-foreground"
+                >
+                  {spec}
+                </span>
+              ))}
+            </div>
+
             {/* Specs link */}
             <a
               href={tier.specsUrl}
@@ -91,13 +106,13 @@ export function HowItWorksTierPreview() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
-              See exact parts via public list
+              View full build
               <ExternalLink className="w-3 h-3" />
             </a>
 
-            {/* Price placeholder */}
-            <p className="text-xs text-muted-foreground mt-2">
-              (Monthly subscription: TBD.)
+            {/* Yearly upgrade badge */}
+            <p className="text-xs text-primary/80 mt-2 font-medium">
+              Yearly upgrades included
             </p>
           </motion.div>
         );

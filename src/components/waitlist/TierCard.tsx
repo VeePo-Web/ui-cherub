@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Crown, Zap, Gamepad2 } from "lucide-react";
+import { Check, Crown, Zap, Gamepad2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TierCardProps {
@@ -13,6 +13,8 @@ interface TierCardProps {
   index: number;
   hasSelection: boolean;
   selectCta?: string;
+  specsUrl?: string;
+  specs?: readonly string[];
 }
 
 const accentColorMap = {
@@ -62,6 +64,8 @@ export function TierCard({
   index,
   hasSelection,
   selectCta,
+  specsUrl,
+  specs,
 }: TierCardProps) {
   const colors = accentColorMap[accentColor];
   const TierIcon = tierIcons[accentColor];
@@ -127,8 +131,22 @@ export function TierCard({
         {description}
       </p>
 
+      {/* Specs pills */}
+      {specs && specs.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {specs.map((spec) => (
+            <span
+              key={spec}
+              className="text-xs px-2 py-0.5 rounded-full bg-secondary/80 text-muted-foreground"
+            >
+              {spec}
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* Included features */}
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-3">
         <span className="text-xs px-2 py-1 rounded-full bg-secondary text-muted-foreground">
           Yearly upgrade
         </span>
@@ -136,6 +154,20 @@ export function TierCard({
           Covered repairs
         </span>
       </div>
+
+      {/* View full build link */}
+      {specsUrl && (
+        <a
+          href={specsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-4"
+        >
+          View full build
+          <ExternalLink className="w-3 h-3" />
+        </a>
+      )}
 
       {/* Select indicator */}
       <div className="pt-4 border-t border-border/50">
