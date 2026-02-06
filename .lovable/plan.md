@@ -1,108 +1,96 @@
 
 
-# Fix: Waitlist Signup RLS Blocking Insert Return
+# Create Minimal Tech Favicon & Remove Lovable Branding
 
-## Problem
+## Overview
 
-The waitlist form submission is failing with error:
-```
-"new row violates row-level security policy for table 'waitlist_signups'"
-```
-
-**Root Cause**: The code uses `.select("queue_position, coupon_code, first_name")` after insert to return the queue position. Since we blocked all SELECT access with `USING (false)` for security, the insert succeeds but the SELECT return fails, causing the entire operation to fail.
+Delete the existing Lovable favicon and all Lovable image references, then create a super minimal geometric favicon using inline SVG - just a few clean lines forming an abstract "C" or geometric shape that fits the Connor Computer brand.
 
 ---
 
-## Solution: Edge Function for Waitlist Signup
+## Files to Delete
 
-Create an edge function that handles the waitlist signup with service role access, bypassing RLS for the insert while maintaining security.
-
-### Files to Create/Modify
-
-| File | Action |
+| File | Reason |
 |------|--------|
-| `supabase/functions/waitlist-signup/index.ts` | Create - New edge function |
-| `src/hooks/useWaitlistSubmit.ts` | Modify - Call edge function instead of direct insert |
+| `public/favicon.ico` | Remove Lovable favicon |
 
 ---
 
-## New Edge Function: `waitlist-signup/index.ts`
+## Files to Create
 
-The edge function will:
-1. Validate incoming data server-side
-2. Use service role to insert (bypasses RLS)
-3. Return queue_position, coupon_code, first_name
-4. Handle duplicate email errors gracefully
+| File | Description |
+|------|-------------|
+| `public/favicon.svg` | Minimal geometric SVG favicon - just 3-4 lines forming an abstract angular shape |
+
+### Favicon Design Concept
 
 ```text
-Request → Edge Function → Validate → Insert (service role) → Return data
+Ultra-minimal design options:
+
+Option A: Abstract "C" with 3 lines
+   ╱──
+  │
+   ╲──
+
+Option B: Hexagonal corner (tech feel)
+  ╱╲
+  ╲╱
+
+Option C: Angular bracket (code-inspired)
+  ◢
+  ◣
 ```
 
-### Key Implementation Details
+The SVG will be:
+- **32x32 viewBox** for sharp rendering
+- **Orange stroke** (#fc7e30) on transparent background
+- **3-4 path elements** maximum
+- **Clean angular lines** - no fills, just strokes
 
-```typescript
-// supabase/functions/waitlist-signup/index.ts
+### SVG Code Preview
 
-import { createClient } from "@supabase/supabase-js";
-
-// Use service role to bypass RLS
-const supabaseAdmin = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-);
-
-// Validate and insert, return queue position
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <path d="M8 8 L4 16 L8 24" stroke="#fc7e30" stroke-width="3" 
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M24 8 L28 16 L24 24" stroke="#fc7e30" stroke-width="3" 
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
 ```
+
+This creates two angular brackets `< >` - minimal, tech-forward, and matches the brand orange.
 
 ---
 
-## Modified Hook: `useWaitlistSubmit.ts`
+## Files to Modify
 
-Change from:
-```typescript
-const { data, error } = await supabase
-  .from("waitlist_signups")
-  .insert({...})
-  .select("queue_position, coupon_code, first_name")
-  .single();
+| File | Changes |
+|------|---------|
+| `index.html` | Add favicon link, remove Lovable OG/Twitter images |
+
+### index.html Changes
+
+**Add** after line 31 (after theme-color meta):
+```html
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 ```
 
-To:
-```typescript
-const { data, error } = await supabase.functions.invoke("waitlist-signup", {
-  body: { ...formData }
-});
-```
+**Remove/Update** lines 37 and 44:
+- Remove `og:image` referencing lovable.dev
+- Remove `twitter:image` referencing lovable.dev
 
----
-
-## Security Considerations
-
-1. **Input validation** - The edge function validates all inputs before insert
-2. **Service role only for insert** - Not exposed to client
-3. **RLS remains restrictive** - Direct table access still blocked
-4. **Rate limiting** - Could add rate limiting in future if needed
-
----
-
-## Data Flow
-
-```text
-┌─────────────┐     ┌──────────────────┐     ┌────────────┐
-│   Client    │────▶│  Edge Function   │────▶│  Database  │
-│   Form      │     │ (service role)   │     │    RLS     │
-└─────────────┘     └──────────────────┘     └────────────┘
-                            │
-                            ▼
-                    Returns: queue_position,
-                    coupon_code, first_name
-```
+Or optionally leave them empty/remove the meta tags entirely until you have custom OG images.
 
 ---
 
 ## Summary
 
-- **1 new file**: `supabase/functions/waitlist-signup/index.ts`
-- **1 modified file**: `src/hooks/useWaitlistSubmit.ts`
-- **No database changes**: RLS policies remain restrictive
+| Action | Target |
+|--------|--------|
+| Delete | `public/favicon.ico` |
+| Create | `public/favicon.svg` (minimal 3-4 line geometric icon) |
+| Modify | `index.html` (add SVG favicon link, remove Lovable images) |
+
+The result: A clean, ultra-minimal favicon with just angular lines in brand orange - no Lovable branding anywhere.
 
