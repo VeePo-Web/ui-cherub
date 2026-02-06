@@ -13,7 +13,7 @@ const features = [
   {
     icon: Shield,
     title: "Covered repairs",
-    description: "Fast turnaround; we handle the workflow end-to-end. (Insurance required.)",
+    description: "Fast turnaround; we handle the workflow end-to-end. (Company-provided insurance included.)",
     size: "small",
     gradient: "from-gaming-blue/20 to-primary/10",
   },

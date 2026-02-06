@@ -141,7 +141,13 @@ export type Database = {
           preferred_tier: string
           queue_position: number
           referral_source: string | null
+          trade_in_cpu: string | null
+          trade_in_gpu: string | null
           trade_in_interest: boolean
+          trade_in_motherboard: string | null
+          trade_in_ram: string | null
+          trade_in_storage: string | null
+          trade_in_uptime: string | null
         }
         Insert: {
           budget_range?: string | null
@@ -156,7 +162,13 @@ export type Database = {
           preferred_tier: string
           queue_position?: number
           referral_source?: string | null
+          trade_in_cpu?: string | null
+          trade_in_gpu?: string | null
           trade_in_interest?: boolean
+          trade_in_motherboard?: string | null
+          trade_in_ram?: string | null
+          trade_in_storage?: string | null
+          trade_in_uptime?: string | null
         }
         Update: {
           budget_range?: string | null
@@ -171,7 +183,13 @@ export type Database = {
           preferred_tier?: string
           queue_position?: number
           referral_source?: string | null
+          trade_in_cpu?: string | null
+          trade_in_gpu?: string | null
           trade_in_interest?: boolean
+          trade_in_motherboard?: string | null
+          trade_in_ram?: string | null
+          trade_in_storage?: string | null
+          trade_in_uptime?: string | null
         }
         Relationships: []
       }

@@ -141,7 +141,7 @@ export function HowItWorksHero() {
           className="text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed"
         >
           Annual upgrades, covered repairs{" "}
-          <span className="text-foreground/70">(insurance required)</span>, and 
+          <span className="text-foreground/70">(company-provided insurance included)</span>, and 
           transparent builds—under one predictable monthly plan.
         </motion.p>
       </motion.div>

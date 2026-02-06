@@ -24,7 +24,7 @@ const steps = [
     number: 3,
     title: "Delivery & care",
     description:
-      "When your region opens, we prep your rig, verify performance, and hand it over ready to play. From there, we own the lifecycle so you don't have to: annual upgrades scheduled, interim refreshes when releases justify it, and covered repairs with a zero-downtime mindset. (Insurance required.)",
+      "When your region opens, we prep your rig, verify performance, and hand it over ready to play. From there, we own the lifecycle so you don't have to: annual upgrades scheduled, interim refreshes when releases justify it, and covered repairs with a zero-downtime mindset. (Company-provided insurance included.)",
     hasIcons: true,
   },
 ];

@@ -30,6 +30,12 @@ export function useWaitlistSubmit() {
           budget_range: data.budgetRange || null,
           trade_in_interest: data.tradeInInterest,
           mailing_list_opt_in: data.mailingListOptIn,
+          trade_in_gpu: data.tradeInGpu || null,
+          trade_in_cpu: data.tradeInCpu || null,
+          trade_in_ram: data.tradeInRam || null,
+          trade_in_storage: data.tradeInStorage || null,
+          trade_in_motherboard: data.tradeInMotherboard || null,
+          trade_in_uptime: data.tradeInUptime || null,
         })
         .select("queue_position, coupon_code, first_name")
         .single();

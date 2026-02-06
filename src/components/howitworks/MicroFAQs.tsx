@@ -20,7 +20,7 @@ const faqs = [
   {
     question: "What if a part fails?",
     answer:
-      "We've got you covered—literally. If something fails, you contact us and we handle the rest: diagnosis, parts, labour, and logistics. Our goal is minimal downtime so you're back to gaming fast. That's why we require insurance as part of the plan—it ensures rapid, no-excuses coverage for hardware issues. You focus on playing; we focus on keeping you running.",
+      "We've got you covered—literally. If something fails, you contact us and we handle the rest: diagnosis, parts, labour, and logistics. Our goal is minimal downtime so you're back to gaming fast. That's why we include insurance as part of the plan—it ensures rapid, no-excuses coverage for hardware issues. You focus on playing; we focus on keeping you running.",
   },
   {
     question: "Do you publish benchmarks?",
