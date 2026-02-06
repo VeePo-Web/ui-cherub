@@ -374,8 +374,13 @@ export function WaitlistForm({
                 className="overflow-hidden"
               >
                 <div className="p-4 rounded-xl bg-card/50 border border-border/50 space-y-4">
-                  <div className="text-sm text-foreground font-medium">
-                    Tell us about your current PC
+                  <div>
+                    <div className="text-sm text-foreground font-medium">
+                      Tell us about your current PC
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Trade-ins get up to $1,000 trade-in value (subject to terms & conditions).
+                    </p>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
