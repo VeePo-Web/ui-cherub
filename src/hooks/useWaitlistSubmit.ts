@@ -18,37 +18,43 @@ export function useWaitlistSubmit() {
     setIsSubmitting(true);
     
     try {
-      // Insert into waitlist_signups table
-      const { data: insertedData, error: insertError } = await supabase
-        .from("waitlist_signups")
-        .insert({
-          email: data.email,
-          first_name: data.firstName,
-          last_name: data.lastName,
-          preferred_tier: data.preferredTier,
-          phone_number: data.phoneNumber || null,
-          budget_range: data.budgetRange || null,
-          trade_in_interest: data.tradeInInterest,
-          mailing_list_opt_in: data.mailingListOptIn,
-          trade_in_gpu: data.tradeInGpu || null,
-          trade_in_cpu: data.tradeInCpu || null,
-          trade_in_ram: data.tradeInRam || null,
-          trade_in_storage: data.tradeInStorage || null,
-          trade_in_motherboard: data.tradeInMotherboard || null,
-          trade_in_uptime: data.tradeInUptime || null,
-        })
-        .select("queue_position, coupon_code, first_name")
-        .single();
-
-      if (insertError) {
-        // Handle duplicate email
-        if (insertError.code === "23505") {
-          return {
-            success: false,
-            error: "This email is already on the waitlist!",
-          };
+      // Call edge function instead of direct insert (bypasses RLS securely)
+      const { data: responseData, error: invokeError } = await supabase.functions.invoke(
+        "waitlist-signup",
+        {
+          body: {
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            preferredTier: data.preferredTier,
+            phoneNumber: data.phoneNumber || null,
+            budgetRange: data.budgetRange || null,
+            tradeInInterest: data.tradeInInterest,
+            mailingListOptIn: data.mailingListOptIn,
+            tradeInGpu: data.tradeInGpu || null,
+            tradeInCpu: data.tradeInCpu || null,
+            tradeInRam: data.tradeInRam || null,
+            tradeInStorage: data.tradeInStorage || null,
+            tradeInMotherboard: data.tradeInMotherboard || null,
+            tradeInUptime: data.tradeInUptime || null,
+          },
         }
-        throw insertError;
+      );
+
+      if (invokeError) {
+        console.error("Edge function error:", invokeError);
+        return {
+          success: false,
+          error: "Something went wrong. Please try again.",
+        };
+      }
+
+      // Check if the response indicates failure
+      if (!responseData.success) {
+        return {
+          success: false,
+          error: responseData.error || "Something went wrong. Please try again.",
+        };
       }
 
       // Trigger confirmation email via edge function
@@ -58,8 +64,8 @@ export function useWaitlistSubmit() {
           body: {
             email: data.email,
             firstName: data.firstName,
-            queuePosition: insertedData.queue_position,
-            couponCode: insertedData.coupon_code,
+            queuePosition: responseData.queuePosition,
+            couponCode: responseData.couponCode,
           },
         });
       } catch (emailError) {
@@ -70,9 +76,9 @@ export function useWaitlistSubmit() {
 
       return {
         success: true,
-        queuePosition: insertedData.queue_position,
-        couponCode: insertedData.coupon_code,
-        firstName: insertedData.first_name,
+        queuePosition: responseData.queuePosition,
+        couponCode: responseData.couponCode,
+        firstName: responseData.firstName,
         emailSent,
       };
     } catch (error) {
