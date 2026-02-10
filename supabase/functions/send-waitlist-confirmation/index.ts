@@ -117,7 +117,7 @@ const handler = async (req: Request): Promise<Response> => {
                       Questions? Reply to this email and we'll help you out.
                     </p>
                     <p style="color: #666; font-size: 11px; margin: 16px 0 0;">
-                      © ${new Date().getFullYear()} Gaming PC Subscription. All rights reserved.
+                      © ${new Date().getFullYear()} Unbound - Gaming. All rights reserved.
                     </p>
                   </td>
                 </tr>
@@ -141,7 +141,7 @@ const handler = async (req: Request): Promise<Response> => {
           Authorization: `Bearer ${RESEND_API_KEY}`,
         },
         body: JSON.stringify({
-          from: "Team Gaming PC <noreply@yourdomain.com>", // User will update this with their verified domain
+          from: "Unbound - Gaming <noreply@olausen.ca>",
           to: [sanitizedEmail],
           subject: "You're on the waitlist! Here's your 10% discount 🎮",
           html: emailHtml,
