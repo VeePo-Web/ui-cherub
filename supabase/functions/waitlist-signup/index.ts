@@ -219,7 +219,7 @@ const handler = async (req: Request): Promise<Response> => {
             Authorization: `Bearer ${RESEND_API_KEY}`,
           },
           body: JSON.stringify({
-            from: "Unbound - Gaming <noreply@olausen.ca>",
+            from: "Unbound - Gaming <noreply@ub-gaming.com>",
             to: ["connor@olausen.ca"],
             subject: `New Waitlist Signup: ${sanitizedData.first_name} ${sanitizedData.last_name} (#${insertedData.queue_position})`,
             html: notificationHtml,

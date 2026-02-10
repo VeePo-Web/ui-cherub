@@ -143,7 +143,7 @@ const handler = async (req: Request): Promise<Response> => {
           Authorization: `Bearer ${RESEND_API_KEY}`,
         },
         body: JSON.stringify({
-          from: "Unbound - Gaming <noreply@olausen.ca>",
+          from: "Unbound - Gaming <noreply@ub-gaming.com>",
           to: [sanitizedEmail],
           subject: "You're on the Unbound waitlist -- here's your 10% discount",
           html: emailHtml,
