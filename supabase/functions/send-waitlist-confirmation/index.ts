@@ -60,65 +60,67 @@ const handler = async (req: Request): Promise<Response> => {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Welcome to the Waitlist</title>
+        <title>Unbound Waitlist Confirmation</title>
       </head>
       <body style="margin: 0; padding: 0; background-color: #1a0a2e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;">
-        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #1a0a2e; padding: 40px 20px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #1a0a2e; padding: 48px 20px;">
           <tr>
             <td align="center">
-              <table width="600" cellpadding="0" cellspacing="0" style="background-color: #2d1b4e; border-radius: 16px; overflow: hidden;">
-                <!-- Header -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 560px; background-color: #2d1b4e; border-radius: 12px; overflow: hidden;">
+                <!-- Brand mark -->
                 <tr>
-                  <td style="padding: 40px 40px 20px; text-align: center;">
-                    <h1 style="color: #ffffff; font-size: 28px; margin: 0 0 10px;">🎮 You're on the list!</h1>
-                    <p style="color: #c4b5d6; font-size: 16px; margin: 0;">Welcome to the future of gaming, ${sanitizedFirstName}!</p>
+                  <td style="padding: 36px 40px 0; text-align: center;">
+                    <p style="color: #fc7e30; font-size: 13px; font-weight: 600; letter-spacing: 4px; text-transform: uppercase; margin: 0;">Unbound &middot; Gaming</p>
                   </td>
                 </tr>
-                
+
+                <!-- Headline -->
+                <tr>
+                  <td style="padding: 32px 40px 0; text-align: center;">
+                    <h1 style="color: #ffffff; font-size: 24px; font-weight: 600; margin: 0; line-height: 1.3;">You're on the list, ${sanitizedFirstName}.</h1>
+                  </td>
+                </tr>
+
                 <!-- Queue position -->
                 <tr>
-                  <td style="padding: 20px 40px; text-align: center;">
-                    <p style="color: #c4b5d6; font-size: 14px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 2px;">Your position in line</p>
-                    <p style="color: #fc7e30; font-size: 48px; font-weight: bold; margin: 0;">#${queuePosition}</p>
+                  <td style="padding: 32px 40px 0; text-align: center;">
+                    <p style="color: #a89bb8; font-size: 11px; margin: 0 0 6px; text-transform: uppercase; letter-spacing: 3px; font-weight: 500;">Position in line</p>
+                    <p style="color: #fc7e30; font-size: 44px; font-weight: 700; margin: 0; line-height: 1;">#${queuePosition}</p>
                   </td>
                 </tr>
-                
+
                 <!-- Coupon box -->
                 <tr>
-                  <td style="padding: 20px 40px;">
-                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: rgba(252, 126, 48, 0.1); border: 2px dashed #fc7e30; border-radius: 12px;">
+                  <td style="padding: 32px 40px 0;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #fc7e30; border-radius: 8px;">
                       <tr>
-                        <td style="padding: 24px; text-align: center;">
-                          <p style="color: #c4b5d6; font-size: 12px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 2px;">Your 10% discount code</p>
-                          <p style="color: #fc7e30; font-size: 32px; font-weight: bold; margin: 0; font-family: monospace; letter-spacing: 4px;">${sanitizedCouponCode}</p>
+                        <td style="padding: 20px; text-align: center;">
+                          <p style="color: #a89bb8; font-size: 11px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 2px; font-weight: 500;">Your 10% discount code</p>
+                          <p style="color: #fc7e30; font-size: 28px; font-weight: 700; margin: 0; font-family: 'Courier New', Courier, monospace; letter-spacing: 3px;">${sanitizedCouponCode}</p>
                         </td>
                       </tr>
                     </table>
                   </td>
                 </tr>
-                
-                <!-- What's next -->
+
+                <!-- What happens next -->
                 <tr>
-                  <td style="padding: 20px 40px;">
-                    <h2 style="color: #ffffff; font-size: 18px; margin: 0 0 16px;">What happens next?</h2>
-                    <ul style="color: #c4b5d6; font-size: 14px; line-height: 1.8; padding-left: 20px; margin: 0;">
-                      <li>We'll notify you when we launch in your area</li>
-                      <li>You'll get early access before the general public</li>
-                      <li>Your discount code will be applied automatically</li>
-                      <li>No commitment until you're ready to subscribe</li>
-                    </ul>
+                  <td style="padding: 32px 40px 0;">
+                    <h2 style="color: #ffffff; font-size: 16px; font-weight: 600; margin: 0 0 16px;">What happens next</h2>
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr><td style="color: #c4b5d6; font-size: 14px; line-height: 1.6; padding: 4px 0;">We'll notify you when we launch in your area</td></tr>
+                      <tr><td style="color: #c4b5d6; font-size: 14px; line-height: 1.6; padding: 4px 0;">Early access before the general public</td></tr>
+                      <tr><td style="color: #c4b5d6; font-size: 14px; line-height: 1.6; padding: 4px 0;">Your discount code will be applied automatically</td></tr>
+                      <tr><td style="color: #c4b5d6; font-size: 14px; line-height: 1.6; padding: 4px 0;">No commitment until you're ready</td></tr>
+                    </table>
                   </td>
                 </tr>
-                
+
                 <!-- Footer -->
                 <tr>
-                  <td style="padding: 30px 40px 40px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
-                    <p style="color: #c4b5d6; font-size: 12px; margin: 0;">
-                      Questions? Reply to this email and we'll help you out.
-                    </p>
-                    <p style="color: #666; font-size: 11px; margin: 16px 0 0;">
-                      © ${new Date().getFullYear()} Unbound - Gaming. All rights reserved.
-                    </p>
+                  <td style="padding: 36px 40px 40px; text-align: center;">
+                    <p style="color: #a89bb8; font-size: 13px; margin: 0 0 12px;">Questions? Reply to this email.</p>
+                    <p style="color: #5a4d6b; font-size: 11px; margin: 0;">&copy; ${new Date().getFullYear()} Unbound - Gaming</p>
                   </td>
                 </tr>
               </table>
@@ -143,7 +145,7 @@ const handler = async (req: Request): Promise<Response> => {
         body: JSON.stringify({
           from: "Unbound - Gaming <noreply@olausen.ca>",
           to: [sanitizedEmail],
-          subject: "You're on the waitlist! Here's your 10% discount 🎮",
+          subject: "You're on the Unbound waitlist -- here's your 10% discount",
           html: emailHtml,
         }),
         signal: controller.signal,
