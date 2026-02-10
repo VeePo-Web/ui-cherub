@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gamepad2 } from "lucide-react";
+import { UnboundLogo } from "@/components/brand/UnboundLogo";
 
 interface StickyDesktopCTAProps {
   spotsRemaining: number;
@@ -35,8 +35,8 @@ export function StickyDesktopCTA({ spotsRemaining, onCtaClick }: StickyDesktopCT
             <div className="max-w-5xl mx-auto flex items-center justify-between">
               {/* Left: Brand */}
               <div className="flex items-center gap-3">
-                <Gamepad2 className="w-5 h-5 text-primary" />
-                <span className="font-semibold text-foreground">Gaming PC Subscription</span>
+                <UnboundLogo size={20} className="text-primary" />
+                <span className="text-foreground"><span className="font-bold">Unbound</span><span className="font-normal text-muted-foreground"> · Gaming</span></span>
               </div>
 
               {/* Center: Spots info */}

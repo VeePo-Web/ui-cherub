@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Gamepad2, ArrowRight } from "lucide-react";
+import { Menu, X, ArrowRight } from "lucide-react";
+import { UnboundLogo } from "@/components/brand/UnboundLogo";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -88,10 +89,11 @@ export function HowItWorksNav() {
                     transition={{ duration: 0.4 }}
                     className="flex items-center justify-center"
                   >
-                    <Gamepad2 className="w-5 h-5 text-primary group-hover:text-foreground transition-colors duration-200" />
+                    <UnboundLogo size={22} className="text-primary group-hover:text-foreground transition-colors duration-200" />
                   </motion.div>
-                  <span className="text-xl font-bold text-foreground">
-                    Connor Computer
+                  <span className="text-xl text-foreground">
+                    <span className="font-bold">Unbound</span>
+                    <span className="font-normal text-muted-foreground"> · Gaming</span>
                   </span>
                 </Link>
 
@@ -192,9 +194,10 @@ export function HowItWorksNav() {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="group flex items-center gap-2.5"
                 >
-                  <Gamepad2 className="w-5 h-5 text-primary" />
-                  <span className="text-xl font-bold text-foreground">
-                    Connor Computer
+                  <UnboundLogo size={22} className="text-primary" />
+                  <span className="text-xl text-foreground">
+                    <span className="font-bold">Unbound</span>
+                    <span className="font-normal text-muted-foreground"> · Gaming</span>
                   </span>
                 </Link>
                 <button

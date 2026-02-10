@@ -15,7 +15,7 @@ import { ComplianceFooter } from "@/components/howitworks/ComplianceFooter";
 const jsonLdSchema = {
   "@context": "https://schema.org",
   "@type": "HowTo",
-  "name": "How It Works — Connor Computer",
+  "name": "How It Works — Unbound - Gaming",
   "description": "Pick a tier. Join the waitlist. We deliver and keep you current with annual upgrades, trigger-based refreshes, and covered repairs.",
   "step": [
     {
@@ -58,7 +58,7 @@ export default function HowItWorks() {
         
         {/* Open Graph */}
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="How It Works — Connor Computer" />
+        <meta property="og:title" content="How It Works — Unbound - Gaming" />
         <meta property="og:description" content="Annual upgrades, covered repairs, and transparent builds—under one predictable monthly plan." />
         
         {/* JSON-LD Schema */}
