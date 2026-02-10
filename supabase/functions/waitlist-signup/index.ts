@@ -131,6 +131,55 @@ const handler = async (req: Request): Promise<Response> => {
       tier: body.preferredTier 
     });
 
+    // Fire-and-forget: send notification email to connor@olausen.ca
+    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+    if (RESEND_API_KEY) {
+      try {
+        const tradeInDetails = sanitizedData.trade_in_interest
+          ? [
+              sanitizedData.trade_in_gpu && `GPU: ${sanitizedData.trade_in_gpu}`,
+              sanitizedData.trade_in_cpu && `CPU: ${sanitizedData.trade_in_cpu}`,
+              sanitizedData.trade_in_ram && `RAM: ${sanitizedData.trade_in_ram}`,
+              sanitizedData.trade_in_storage && `Storage: ${sanitizedData.trade_in_storage}`,
+              sanitizedData.trade_in_motherboard && `Motherboard: ${sanitizedData.trade_in_motherboard}`,
+              sanitizedData.trade_in_uptime && `Uptime: ${sanitizedData.trade_in_uptime}`,
+            ].filter(Boolean).join("<br/>")
+          : null;
+
+        const notificationHtml = `
+          <h2>New Waitlist Signup #${insertedData.queue_position}</h2>
+          <p><strong>Name:</strong> ${sanitizedData.first_name} ${sanitizedData.last_name}</p>
+          <p><strong>Email:</strong> ${sanitizedData.email}</p>
+          <p><strong>Tier:</strong> ${sanitizedData.preferred_tier}</p>
+          ${sanitizedData.phone_number ? `<p><strong>Phone:</strong> ${sanitizedData.phone_number}</p>` : ""}
+          ${sanitizedData.budget_range ? `<p><strong>Budget:</strong> ${sanitizedData.budget_range}</p>` : ""}
+          ${sanitizedData.trade_in_interest ? `<p><strong>Trade-In Interest:</strong> Yes</p>` : ""}
+          ${tradeInDetails ? `<p><strong>Trade-In Details:</strong><br/>${tradeInDetails}</p>` : ""}
+          <p><strong>Mailing List:</strong> ${sanitizedData.mailing_list_opt_in ? "Yes" : "No"}</p>
+          <p><strong>Coupon:</strong> ${insertedData.coupon_code}</p>
+        `;
+
+        fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${RESEND_API_KEY}`,
+          },
+          body: JSON.stringify({
+            from: "Unbound - Gaming <noreply@olausen.ca>",
+            to: ["connor@olausen.ca"],
+            subject: `New Waitlist Signup: ${sanitizedData.first_name} ${sanitizedData.last_name} (#${insertedData.queue_position})`,
+            html: notificationHtml,
+          }),
+        }).then((res) => {
+          if (!res.ok) res.text().then((t) => console.error("Notification email failed:", t));
+          else console.log("Notification email sent to connor@olausen.ca");
+        }).catch((err) => console.error("Notification email error:", err));
+      } catch (notifErr) {
+        console.error("Notification email setup error:", notifErr);
+      }
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
