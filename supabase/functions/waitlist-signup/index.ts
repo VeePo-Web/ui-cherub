@@ -135,28 +135,81 @@ const handler = async (req: Request): Promise<Response> => {
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     if (RESEND_API_KEY) {
       try {
-        const tradeInDetails = sanitizedData.trade_in_interest
-          ? [
-              sanitizedData.trade_in_gpu && `GPU: ${sanitizedData.trade_in_gpu}`,
-              sanitizedData.trade_in_cpu && `CPU: ${sanitizedData.trade_in_cpu}`,
-              sanitizedData.trade_in_ram && `RAM: ${sanitizedData.trade_in_ram}`,
-              sanitizedData.trade_in_storage && `Storage: ${sanitizedData.trade_in_storage}`,
-              sanitizedData.trade_in_motherboard && `Motherboard: ${sanitizedData.trade_in_motherboard}`,
-              sanitizedData.trade_in_uptime && `Uptime: ${sanitizedData.trade_in_uptime}`,
-            ].filter(Boolean).join("<br/>")
-          : null;
+        const tradeInRows = sanitizedData.trade_in_interest ? [
+              sanitizedData.trade_in_gpu && `<tr><td style="color:#666;padding:4px 12px 4px 0;font-size:13px;white-space:nowrap;">GPU</td><td style="color:#222;padding:4px 0;font-size:13px;">${sanitizedData.trade_in_gpu}</td></tr>`,
+              sanitizedData.trade_in_cpu && `<tr><td style="color:#666;padding:4px 12px 4px 0;font-size:13px;white-space:nowrap;">CPU</td><td style="color:#222;padding:4px 0;font-size:13px;">${sanitizedData.trade_in_cpu}</td></tr>`,
+              sanitizedData.trade_in_ram && `<tr><td style="color:#666;padding:4px 12px 4px 0;font-size:13px;white-space:nowrap;">RAM</td><td style="color:#222;padding:4px 0;font-size:13px;">${sanitizedData.trade_in_ram}</td></tr>`,
+              sanitizedData.trade_in_storage && `<tr><td style="color:#666;padding:4px 12px 4px 0;font-size:13px;white-space:nowrap;">Storage</td><td style="color:#222;padding:4px 0;font-size:13px;">${sanitizedData.trade_in_storage}</td></tr>`,
+              sanitizedData.trade_in_motherboard && `<tr><td style="color:#666;padding:4px 12px 4px 0;font-size:13px;white-space:nowrap;">Board</td><td style="color:#222;padding:4px 0;font-size:13px;">${sanitizedData.trade_in_motherboard}</td></tr>`,
+              sanitizedData.trade_in_uptime && `<tr><td style="color:#666;padding:4px 12px 4px 0;font-size:13px;white-space:nowrap;">Uptime</td><td style="color:#222;padding:4px 0;font-size:13px;">${sanitizedData.trade_in_uptime}</td></tr>`,
+            ].filter(Boolean).join("") : "";
 
         const notificationHtml = `
-          <h2>New Waitlist Signup #${insertedData.queue_position}</h2>
-          <p><strong>Name:</strong> ${sanitizedData.first_name} ${sanitizedData.last_name}</p>
-          <p><strong>Email:</strong> ${sanitizedData.email}</p>
-          <p><strong>Tier:</strong> ${sanitizedData.preferred_tier}</p>
-          ${sanitizedData.phone_number ? `<p><strong>Phone:</strong> ${sanitizedData.phone_number}</p>` : ""}
-          ${sanitizedData.budget_range ? `<p><strong>Budget:</strong> ${sanitizedData.budget_range}</p>` : ""}
-          ${sanitizedData.trade_in_interest ? `<p><strong>Trade-In Interest:</strong> Yes</p>` : ""}
-          ${tradeInDetails ? `<p><strong>Trade-In Details:</strong><br/>${tradeInDetails}</p>` : ""}
-          <p><strong>Mailing List:</strong> ${sanitizedData.mailing_list_opt_in ? "Yes" : "No"}</p>
-          <p><strong>Coupon:</strong> ${insertedData.coupon_code}</p>
+          <!DOCTYPE html>
+          <html>
+          <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+          <body style="margin:0;padding:0;background-color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;padding:32px 16px;">
+              <tr>
+                <td align="center">
+                  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:8px;overflow:hidden;">
+                    <!-- Brand header -->
+                    <tr>
+                      <td style="padding:24px 28px 16px;">
+                        <p style="color:#1a0a2e;font-size:13px;font-weight:600;letter-spacing:3px;text-transform:uppercase;margin:0 0 12px;">Unbound &middot; Gaming</p>
+                        <hr style="border:none;border-top:2px solid #fc7e30;margin:0;">
+                      </td>
+                    </tr>
+                    <!-- Title -->
+                    <tr>
+                      <td style="padding:16px 28px 0;">
+                        <h1 style="color:#1a0a2e;font-size:18px;font-weight:600;margin:0;">New Waitlist Signup <span style="color:#fc7e30;">#${insertedData.queue_position}</span></h1>
+                      </td>
+                    </tr>
+                    <!-- Contact -->
+                    <tr>
+                      <td style="padding:20px 28px 0;">
+                        <p style="color:#999;font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin:0 0 8px;">Contact</p>
+                        <table cellpadding="0" cellspacing="0">
+                          <tr><td style="color:#666;padding:3px 12px 3px 0;font-size:13px;">Name</td><td style="color:#222;padding:3px 0;font-size:13px;">${sanitizedData.first_name} ${sanitizedData.last_name}</td></tr>
+                          <tr><td style="color:#666;padding:3px 12px 3px 0;font-size:13px;">Email</td><td style="color:#222;padding:3px 0;font-size:13px;">${sanitizedData.email}</td></tr>
+                          ${sanitizedData.phone_number ? `<tr><td style="color:#666;padding:3px 12px 3px 0;font-size:13px;">Phone</td><td style="color:#222;padding:3px 0;font-size:13px;">${sanitizedData.phone_number}</td></tr>` : ""}
+                        </table>
+                      </td>
+                    </tr>
+                    <!-- Preferences -->
+                    <tr>
+                      <td style="padding:20px 28px 0;">
+                        <p style="color:#999;font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin:0 0 8px;">Preferences</p>
+                        <table cellpadding="0" cellspacing="0">
+                          <tr><td style="color:#666;padding:3px 12px 3px 0;font-size:13px;">Tier</td><td style="color:#222;padding:3px 0;font-size:13px;text-transform:capitalize;">${sanitizedData.preferred_tier}</td></tr>
+                          ${sanitizedData.budget_range ? `<tr><td style="color:#666;padding:3px 12px 3px 0;font-size:13px;">Budget</td><td style="color:#222;padding:3px 0;font-size:13px;">${sanitizedData.budget_range}</td></tr>` : ""}
+                          <tr><td style="color:#666;padding:3px 12px 3px 0;font-size:13px;">Mailing</td><td style="color:#222;padding:3px 0;font-size:13px;">${sanitizedData.mailing_list_opt_in ? "Yes" : "No"}</td></tr>
+                          <tr><td style="color:#666;padding:3px 12px 3px 0;font-size:13px;">Coupon</td><td style="color:#222;padding:3px 0;font-size:13px;font-family:'Courier New',monospace;">${insertedData.coupon_code}</td></tr>
+                        </table>
+                      </td>
+                    </tr>
+                    ${tradeInRows ? `
+                    <!-- Trade-in -->
+                    <tr>
+                      <td style="padding:20px 28px 0;">
+                        <p style="color:#999;font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin:0 0 8px;">Trade-in</p>
+                        <table cellpadding="0" cellspacing="0">${tradeInRows}</table>
+                      </td>
+                    </tr>
+                    ` : ""}
+                    <!-- Footer -->
+                    <tr>
+                      <td style="padding:24px 28px;text-align:center;">
+                        <p style="color:#bbb;font-size:11px;margin:0;">&copy; ${new Date().getFullYear()} Unbound - Gaming</p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </body>
+          </html>
         `;
 
         fetch("https://api.resend.com/emails", {
