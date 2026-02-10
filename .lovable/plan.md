@@ -1,111 +1,107 @@
 
 
-# Branding Verification Audit: Unbound - Gaming
+# Performance Optimization and Email Notification Setup
 
-## Audit Summary
+## Overview
 
-After a thorough review of every file in the project, here is the complete status of the rebrand and favicon.
-
----
-
-## Favicon Status: KEEP AS-IS
-
-The current `public/favicon.svg` uses the original `< >` angular bracket design -- which you want to keep. It renders correctly:
-
-```svg
-<!-- Two angular brackets + vertical bar in brand orange #fc7e30 -->
-<path d="M20 4 L8 4 L3 16" />   <!-- Top-left bracket arm -->
-<path d="M3 16 L8 28 L20 28" /> <!-- Bottom-left bracket arm -->
-<path d="M26 10 L26 22" />      <!-- Right vertical bar -->
-```
-
-The `index.html` correctly references it as `<link rel="icon" type="image/svg+xml" href="/favicon.svg" />`. No old `favicon.ico` file remains. No changes needed.
+Two objectives: (1) ensure the waitlist site is performance-optimized and everything works perfectly, and (2) add email notifications to **connor@olausen.ca** whenever someone submits the waitlist form.
 
 ---
 
-## Branding Verification: What's Correct
+## Part 1: Email Notification to connor@olausen.ca
 
-| Location | Status | Details |
-|----------|--------|---------|
-| **Browser tab title** | Correct | "Unbound - Gaming | Gaming PC Subscription | Always-Current Performance" |
-| **Meta author** | Correct | "Unbound - Gaming" |
-| **OG title** | Correct | "Unbound - Gaming | Gaming PC Subscription" |
-| **Twitter title** | Correct | "Unbound - Gaming | Gaming PC Subscription" |
-| **Nav bar (desktop)** | Correct | UnboundLogo + "Unbound . Gaming" with proper typography |
-| **Nav bar (mobile menu)** | Correct | UnboundLogo + "Unbound . Gaming" |
-| **Sticky desktop CTA** | Correct | UnboundLogo + "Unbound . Gaming" |
-| **Waitlist footer** | Correct | "(c) 2026 Unbound - Gaming. All rights reserved." |
-| **How It Works JSON-LD** | Correct | "How It Works -- Unbound - Gaming" |
-| **How It Works OG title** | Correct | "How It Works -- Unbound - Gaming" |
-| **UnboundLogo component** | Correct | Reusable SVG with currentColor |
+### Approach
 
----
+Rather than relying on the Resend-based confirmation email (which requires a RESEND_API_KEY that is not currently configured), we will modify the `waitlist-signup` edge function to also send a **notification email to connor@olausen.ca** using Resend. This way, every signup triggers an email to you with the submitter's details.
 
-## Issues Found: 2 Minor Remnants
+### Prerequisite: RESEND_API_KEY
 
-### Issue 1: SEOHead.tsx still references "EventHub"
+You will need to:
+1. Sign up at [resend.com](https://resend.com) (if you haven't already)
+2. Verify your domain at [resend.com/domains](https://resend.com/domains) (e.g., olausen.ca)
+3. Create an API key at [resend.com/api-keys](https://resend.com/api-keys)
+4. Provide the API key so it can be added as a project secret
 
-**File:** `src/components/SEOHead.tsx` (line 18)
+Without this key, emails cannot be sent.
 
-```typescript
-const fullTitle = `${title} | EventHub`;  // <-- Should be "Unbound - Gaming"
-```
+### Changes to `supabase/functions/waitlist-signup/index.ts`
 
-This component is used by `NotFound.tsx`, meaning the 404 page displays "404 - Page Not Found | EventHub" instead of "404 - Page Not Found | Unbound - Gaming".
+After the successful database insert, add a fetch call to Resend's API that sends a notification email to connor@olausen.ca containing:
+- Submitter's name, email, selected tier
+- Phone number and budget range (if provided)
+- Trade-in details (if provided)
+- Queue position
 
-**Fix:** Change `EventHub` to `Unbound - Gaming`.
+This is a fire-and-forget call -- if the email fails, the signup still succeeds.
 
-### Issue 2: NotFound.tsx description references "events"
+### Changes to `supabase/functions/send-waitlist-confirmation/index.ts`
 
-**File:** `src/pages/NotFound.tsx` (line 16)
+- Update the "from" address and footer branding from "Gaming PC Subscription" to "Unbound - Gaming"
+- This function remains dormant until RESEND_API_KEY is configured
 
-```typescript
-description="The page you're looking for doesn't exist. Return to discover events and community calendars."
-```
+### Changes to `src/hooks/useWaitlistSubmit.ts`
 
-This copy references "events and community calendars" -- leftover from a different project template.
-
-**Fix:** Update to something like: "The page you're looking for doesn't exist. Return to the Unbound - Gaming homepage."
+No changes needed -- the confirmation email call already exists and gracefully handles failures.
 
 ---
 
-## Additional Observation: StickyDesktopCTA Not Currently Used
+## Part 2: Performance Verification and Optimizations
 
-The `StickyDesktopCTA` component has correct Unbound branding but is not imported or rendered anywhere in the current `Waitlist.tsx` page. This is not a branding issue -- just noting it exists as an unused component with correct branding in case you want to re-enable it later.
+After auditing the codebase, the site already follows many best practices. The following minor improvements will be made:
+
+### 2a. Font Loading Optimization (`index.html`)
+
+The current font loading uses `preload` + `onload` pattern which is correct. No changes needed.
+
+### 2b. Image Optimization
+
+The site uses no raster images in the main flow (all SVG/CSS), so image optimization is not applicable. The `placeholder.svg` and `badge.png` in assets are not used in the critical path.
+
+### 2c. Code Splitting
+
+Already implemented via `React.lazy()` in `App.tsx` for all three routes. No changes needed.
+
+### 2d. CSS Performance (`src/index.css`)
+
+Already has:
+- `content-visibility: auto` for off-screen sections
+- `will-change` and `contain` utilities
+- Comprehensive `prefers-reduced-motion` support
+- GPU acceleration classes
+
+No changes needed.
+
+### 2e. Network Optimization (`index.html`)
+
+Already has:
+- `dns-prefetch` for Google Fonts and backend
+- `preconnect` for the same
+- Non-blocking font loading with `media="print"` + `onload`
+
+No changes needed.
+
+### 2f. Form Performance (`WaitlistForm.tsx`)
+
+Already optimized with:
+- `mode: "onBlur"` validation (not onChange)
+- `useMemo` and `useCallback` for handlers
+- Memoized tier info lookups
+
+No changes needed.
+
+### 2g. Spots Remaining Cache (`useActualSpotsRemaining.ts`)
+
+Already uses sessionStorage with 1-minute TTL and `head: true` for count-only queries. No changes needed.
 
 ---
 
-## Plan: Fix the 2 Remaining Issues
-
-### Step 1: Update `src/components/SEOHead.tsx`
-
-Change line 18 from:
-```typescript
-const fullTitle = `${title} | EventHub`;
-```
-To:
-```typescript
-const fullTitle = `${title} | Unbound - Gaming`;
-```
-
-### Step 2: Update `src/pages/NotFound.tsx`
-
-Change the description and also update the styling to match the dark theme used across the rest of the site (currently it uses gray-100 background and blue links, which are inconsistent with the premium dark aesthetic).
-
-Update:
-- Description text to reference Unbound - Gaming instead of "events and community calendars"
-- Background from `bg-gray-100` to `bg-background`
-- Text colors to use theme tokens (`text-foreground`, `text-muted-foreground`)
-- Link color from `text-blue-500` to `text-primary`
-
----
-
-## Technical Summary
+## Summary of File Changes
 
 | Action | File | Change |
 |--------|------|--------|
-| Modify | `src/components/SEOHead.tsx` | Replace "EventHub" with "Unbound - Gaming" |
-| Modify | `src/pages/NotFound.tsx` | Update description copy and match dark theme styling |
+| Modify | `supabase/functions/waitlist-signup/index.ts` | Add notification email to connor@olausen.ca after successful insert |
+| Modify | `supabase/functions/send-waitlist-confirmation/index.ts` | Update branding to "Unbound - Gaming" |
+| Secret | `RESEND_API_KEY` | Required -- user must provide from resend.com |
 
-Everything else -- nav, sticky bar, footer, favicon, meta tags, JSON-LD -- is confirmed correct with "Unbound - Gaming" branding and the `< >` bracket favicon.
+The site is already well-optimized for performance. The primary actionable change is wiring up the email notification so you receive submissions at connor@olausen.ca.
 
