@@ -131,7 +131,7 @@ export default function Waitlist() {
       {/* Footer */}
       <footer className="py-8 px-6 border-t border-border/50">
         <div className="max-w-5xl mx-auto text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} Gaming PC Subscription. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Unbound - Gaming. All rights reserved.</p>
           <p className="mt-2 text-xs">
             By joining the waitlist, you agree to receive email communications about our service.
           </p>
