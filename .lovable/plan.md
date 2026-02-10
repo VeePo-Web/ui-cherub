@@ -1,131 +1,111 @@
 
 
-# Rebrand to "Unbound - Gaming" with Custom Logo
+# Branding Verification Audit: Unbound - Gaming
 
-## Overview
+## Audit Summary
 
-Replace all "Connor Computer" branding with "Unbound - Gaming" across the entire codebase, create a new minimal geometric SVG logo and favicon, and update the nav/sticky bar brand marks.
+After a thorough review of every file in the project, here is the complete status of the rebrand and favicon.
 
 ---
 
-## Logo Design Concept
+## Favicon Status: KEEP AS-IS
 
-The logo will be an ultra-minimal geometric mark that represents "breaking free" (unbound) with a tech/gaming edge. The design: an abstract open hexagon fragment -- three connected angular lines forming a partial hexagon shape that looks like it's breaking apart. This conveys:
+The current `public/favicon.svg` uses the original `< >` angular bracket design -- which you want to keep. It renders correctly:
 
-- **Unbound** -- open, not closed, breaking free from constraints
-- **Tech** -- geometric, precise, angular
-- **Gaming** -- dynamic, forward-moving energy
-
-```text
-Logo mark (UnboundMark):
-
-    ╱‾‾
-   ╱
-   ╲
-    ╲__
-
-Three strokes forming an open angular "U" shape,
-like a hexagon with the right side removed.
+```svg
+<!-- Two angular brackets + vertical bar in brand orange #fc7e30 -->
+<path d="M20 4 L8 4 L3 16" />   <!-- Top-left bracket arm -->
+<path d="M3 16 L8 28 L20 28" /> <!-- Bottom-left bracket arm -->
+<path d="M26 10 L26 22" />      <!-- Right vertical bar -->
 ```
 
-The SVG will use brand orange (#fc7e30) strokes on transparent background, stroke-width 2.5, round caps/joins. Approximately 3 path elements.
-
-### Favicon (32x32 viewBox)
-Same mark scaled to fit the favicon grid -- compact, recognizable at 16px.
-
-### Inline Logo Component
-A reusable React component `UnboundLogo` that renders the SVG inline, accepting `size` and `className` props. This replaces the `Gamepad2` icon used as the brand mark in the nav.
+The `index.html` correctly references it as `<link rel="icon" type="image/svg+xml" href="/favicon.svg" />`. No old `favicon.ico` file remains. No changes needed.
 
 ---
 
-## Files to Create
+## Branding Verification: What's Correct
 
-| File | Description |
-|------|-------------|
-| `src/components/brand/UnboundLogo.tsx` | Reusable inline SVG logo component |
+| Location | Status | Details |
+|----------|--------|---------|
+| **Browser tab title** | Correct | "Unbound - Gaming | Gaming PC Subscription | Always-Current Performance" |
+| **Meta author** | Correct | "Unbound - Gaming" |
+| **OG title** | Correct | "Unbound - Gaming | Gaming PC Subscription" |
+| **Twitter title** | Correct | "Unbound - Gaming | Gaming PC Subscription" |
+| **Nav bar (desktop)** | Correct | UnboundLogo + "Unbound . Gaming" with proper typography |
+| **Nav bar (mobile menu)** | Correct | UnboundLogo + "Unbound . Gaming" |
+| **Sticky desktop CTA** | Correct | UnboundLogo + "Unbound . Gaming" |
+| **Waitlist footer** | Correct | "(c) 2026 Unbound - Gaming. All rights reserved." |
+| **How It Works JSON-LD** | Correct | "How It Works -- Unbound - Gaming" |
+| **How It Works OG title** | Correct | "How It Works -- Unbound - Gaming" |
+| **UnboundLogo component** | Correct | Reusable SVG with currentColor |
 
-### UnboundLogo Component
+---
 
-```tsx
-// Accepts size prop (default 20), renders inline SVG
-// Three angular strokes forming an open hexagonal "U" shape
-// Uses currentColor so it inherits text color, or brand orange
+## Issues Found: 2 Minor Remnants
+
+### Issue 1: SEOHead.tsx still references "EventHub"
+
+**File:** `src/components/SEOHead.tsx` (line 18)
+
+```typescript
+const fullTitle = `${title} | EventHub`;  // <-- Should be "Unbound - Gaming"
 ```
 
----
+This component is used by `NotFound.tsx`, meaning the 404 page displays "404 - Page Not Found | EventHub" instead of "404 - Page Not Found | Unbound - Gaming".
 
-## Files to Modify
+**Fix:** Change `EventHub` to `Unbound - Gaming`.
 
-| File | Changes |
-|------|---------|
-| `public/favicon.svg` | Replace brackets with new unbound mark |
-| `index.html` | Update all meta titles/descriptions from "Connor Computer" to "Unbound - Gaming" |
-| `src/components/howitworks/HowItWorksNav.tsx` | Replace Gamepad2 icon with UnboundLogo, rename "Connor Computer" to "Unbound" with styled " - Gaming" suffix |
-| `src/components/waitlist/StickyDesktopCTA.tsx` | Replace Gamepad2 icon with UnboundLogo, update brand text |
-| `src/pages/HowItWorks.tsx` | Update JSON-LD schema and OG meta from "Connor Computer" to "Unbound - Gaming" |
-| `src/pages/Waitlist.tsx` | Update footer copyright text |
+### Issue 2: NotFound.tsx description references "events"
 
----
+**File:** `src/pages/NotFound.tsx` (line 16)
 
-## Detailed Changes
-
-### 1. `public/favicon.svg`
-Replace the current `< >` brackets with the new open-hex mark:
-- Three path elements forming the partial hexagon/angular U shape
-- 32x32 viewBox, orange stroke (#fc7e30), stroke-width 3
-
-### 2. `index.html`
-- Line 8: Title becomes `Unbound - Gaming | Gaming PC Subscription | Always-Current Performance`
-- Line 10: Author becomes `Unbound - Gaming`
-- Line 37: OG title becomes `Unbound - Gaming | Gaming PC Subscription`
-- Line 44: Twitter title becomes `Unbound - Gaming | Gaming PC Subscription`
-
-### 3. `HowItWorksNav.tsx`
-- Import `UnboundLogo` instead of `Gamepad2` (keep Gamepad2 for other uses if needed, but the brand mark spots switch)
-- Desktop nav logo: `<UnboundLogo className="w-5 h-5 text-primary" />` + "Unbound" in bold + " - Gaming" in lighter weight
-- Mobile menu logo: Same treatment
-- Floating mobile button stays the same (Menu icon)
-
-### 4. `StickyDesktopCTA.tsx`
-- Replace `Gamepad2` with `UnboundLogo`
-- Update text from "Gaming PC Subscription" to "Unbound - Gaming"
-
-### 5. `HowItWorks.tsx`
-- JSON-LD schema name: "How It Works -- Unbound - Gaming"
-- OG title: "How It Works -- Unbound - Gaming"
-
-### 6. `Waitlist.tsx`
-- Footer: Update copyright from "Gaming PC Subscription" to "Unbound - Gaming"
-
----
-
-## Brand Typography Treatment
-
-The wordmark in the nav will be styled as:
-
-```text
-[Logo Mark]  Unbound · Gaming
+```typescript
+description="The page you're looking for doesn't exist. Return to discover events and community calendars."
 ```
 
-- "Unbound" in `font-bold text-foreground`
-- The separator and "Gaming" in `font-normal text-muted-foreground` or `text-primary`
-- This creates visual hierarchy and sophistication
+This copy references "events and community calendars" -- leftover from a different project template.
+
+**Fix:** Update to something like: "The page you're looking for doesn't exist. Return to the Unbound - Gaming homepage."
 
 ---
 
-## Files NOT Changed
+## Additional Observation: StickyDesktopCTA Not Currently Used
 
-- `TierCard.tsx`, `WaitlistForm.tsx`, `ThankYouModal.tsx` -- these use `Gamepad2` as tier icons (Pro tier), not as brand marks. They stay as-is since they represent the gaming category, not the company logo.
+The `StickyDesktopCTA` component has correct Unbound branding but is not imported or rendered anywhere in the current `Waitlist.tsx` page. This is not a branding issue -- just noting it exists as an unused component with correct branding in case you want to re-enable it later.
 
 ---
 
-## Summary
+## Plan: Fix the 2 Remaining Issues
 
-| Action | Count |
-|--------|-------|
-| Create | 1 file (UnboundLogo component) |
-| Modify | 6 files (favicon, index.html, nav, sticky CTA, HowItWorks, Waitlist footer) |
-| Delete | 0 files |
+### Step 1: Update `src/components/SEOHead.tsx`
 
-The result: A cohesive rebrand with a minimal, geometric logo mark that feels premium, techy, and "unbound" -- consistent across favicon, nav, sticky bar, and all meta tags.
+Change line 18 from:
+```typescript
+const fullTitle = `${title} | EventHub`;
+```
+To:
+```typescript
+const fullTitle = `${title} | Unbound - Gaming`;
+```
+
+### Step 2: Update `src/pages/NotFound.tsx`
+
+Change the description and also update the styling to match the dark theme used across the rest of the site (currently it uses gray-100 background and blue links, which are inconsistent with the premium dark aesthetic).
+
+Update:
+- Description text to reference Unbound - Gaming instead of "events and community calendars"
+- Background from `bg-gray-100` to `bg-background`
+- Text colors to use theme tokens (`text-foreground`, `text-muted-foreground`)
+- Link color from `text-blue-500` to `text-primary`
+
+---
+
+## Technical Summary
+
+| Action | File | Change |
+|--------|------|--------|
+| Modify | `src/components/SEOHead.tsx` | Replace "EventHub" with "Unbound - Gaming" |
+| Modify | `src/pages/NotFound.tsx` | Update description copy and match dark theme styling |
+
+Everything else -- nav, sticky bar, footer, favicon, meta tags, JSON-LD -- is confirmed correct with "Unbound - Gaming" branding and the `< >` bracket favicon.
 
