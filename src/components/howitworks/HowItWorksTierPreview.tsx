@@ -9,8 +9,10 @@ const tiers = [
     tagline: "Peak Gaming Performance",
     icon: Crown,
     accentColor: "gaming-gold",
-    specsUrl: "https://ca.pcpartpicker.com/list/GcVLC8",
-    specs: ["RTX 4090", "Ryzen 9 7950X", "64GB DDR5"],
+    specsUrl: "/images/ludacris-specs.png",
+    specs: ["RTX 5070 Ti", "Ryzen 7 7800X3D", "32GB DDR5"],
+    price: "$139.99/mo",
+    originalPrice: "$155.55/mo",
   },
   {
     id: "esports",
@@ -20,6 +22,8 @@ const tiers = [
     accentColor: "gaming-blue",
     specsUrl: "https://ca.pcpartpicker.com/list/9NwCpK",
     specs: ["RTX 4070 Super", "Ryzen 7 7800X3D", "32GB DDR5"],
+    price: "$109.99/mo",
+    originalPrice: "$122.21/mo",
   },
   {
     id: "pro",
@@ -29,6 +33,8 @@ const tiers = [
     accentColor: "gaming-green",
     specsUrl: "https://ca.pcpartpicker.com/list/VJdJzP",
     specs: ["RTX 4060 Ti", "Ryzen 5 7600", "32GB DDR5"],
+    price: "$89.99/mo",
+    originalPrice: "$99.99/mo",
   },
 ];
 
@@ -83,9 +89,22 @@ export function HowItWorksTierPreview() {
             <h4 className={cn("text-lg font-bold mb-1", colors.text)}>
               {tier.name}
             </h4>
-            <p className="text-sm text-muted-foreground mb-3">
+            <p className="text-sm text-muted-foreground mb-2">
               {tier.tagline}
             </p>
+
+            {/* Pricing */}
+            {tier.price && (
+              <div className="mb-3">
+                <div className="flex items-baseline gap-1.5">
+                  {tier.originalPrice && (
+                    <span className="text-xs text-muted-foreground line-through">{tier.originalPrice}</span>
+                  )}
+                  <span className={cn("text-lg font-bold", colors.text)}>{tier.price}</span>
+                </div>
+                <span className="text-[10px] text-primary/80 font-medium">10% early-bird discount</span>
+              </div>
+            )}
 
             {/* Specs pills */}
             <div className="flex flex-wrap gap-1.5 mb-3">

@@ -80,8 +80,10 @@ export const tierOptions = [
     tagline: "Peak Gaming Performance",
     description: "For those who demand the absolute best. Max settings on every title, future-proofed for years.",
     accentColor: "gaming-gold" as const,
-    specsUrl: "https://ca.pcpartpicker.com/list/GcVLC8",
-    specs: ["RTX 4090", "Ryzen 9 7950X", "64GB DDR5"],
+    specsUrl: "/images/ludacris-specs.png",
+    specs: ["RTX 5070 Ti", "Ryzen 7 7800X3D", "32GB DDR5"],
+    price: "$139.99/mo",
+    originalPrice: "$155.55/mo",
   },
   {
     id: "esports" as const,
@@ -91,6 +93,8 @@ export const tierOptions = [
     accentColor: "gaming-blue" as const,
     specsUrl: "https://ca.pcpartpicker.com/list/9NwCpK",
     specs: ["RTX 4070 Super", "Ryzen 7 7800X3D", "32GB DDR5"],
+    price: "$109.99/mo",
+    originalPrice: "$122.21/mo",
   },
   {
     id: "pro" as const,
@@ -100,6 +104,8 @@ export const tierOptions = [
     accentColor: "gaming-green" as const,
     specsUrl: "https://ca.pcpartpicker.com/list/VJdJzP",
     specs: ["RTX 4060 Ti", "Ryzen 5 7600", "32GB DDR5"],
+    price: "$89.99/mo",
+    originalPrice: "$99.99/mo",
   },
 ] as const;
 
