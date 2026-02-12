@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Check, Crown, Zap, Gamepad2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface TierCardProps {
   id: string;
@@ -71,6 +73,7 @@ export function TierCard({
   price,
   originalPrice,
 }: TierCardProps) {
+  const [specsOpen, setSpecsOpen] = useState(false);
   const colors = accentColorMap[accentColor];
   const TierIcon = tierIcons[accentColor];
   const isDimmed = hasSelection && !isSelected;
@@ -174,16 +177,40 @@ export function TierCard({
 
       {/* View full build link */}
       {specsUrl && (
-        <a
-          href={specsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-4"
-        >
-          View full build
-          <ExternalLink className="w-3 h-3" />
-        </a>
+        specsUrl.match(/\.(png|jpg|jpeg|webp|gif)$/i) ? (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setSpecsOpen(true); }}
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-4"
+          >
+            View full build
+            <ExternalLink className="w-3 h-3" />
+          </button>
+        ) : (
+          <a
+            href={specsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-4"
+          >
+            View full build
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        )
+      )}
+
+      {/* Specs image modal */}
+      {specsUrl && specsUrl.match(/\.(png|jpg|jpeg|webp|gif)$/i) && (
+        <Dialog open={specsOpen} onOpenChange={setSpecsOpen}>
+          <DialogContent className="bg-transparent border-none shadow-none p-0 max-w-[90vw] w-auto">
+            <img
+              src={specsUrl}
+              alt={`${name} full build specs`}
+              className="max-h-[80vh] w-auto object-contain rounded-lg"
+            />
+          </DialogContent>
+        </Dialog>
       )}
 
       {/* Select indicator */}
