@@ -15,6 +15,8 @@ interface TierCardProps {
   selectCta?: string;
   specsUrl?: string;
   specs?: readonly string[];
+  price?: string;
+  originalPrice?: string;
 }
 
 const accentColorMap = {
@@ -66,6 +68,8 @@ export function TierCard({
   selectCta,
   specsUrl,
   specs,
+  price,
+  originalPrice,
 }: TierCardProps) {
   const colors = accentColorMap[accentColor];
   const TierIcon = tierIcons[accentColor];
@@ -125,6 +129,19 @@ export function TierCard({
 
       {/* Tagline */}
       <p className="text-foreground font-medium mb-3">{tagline}</p>
+
+      {/* Pricing */}
+      {price && (
+        <div className="mb-3">
+          <div className="flex items-baseline gap-2">
+            {originalPrice && (
+              <span className="text-sm text-muted-foreground line-through">{originalPrice}</span>
+            )}
+            <span className={cn("text-2xl font-bold", colors.text)}>{price}</span>
+          </div>
+          <span className="text-xs text-primary/80 font-medium">10% early-bird discount</span>
+        </div>
+      )}
 
       {/* Description */}
       <p className="text-sm text-muted-foreground leading-relaxed mb-4">

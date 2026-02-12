@@ -52,6 +52,8 @@ export function TierSelector({ selectedTier, onSelectTier }: TierSelectorProps) 
               selectCta={tierCtas[tier.id]}
               specsUrl={tier.specsUrl}
               specs={tier.specs}
+              price={tier.price}
+              originalPrice={tier.originalPrice}
             />
           ))}
         </div>
