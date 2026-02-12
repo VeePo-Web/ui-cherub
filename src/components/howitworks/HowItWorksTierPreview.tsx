@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Crown, Zap, Gamepad2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const tiers = [
   {
@@ -58,6 +60,38 @@ const colorMap = {
     hoverBorder: "hover:border-gaming-green/50",
   },
 };
+
+function SpecsLink({ specsUrl, name }: { specsUrl: string; name: string }) {
+  const [open, setOpen] = useState(false);
+  const isImage = specsUrl.match(/\.(png|jpg|jpeg|webp|gif)$/i);
+
+  if (isImage) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          View full build
+          <ExternalLink className="w-3 h-3" />
+        </button>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="bg-transparent border-none shadow-none p-0 max-w-[90vw] w-auto">
+            <img src={specsUrl} alt={`${name} full build specs`} className="max-h-[80vh] w-auto object-contain rounded-lg" />
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+
+  return (
+    <a href={specsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
+      View full build
+      <ExternalLink className="w-3 h-3" />
+    </a>
+  );
+}
 
 export function HowItWorksTierPreview() {
   return (
@@ -119,15 +153,7 @@ export function HowItWorksTierPreview() {
             </div>
 
             {/* Specs link */}
-            <a
-              href={tier.specsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              View full build
-              <ExternalLink className="w-3 h-3" />
-            </a>
+            <SpecsLink specsUrl={tier.specsUrl} name={tier.name} />
 
             {/* Yearly upgrade badge */}
             <p className="text-xs text-primary/80 mt-2 font-medium">
