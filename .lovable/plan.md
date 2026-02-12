@@ -1,35 +1,43 @@
 
 
-# Specs Image: Popup Modal Instead of New Tab
+# Revert to External Links and Update Specs to Match PCPartPicker Builds
 
 ## Overview
-Replace the "View full build" link behavior so it opens the specs image in a clean, borderless popup/modal overlay instead of navigating to a new browser tab. The modal will have a simple close button (X) and clicking the backdrop also dismisses it.
+Remove the popup/modal behavior for "View full build" links and go back to opening PCPartPicker in a new tab. Update the specs pills on each card to match the actual components in each PCPartPicker build. Update the Ludacris link to the new URL.
+
+## Specs from PCPartPicker (verified)
+
+| Tier | GPU | CPU | RAM | Link |
+|------|-----|-----|-----|------|
+| Ludacris | RTX 5070 Ti | Ryzen 7 7800X3D | 32GB DDR5 | ca.pcpartpicker.com/list/GcVLC8 |
+| Esports | RTX 5070 | Ryzen 5 7600X | 32GB DDR5 | ca.pcpartpicker.com/list/9NwCpK |
+| Pro | RTX 5060 | Ryzen 5 7600X | 16GB DDR5 | ca.pcpartpicker.com/list/VJdJzP |
 
 ## Changes
 
-### 1. Update `TierCard.tsx`
-- Replace the `<a>` tag for "View full build" with a `<button>` that opens a local state-controlled Dialog modal
-- Import `Dialog`, `DialogContent`, `DialogClose` from the existing `@/components/ui/dialog.tsx`
-- Add `useState` to track whether the modal is open
-- Inside the Dialog, render the image with no border styling -- use `bg-transparent` and no `border` classes on the DialogContent so the image appears clean and borderless
-- The Dialog already includes a built-in X close button and clicking the overlay backdrop closes it automatically
-- Keep `e.stopPropagation()` on the trigger button so clicking it doesn't also select the tier card
+### 1. `src/lib/waitlist-validation.ts` -- Update tier data
+- **Ludacris**: Change `specsUrl` from `/images/ludacris-specs.png` to `https://ca.pcpartpicker.com/list/GcVLC8`. Specs stay the same (already correct: RTX 5070 Ti, Ryzen 7 7800X3D, 32GB DDR5).
+- **Esports**: Update specs from `["RTX 4070 Super", "Ryzen 7 7800X3D", "32GB DDR5"]` to `["RTX 5070", "Ryzen 5 7600X", "32GB DDR5"]`. Link stays the same.
+- **Pro**: Update specs from `["RTX 4060 Ti", "Ryzen 5 7600", "32GB DDR5"]` to `["RTX 5060", "Ryzen 5 7600X", "16GB DDR5"]`. Link stays the same.
 
-### 2. Update `HowItWorksTierPreview.tsx`
-- Apply the same modal pattern to the "View full build" link in the How It Works preview cards
-- Only show the modal for image-based URLs (Ludacris); external URLs (Esports, Pro) continue opening in a new tab as before
+### 2. `src/components/waitlist/TierCard.tsx` -- Remove modal, revert to simple link
+- Remove the `useState` for `specsOpen` and the `Dialog` import
+- Remove the image-detection conditional logic (`specsUrl.match(...)`)
+- Replace with a simple `<a>` tag that opens `specsUrl` in a new tab (`target="_blank"`)
+- Keep `e.stopPropagation()` so clicking the link does not select the tier card
 
-### 3. Image display styling
-- Render the image with `rounded-lg` and no border/outline
-- Use `max-h-[80vh] w-auto object-contain` so it scales nicely on all screens without overflow
-- DialogContent will use a transparent/minimal background with no padding so the image feels clean and frameless
+### 3. `src/components/howitworks/HowItWorksTierPreview.tsx` -- Remove modal, revert to simple link
+- Remove the `SpecsLink` helper component and `Dialog` imports
+- Remove `useState` import (if no longer needed)
+- Replace with a simple `<a>` tag that opens `specsUrl` in a new tab
+- Update the Ludacris tier data inline to match the new URL and specs
 
-## Files touched
-1. `src/components/waitlist/TierCard.tsx` -- add Dialog modal for image specs
-2. `src/components/howitworks/HowItWorksTierPreview.tsx` -- same modal pattern
+### 4. Cleanup
+- The `public/images/ludacris-specs.png` file can remain (no harm) but will no longer be referenced
 
 ## What stays the same
-- All pricing, specs, form logic, and submission flow unchanged
-- External PCPartPicker links for Esports and Pro tiers still open in new tabs
-- Overall page layout and design unchanged
+- All pricing (Ludacris $139.99, Esports $109.99, Pro $89.99 with early-bird discounts)
+- Card layout, design, animations, and selection behavior
+- Form logic, validation, and submission flow
+- All other page sections
 
