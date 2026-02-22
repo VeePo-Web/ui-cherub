@@ -43,6 +43,20 @@ export function useWaitlistSubmit() {
 
       if (invokeError) {
         console.error("Edge function error:", invokeError);
+        // Try to extract the actual error message from the response
+        try {
+          const context = (invokeError as any).context;
+          if (context?.body) {
+            const reader = context.body.getReader();
+            const { value } = await reader.read();
+            const errorBody = JSON.parse(new TextDecoder().decode(value));
+            if (errorBody?.error) {
+              return { success: false, error: errorBody.error };
+            }
+          }
+        } catch {
+          // Fall through to generic message
+        }
         return {
           success: false,
           error: "Something went wrong. Please try again.",
