@@ -89,7 +89,7 @@ export const tierOptions = [
     id: "esports" as const,
     name: "Esports",
     tagline: "Competition-Ready Performance",
-    description: "Built for competitive play. Ultra-low latency, high refresh rates, zero input lag.",
+    description: "Built for competitive play. Ultra-low latency, high refresh rates.",
     accentColor: "gaming-blue" as const,
     specsUrl: "https://ca.pcpartpicker.com/list/9NwCpK",
     specs: ["RTX 5070", "Ryzen 5 7600X", "32GB DDR5"],
